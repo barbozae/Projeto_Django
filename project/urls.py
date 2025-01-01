@@ -1,12 +1,10 @@
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from users.views import register
+from . import views
 
-# def home(request):
-#     return render(request, 'home.html')
+from django.contrib.auth import views as auth_views
 
 # Função personalizada para logout
 def custom_logout(request):
@@ -16,13 +14,12 @@ def custom_logout(request):
 urlpatterns = [
                 path('admin/', admin.site.urls),
 
-                path('register/', register, name='register'),
-                path('logout/', custom_logout, name='logout'),  # Substitui a LogoutView
-                # path('', home, name='home'),  # Rota para a página inicial
+                path('', views.home_view, name='home'),
 
-                path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-                # path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-
+                path('logout/', custom_logout, name='logout'),
+                
+                
+                path('', include('users.urls')),
                 path('', include('vendas.urls')),
                 path('', include('funcionarios.urls')),
                 path('', include('compras.urls')),
