@@ -4,7 +4,6 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 from . import views
 
-from django.contrib.auth import views as auth_views
 
 # Função personalizada para logout
 def custom_logout(request):

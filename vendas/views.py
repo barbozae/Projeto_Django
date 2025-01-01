@@ -5,6 +5,9 @@ from django.urls import reverse_lazy
 from .models import Vendas
 
 
+def vendas_resumo(request):
+    return render(request, 'vendas/vendas_resume.html')
+
 class VendasListView(ListView):
     model = Vendas
     template_name = 'vendas_list.html'  # Garante que o template correto será usado
@@ -77,10 +80,7 @@ class VendasUpDateView(UpdateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
+
 class VendasDeleteView(DeleteView):
     model = Vendas
     success_url = reverse_lazy("venda_list")
-
-
-def vendas_resumo(request):
-    return render(request, 'vendas/vendas_resume.html')
