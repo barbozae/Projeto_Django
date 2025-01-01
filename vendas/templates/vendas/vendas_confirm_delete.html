@@ -1,0 +1,24 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Excluir
+{% endblock page_title %}
+
+{% block content %}
+    <h3>Excluir Venda</h3>
+
+    <p>
+        Tem certeza que deseja excluir a venda do dia 
+        <strong>{{ vendas.data_venda }}</strong> 
+        do período 
+        <strong>{{ vendas.periodo }}</strong>
+        ?
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{% url 'venda_list' %}" class="btn btn-primary">Cancelar</a>
+    </form>
+{% endblock content %}

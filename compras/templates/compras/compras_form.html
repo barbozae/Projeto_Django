@@ -1,0 +1,28 @@
+{% extends 'global/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+  {% if compras.pk %}
+    Editar Compra
+  {% else %}
+    Nova Compra
+  {% endif %}
+{% endblock page_title %}
+
+
+{% block content %}
+  <!-- se eu tenho um id selecionado é porque estou realizando uma edição -->
+  {% if compras.pk %}
+    <h2>Editar Compras ID {{compras.pk}}</h2>
+  {% else %}
+    <h2>Nova Compra</h2>
+  {% endif %}
+    <form method="POST">
+      <!-- para evitar o seguinte erro -> CSRF verification failed. Request aborted. -->
+        {% csrf_token %}
+      <!-- form faz aparecer o formulario já do Django -->
+        {{ form|crispy }}
+      <button type="submit" class="btn btn-primary">Salvar</button>
+      <a href="{% url 'compras_list' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+{% endblock content %}

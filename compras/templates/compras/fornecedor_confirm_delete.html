@@ -1,0 +1,18 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Excluir
+{% endblock page_title %}
+
+{% block content %}
+    <h3>Excluir Fornecedor?</h3>
+
+    <p>Tem certeza que deseja excluir a venda do dia <strong>{{ fornecedor }}</strong>?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{% url 'fornecedor_list' %}" class="btn btn-primary">Cancelar</a>
+    </form>
+{% endblock content %}

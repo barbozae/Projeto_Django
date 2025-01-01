@@ -1,0 +1,30 @@
+{% extends 'global/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+  {% if funcionario.pk %}
+    Editar Funcionario
+  {% else %}
+    Novo Funcionário
+  {% endif %}
+{% endblock page_title %}
+
+{% block content %}
+  <!-- se eu tenho um id selecionado é porque estou realizando uma edição -->
+  {% if funcionario.pk %}
+    <h2>Editar Funcionario ID {{funcionario.pk}} - {{ funcionario.nome_funcionario }}</h2>
+  {% else %}
+    <h2>Cadastro de Novo Funcionário</h2>
+  {% endif %}
+
+    <form method="POST">
+      <!-- para evitar o seguinte erro -> CSRF verification failed. Request aborted. -->
+        {% csrf_token %}
+      <!-- form faz aparecer o formulario já do Django -->
+        {{ form|crispy }}
+      <button type="submit" class="btn btn-primary" name="salvar_cadastro">Salvar</button>
+
+      <a href="{% url 'funcionarios_list' %}" class="btn btn-danger">Cancelar</a>
+    </form>
+
+{% endblock content %}

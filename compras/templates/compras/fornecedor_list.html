@@ -1,0 +1,53 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Fornecedor
+{% endblock page_title %}
+
+{% block content %}
+    <h2>Fornecedor</h2>
+    {% if fornecedor_list %}
+        <table class="table table-sm">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Empresa</th>
+                <th scope="col">CNPJ</th>
+                <th scope="col">Nome Contato</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Endereço</th>
+                <th scope="col">CEP</th>
+                <th scope="col">Número</th>
+                <th scope="col">Bairro</th>
+                <th scope="col">Cidade</th>
+                <th scope="col">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for fornecedor in fornecedor_list %}
+                    <tr>
+                        <th scope="row" >{{ fornecedor.pk }}</th>
+                        <td>{{ fornecedor.nome_empresa }}</td>
+                        <td>{{ fornecedor.cnpj| default:"-" }}</td>
+                        <td>{{ fornecedor.nome_contato| default:"-" }}</td>
+                        <td>{{ fornecedor.telefone| default:"-" }}</td>
+                        <td>{{ fornecedor.email| default:"-" }}</td>
+                        <td>{{ fornecedor.endereco| default:"-" }}</td>
+                        <td>{{ fornecedor.cep| default:"-" }}</td>
+                        <td>{{ fornecedor.numero| default:"-" }}</td>
+                        <td>{{ fornecedor.bairro| default:"-" }}</td>
+                        <td>{{ fornecedor.cidade| default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'update_fornecedor' pk=fornecedor.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Não há registros</p>
+    {% endif %}
+
+    <a href="{% url 'create_fornecedor' %}" class="btn btn-primary">Novo Fornecedor</a>
+{% endblock content %}

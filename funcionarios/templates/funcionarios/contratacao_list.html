@@ -1,0 +1,62 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Funcionário
+{% endblock page_title %}
+
+{% block content %}
+    <h2>Funcionário</h2>
+    <h3>Contratação de Funcionário</h3>8
+
+    <!-- <h3>Contexto disponível:</h3>
+    <pre>{{ view|default_if_none:"View não disponível" }}</pre>
+    <pre>{{ object_list|default_if_none:"object_list não disponível" }}</pre>
+    <pre>{{ contratacao_list|default_if_none:"contratacao_list não disponível" }}</pre>
+    <pre>{{ contratacoes|default_if_none:"contratacoes não disponível" }}</pre> -->
+
+
+    {% if contratacao_list %}
+        <table class="table table-sm">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Cargo</th>
+                <th scope="col">Setor</th>
+                <th scope="col">Exame</th>
+                <th scope="col">Contratação</th>
+                <th scope="col">Salário</th>
+                <th scope="col">Documentação Recebido</th>
+                <th scope="col">Status Admissional</th>
+                <th scope="col">Doc Enviada Contabilidade</th>
+                <th scope="col">Observação</th>
+                <th scope="col">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for contratacao in contratacao_list %}
+                    <tr>
+                        <th scope="row" >{{ contratacao.pk }}</th>
+                        <td>{{ contratacao.nome_funcionario }}</td>
+                        <td>{{ contratacao.cargo| default:"-" }}</td>
+                        <td>{{ contratacao.setor| default:"-" }}</td>
+                        <td>{{ contratacao.data_exame_admissional|date:"d/m/y"}}</td>
+                        <td>{{ contratacao.data_contratacao|date:"d/m/y" }}</td>
+                        <td>{{ contratacao.salario| default:"-" }}</td>
+                        <td>{{ contratacao.documentacao_admissional| default:"-" }}</td>
+                        <td>{{ contratacao.status_admissional| default:"-" }}</td>
+                        <td>{{ contratacao.contabilidade_admissional| default:"-" }}</td>
+                        <td>{{ contratacao.observacao_admissional| default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'update_contratacao' pk=contratacao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Não há registros</p>
+    {% endif %}
+
+    <a href="{% url 'create_contratacao' %}" class="btn btn-primary">Contratar Funcionário</a>
+{% endblock content %}

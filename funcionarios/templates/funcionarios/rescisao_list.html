@@ -1,0 +1,53 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Funcionário
+{% endblock page_title %}
+
+{% block content %}
+    <h2>Funcionário</h2>
+    <h3>Rescisão de Funcionário</h3>
+
+    {% if rescisao_list %}
+        <table class="table table-sm">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Data Desligamento</th>
+                <th scope="col">Devolução Uniforme</th>
+                <th scope="col">Data Exame Demissional</th>
+                <th scope="col">Data Homologação</th>
+                <th scope="col">Tipo Desligamento</th>
+                <th scope="col">Doc Contabilidade</th>
+                <th scope="col">Status</th>
+                <th scope="col">Observação</th>
+                <th scope="col">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for rescisao in rescisao_list %}
+                    <tr>
+                        <th scope="row" >{{ rescisao.pk }}</th>
+                        <td>{{ rescisao.nome_funcionario }}</td>
+                        <td>{{ rescisao.data_desligamento| date:"d/m/y"| default:"-" }}</td>
+                        <td>{{ rescisao.devolucao_uniforme| default:"-" }}</td>
+                        <td>{{ rescisao.data_exame_demissional| date:"d/m/y"|default:"-" }}</td>
+                        <td>{{ rescisao.data_homologacao| date:"d/m/y"|default:"-" }}</td>
+                        <td>{{ rescisao.tipo_desligamento| default:"-" }}</td>
+                        <td>{{ rescisao.contabilidade_rescisao| default:"-" }}</td>
+                        <td>{{ rescisao.status_rescisao| default:"-" }}</td>
+                        <td>{{ rescisao.observacao_demissional| default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'update_rescisao' pk=rescisao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Não há registros</p>
+    {% endif %}
+
+    <a href="{% url 'create_rescisao' %}" class="btn btn-primary">Rescisão Funcionário</a>
+{% endblock content %}

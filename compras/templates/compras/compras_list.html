@@ -1,0 +1,56 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Compras
+{% endblock page_title %}
+
+{% block content %}
+    <h2>Compras</h2>
+    {% if compras_list %}
+        <table class="table table-sm">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data Compra</th>
+                <th scope="col">Vencimento</th>
+                <th scope="col">Pagamento</th>
+                <th scope="col">Fornecedor</th>
+                <th scope="col">Valor Compra</th>
+                <th scope="col">Valor Pago</th>
+                <th scope="col">N° Boleto</th>
+                <th scope="col">Grupo</th>
+                <th scope="col">Produto</th>
+                <th scope="col">Classificação</th>
+                <th scope="col">Forma Pagamento</th>
+                <th scope="col">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for compras in compras_list %}
+                    <tr>
+                        <th scope="row" >{{ compras.pk }}</th>
+                        <td>{{ compras.data_compra| date:"d/m/y"}}</td>
+                        <td>{{ compras.data_vencimento| date:"d/m/y"}}</td>
+                        <td>{{ compras.data_pagamento| date:"d/m/y"}}</td>
+                        <td>{{ compras.fornecedor }}</td>
+                        <td>{{ compras.valor_compra| floatformat:2| default:"-" }}</td>
+                        <td>{{ compras.valor_pago| floatformat:2| default:"-" }}</td>
+                        <td>{{ compras.numero_boleto| default:"-" }}</td>
+                        <td>{{ compras.grupo_produto| default:"-" }}</td>
+                        <td>{{ compras.produto| default:"-" }}</td>
+                        <td>{{ compras.classificacao| default:"-" }}</td>
+                        <td>{{ compras.forma_pagamento| default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'update_compras' pk=compras.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                            <a href="{% url 'delete_compras' pk=compras.pk %}" class="btn btn-danger btn-sm" >Excluir</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Não há registros</p>
+    {% endif %}
+
+    <a href="{% url 'create_compras' %}" class="btn btn-primary">Nova Compra</a>
+{% endblock content %}

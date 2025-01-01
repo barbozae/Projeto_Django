@@ -1,0 +1,45 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Funcionário
+{% endblock page_title %}
+
+{% block content %}
+    <h2>Funcionário</h2>
+    <h3>Pagamento de Funcionário</h3>
+
+    {% if pagamento_list %}
+        <table class="table table-sm">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Data Pagamento</th>
+                <th scope="col">Valor Pago</th>
+                <th scope="col">Tipo Pagamento</th>
+                <th scope="col">Forma Pagamento</th>
+                <th scope="col">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for pagamento in pagamento_list %}
+                    <tr>
+                        <th scope="row" >{{ pagamento.pk }}</th>
+                        <td>{{ pagamento.nome_funcionario }}</td>
+                        <td>{{ pagamento.data_pagamento| date:"d/m/y"| default:"-" }}</td>
+                        <td>{{ pagamento.valor_pago| default:"-" }}</td>
+                        <td>{{ pagamento.tipo_pagamento| default:"-" }}</td>
+                        <td>{{ pagamento.forma_pagamento| default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'update_payment' pk=pagamento.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Não há registros</p>
+    {% endif %}
+
+    <a href="{% url 'create_payment' %}" class="btn btn-primary">Pagar Funcionário</a>
+{% endblock content %}
