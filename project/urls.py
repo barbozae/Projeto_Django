@@ -16,8 +16,7 @@ urlpatterns = [
                 path('', views.home_view, name='home'),
 
                 path('logout/', custom_logout, name='logout'),
-                
-                
+
                 path('', include('users.urls')),
                 path('', include('vendas.urls')),
                 path('', include('funcionarios.urls')),

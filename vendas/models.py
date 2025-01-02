@@ -30,6 +30,11 @@ class Vendas(models.Model):
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
 
+    def save(self, *args, **kwargs):
+        if not self.author_id :  # Verifica se o autor não foi definido
+            self.author = kwargs.pop('user', None)  # Pega o usuário da kwargs
+        super().save(*args, **kwargs)
+
     def calcular_debito(self):
         return (self.debito_mastercard or 0) + (self.debito_visa or 0) + (self.debito_elo or 0)
 
