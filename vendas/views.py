@@ -12,9 +12,8 @@ def vendas_resumo(request):
 
 # Função para verificar se o usuário é membro da equipe
 def is_team_member(user):
-    return user.groups.filter(name='Vendas').exists()
     # Verifica se o usuário é um superusuário ou se é membro do grupo 'Equipe'
-    # return user.is_superuser or user.groups.filter(name='Vendas').exists()
+    return user.is_superuser or user.groups.filter(name='Vendas').exists()
 
 class VendasListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 # class VendasListView(ListView):
