@@ -53,7 +53,6 @@ class VendasListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             venda.beneficio = venda.calcular_beneficio()
             venda.total = venda.calcular_total()
 
-            total_geral += venda.total
             # somando todas as linhas
             total_geral += venda.total
         
