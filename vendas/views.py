@@ -2,13 +2,11 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-
 from .models import Vendas
 
 
 def vendas_resumo(request):
     return render(request, 'vendas/vendas_resume.html')
-
 
 class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Vendas
@@ -62,7 +60,6 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
 
 class VendasCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-# class VendasCreateView(CreateView):
     model = Vendas
     # campos que o usuario precisa preencher
     fields = ["data_venda", "periodo", "rodizio", "dinheiro", "pix", "debito_mastercard", "debito_visa", 
@@ -85,7 +82,6 @@ class VendasCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
 
 class VendasUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-# class VendasUpDateView(UpdateView):
     model = Vendas
     fields = ["data_venda", "periodo", "rodizio", "dinheiro", "pix", "debito_mastercard", "debito_visa", 
               "debito_elo", "credito_mastercard", "credito_visa", "credito_elo", "alelo", "american_express",
