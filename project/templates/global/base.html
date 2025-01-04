@@ -7,57 +7,81 @@
     <title>Restaurante - {% block page_title %}{% endblock page_title %}</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-    rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    rel="stylesheet">
   </head>
 
-  <nav class="navbar bg-dark mb-4" data-bs-theme="dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'home' %}" style="font-size: 16px; margin-right: 28px;">Home</a>
-      <a class="navbar-brand" href="{% url 'venda_list' %}" style="font-size: 16px; margin-right: 28px;">Vendas</a>
-      <a class="navbar-brand" href="{% url 'fornecedor_list' %}" style="font-size: 16px; margin-right: 28px;">Fornecedores</a>
-      <a class="navbar-brand" href="{% url 'compras_list' %}" style="font-size: 16px;margin-right: 28px;">Compras</a>
-      <a class="navbar-brand" href="{% url 'funcionarios_list' %}" style="font-size: 16px; margin-right: 28px;">Funcionários</a>
-      <a class="navbar-brand" href="{% url 'contratacao_list' %}" style="font-size: 16px; margin-right: 28px;">Contratação</a>
-      <a class="navbar-brand" href="{% url 'pagamento_list' %}" style="font-size: 16px; margin-right: 28px;">Pagamento Funcionário</a>
-      <a class="navbar-brand" href="{% url 'rescisao_list' %}" style="font-size: 16px; margin-right: 28px;">Rescisão</a>
-  
-      <!-- Verifica se o usuário está autenticado -->
-      <div class="d-flex ms-auto">
-        {% if user.is_authenticated %}
-          <span class="navbar-text text-white me-3">
-            Bem-vindo, {{ user.first_name }}!
-          </span>
-          <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
-        {% else %}
-          <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
-  
   <body>
-    <style>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}" style="color: green">SCV</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'venda_list' %}">Vendas</a>
+            <!-- Dropdown Compras -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Compras
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}">Fornecedor</a></li>
+                <li><a class="dropdown-item" href="{% url 'compras_list' %}">Compras</a></li>
+              </ul>
+            </li>
+            <!-- Dropdown Funcionários -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Funcionários
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'contratacao_list' %}">Contratação</a></li>
+                <li><a class="dropdown-item" href="{% url 'funcionarios_list' %}">Cadastro</a></li>
+                <li><a class="dropdown-item" href="{% url 'rescisao_list' %}">Rescisão</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'pagamento_list' %}">Pagamento</a></li>
+              </ul>
+            </li>
+          </ul>
+          <!-- Verifica se o usuário está autenticado -->
+          <div class="d-flex ms-auto">
+            {% if user.is_authenticated %}
+              <span class="navbar-text text-dark me-3">
+                Bem-vindo, {{ user.first_name }}!
+              </span>
+              <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- <style>
       body {
         background-color: #f8f9fa; /* Fundo claro */
       }
-    </style>
+    </style> -->
 
     <main class="container">
         {% block content %}{% endblock content %}
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+      <footer class="bg-body-tertiary text-dark py-3 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Restaurante. Todos os direitos reservados.</p>
+            <p>
+                <a href="#" class="text-dark me-3">Política de Privacidade</a>
+                <a href="#" class="text-dark">Termos de Uso</a>
+            </p>
+        </div>
+      </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
   </body>
-
-  <footer class="bg-dark text-white py-3 mt-5">
-    <div class="container text-center">
-        <p>&copy; 2024 Restaurante. Todos os direitos reservados.</p>
-        <p>
-            <a href="#" class="text-white me-3">Política de Privacidade</a>
-            <a href="#" class="text-white">Termos de Uso</a>
-        </p>
-    </div>
-</footer>
-
 </html>
