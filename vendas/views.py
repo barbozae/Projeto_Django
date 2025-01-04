@@ -13,6 +13,12 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name = 'vendas_list.html'  # Garante que o template correto será usado
     permission_required = 'vendas.view_vendas'  # Permissão para visualizar objetos'
 
+    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('login')  # Redireciona para a página de login
+        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+
     def get_queryset(self):
         queryset = Vendas.objects.all()
 
@@ -51,12 +57,6 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         # Adiciona o total geral ao contexto
         context['vendas_total'] = total_geral
         return context
-
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
 
 
 class VendasCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

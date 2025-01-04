@@ -10,10 +10,6 @@
     rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   </head>
 
-
-
-  
-<!-- ***************************************************************** -->
   <nav class="navbar bg-dark mb-4" data-bs-theme="dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="{% url 'home' %}" style="font-size: 16px; margin-right: 28px;">Home</a>
@@ -24,7 +20,6 @@
       <a class="navbar-brand" href="{% url 'contratacao_list' %}" style="font-size: 16px; margin-right: 28px;">Contratação</a>
       <a class="navbar-brand" href="{% url 'pagamento_list' %}" style="font-size: 16px; margin-right: 28px;">Pagamento Funcionário</a>
       <a class="navbar-brand" href="{% url 'rescisao_list' %}" style="font-size: 16px; margin-right: 28px;">Rescisão</a>
-      <!-- Outros links -->
   
       <!-- Verifica se o usuário está autenticado -->
       <div class="d-flex ms-auto">
@@ -39,8 +34,6 @@
       </div>
     </div>
   </nav>
-  <!-- ***************************************************************** -->
-
   
   <body>
     <style>
@@ -48,20 +41,6 @@
         background-color: #f8f9fa; /* Fundo claro */
       }
     </style>
-
-    <!-- <h1>
-        <nav class="navbar bg-dark mb-4" data-bs-theme="dark">
-            <div class="container-fluid">
-              <a class="navbar-brand" href="{% url 'venda_list' %}">Vendas</a>
-              <a class="navbar-brand" href="{% url 'fornecedor_list' %}">Fornecedores</a>
-              <a class="navbar-brand" href="{% url 'compras_list' %}">Compras</a>
-              <a class="navbar-brand" href="{% url 'funcionarios_list' %}">Funcionários</a>
-              <a class="navbar-brand" href="{% url 'contratacao_list' %}">Contratação</a>
-              <a class="navbar-brand" href="{% url 'pagamento_list' %}">Pagamento Funcionário</a>
-              <a class="navbar-brand" href="{% url 'rescisao_list' %}">Rescisão</a>
-            </div>
-        </nav>
-    </h1> -->
 
     <main class="container">
         {% block content %}{% endblock content %}

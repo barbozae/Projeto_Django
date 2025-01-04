@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -13,6 +14,7 @@ class Fornecedor(models.Model):
     numero = models.CharField(verbose_name="Número", max_length=10, null=True, blank=True)
     bairro = models.CharField(verbose_name="Bairro", max_length=20, null=True, blank=True)
     cidade = models.CharField(verbose_name="Cidade", max_length=30, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     def __str__(self):
@@ -37,12 +39,13 @@ class Compras(models.Model):
                     ('Boleto', 'Boleto'),
                     ('Débito Automático', 'Débito Automático')
     ]
+    
     created_at = models.DateTimeField(auto_now_add=True)
     data_compra = models.DateField(verbose_name="Data da Venda", null=False, blank=False)
-    data_vencimento = models.DateField(verbose_name="Data do Vencimento", null=False, blank=False)
+    data_vencimento = models.DateField(verbose_name="Data do Vencimento", null=True, blank=False)
     data_pagamento = models.DateField(verbose_name="Data do Pagamento", null=True, blank=True)
     # Chave estrangeira para Fornecedor, associando a PK de Fornecedor
-    fornecedor = models.ForeignKey(Fornecedor, on_delete=models.PROTECT, verbose_name="Fornecedor", null=True)
+    fornecedor = models.ForeignKey(Fornecedor, on_delete=models.PROTECT, verbose_name="Fornecedor", null=False, blank=False)
     valor_compra = models.DecimalField(verbose_name="Valor da Compra", max_digits=9, decimal_places=2, null=False, blank=False)
     valor_pago = models.DecimalField(verbose_name="Valor de Pagamento", max_digits=9, decimal_places=2, null=True, blank=True)
     qtd = models.CharField(verbose_name="Quantidade", max_length=10, null=True, blank=True)
@@ -51,5 +54,6 @@ class Compras(models.Model):
     produto = models.CharField(verbose_name="Produto", max_length=20, null=True, blank=False)
     classificacao = models.CharField(verbose_name="Classificação", choices=classificacao_choices, max_length=20, null=True, blank=False)
     forma_pagamento = models.CharField(verbose_name="Forma de Pagamento", choices=tipo_pagamento, max_length=17, null=True, blank=False)
-    observacao = models.CharField(verbose_name="Observação", max_length=35, null=True, blank=True,)
+    observacao = models.CharField(verbose_name="Observação", max_length=35, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)

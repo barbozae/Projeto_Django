@@ -8,21 +8,14 @@
     <h2>Funcionário</h2>
     <h3>Contratação de Funcionário</h3>
 
-    <!-- <h3>Contexto disponível:</h3>
-    <pre>{{ view|default_if_none:"View não disponível" }}</pre>
-    <pre>{{ object_list|default_if_none:"object_list não disponível" }}</pre>
-    <pre>{{ contratacao_list|default_if_none:"contratacao_list não disponível" }}</pre>
-    <pre>{{ contratacoes|default_if_none:"contratacoes não disponível" }}</pre> -->
-
-
     {% if contratacao_list %}
         <table class="table table-sm">
             <thead class="table-light">
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Nome</th>
-                <th scope="col">Cargo</th>
                 <th scope="col">Setor</th>
+                <th scope="col">Cargo</th>
                 <th scope="col">Exame</th>
                 <th scope="col">Contratação</th>
                 <th scope="col">Salário</th>
@@ -38,8 +31,8 @@
                     <tr>
                         <th scope="row" >{{ contratacao.pk }}</th>
                         <td>{{ contratacao.nome_funcionario }}</td>
-                        <td>{{ contratacao.cargo| default:"-" }}</td>
                         <td>{{ contratacao.setor| default:"-" }}</td>
+                        <td>{{ contratacao.cargo| default:"-" }}</td>
                         <td>{{ contratacao.data_exame_admissional|date:"d/m/y"}}</td>
                         <td>{{ contratacao.data_contratacao|date:"d/m/y" }}</td>
                         <td>{{ contratacao.salario| default:"-" }}</td>
