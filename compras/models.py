@@ -14,7 +14,7 @@ class Fornecedor(models.Model):
     numero = models.CharField(verbose_name="Número", max_length=10, null=True, blank=True)
     bairro = models.CharField(verbose_name="Bairro", max_length=20, null=True, blank=True)
     cidade = models.CharField(verbose_name="Cidade", max_length=30, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     def __str__(self):
@@ -55,5 +55,5 @@ class Compras(models.Model):
     classificacao = models.CharField(verbose_name="Classificação", choices=classificacao_choices, max_length=20, null=True, blank=False)
     forma_pagamento = models.CharField(verbose_name="Forma de Pagamento", choices=tipo_pagamento, max_length=17, null=True, blank=False)
     observacao = models.CharField(verbose_name="Observação", max_length=35, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)

@@ -14,14 +14,14 @@
             <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Nome</th>
-                <th scope="col">Data Desligamento</th>
+                <th scope="col">Desligamento</th>
                 <th scope="col">Devolução Uniforme</th>
-                <th scope="col">Data Exame Demissional</th>
-                <th scope="col">Data Homologação</th>
+                <th scope="col">Exame Demissional</th>
+                <th scope="col">Homologação</th>
                 <th scope="col">Tipo Desligamento</th>
                 <th scope="col">Doc Contabilidade</th>
-                <th scope="col">Status</th>
                 <th scope="col">Observação</th>
+                <th scope="col">Status</th>
                 <th scope="col">Ações</th>
             </tr>
             </thead>
@@ -36,8 +36,18 @@
                         <td>{{ rescisao.data_homologacao| date:"d/m/y"|default:"-" }}</td>
                         <td>{{ rescisao.tipo_desligamento| default:"-" }}</td>
                         <td>{{ rescisao.contabilidade_rescisao| default:"-" }}</td>
-                        <td>{{ rescisao.status_rescisao| default:"-" }}</td>
                         <td>{{ rescisao.observacao_demissional| default:"-" }}</td>
+                        <!-- Coluna Status com formato condicional -->
+                        <td>
+                            <span 
+                            class="btn btn-sm 
+                            {% if rescisao.status_rescisao %}
+                                btn-success
+                            {% else %}
+                                btn-danger
+                            {% endif %}
+                            ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        </td>
                         <td>
                             <a href="{% url 'update_rescisao' pk=rescisao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
                         </td>

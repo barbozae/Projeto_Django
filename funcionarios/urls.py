@@ -1,5 +1,5 @@
 from django.urls import path
-from funcionarios.views import CadastroListView, CadastroCreateView, CadastroUpDateView, ContratacaoListView, ContratacaoCreateView, ContratacaoUpDateView, PagamentoListView, PagamentoCreateView, PagamentoUpDateView, RescisaoListView, RescisaoCreateView, RescisaoUpDateView
+from funcionarios.views import CadastroListView, CadastroCreateView, CadastroUpDateView, ContratacaoListView, ContratacaoCreateView, ContratacaoUpDateView, PagamentoListView, PagamentoCreateView, PagamentoUpDateView, RescisaoListView, RescisaoCreateView, RescisaoUpDateView, PagamentoDeleteView
 
 urlpatterns = [
                 # Rotas para Funcionários
@@ -16,6 +16,7 @@ urlpatterns = [
                 path('payment/', PagamentoListView.as_view(), name="pagamento_list"),
                 path('create_payment/', PagamentoCreateView.as_view(), name="create_payment"),
                 path('update_payment/<int:pk>', PagamentoUpDateView.as_view(), name="update_payment"),
+                path('delete_payment/<int:pk>', PagamentoDeleteView.as_view(), name="delete_payment"),
 
                 # Rotas para rescisao de funcionarios
                 path('rescisao/', RescisaoListView.as_view(), name="rescisao_list"),

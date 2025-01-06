@@ -32,6 +32,7 @@
                         <td>{{ pagamento.forma_pagamento| default:"-" }}</td>
                         <td>
                             <a href="{% url 'update_payment' pk=pagamento.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                            <a href="{% url 'delete_payment' pk=pagamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>
                         </td>
                     </tr>
                 {% endfor %}

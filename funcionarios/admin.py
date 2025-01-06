@@ -9,7 +9,7 @@ class CadastroAdmin(admin.ModelAdmin):
 
 class ContratacaoAdmin(admin.ModelAdmin):
     list_display = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
-                  "documentacao_admissional", "contabilidade_admissional", "status_admissional", "observacao_admissional"]
+                        "contabilidade_admissional", "status_admissional", "observacao_admissional"]
 
 
 class PagamentoAdmin(admin.ModelAdmin):

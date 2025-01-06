@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-
+# TODO falta garantir que não haja pagamentos de funcionarios que foram desligado
 class Cadastro(models.Model):
-    lista_banco = [('Banco do Brasil', 'Banco do Brasil'),
+    LIST_BANK = [('Banco do Brasil', 'Banco do Brasil'),
                    ('Banco Original', 'Banco Original'),
                    ('Bradesco', 'Bradesco'),
                    ('Caixa Econômica', 'Caixa Econômica'),
@@ -20,16 +20,16 @@ class Cadastro(models.Model):
     nome_funcionario = models.CharField(verbose_name="Funcionário", max_length=40 , blank=False, unique=True)
     rg = models.CharField(verbose_name="RG", max_length=14, null=True , blank=True)
     cpf = models.CharField(verbose_name="CPF", max_length=14, null=True , blank=True)
-    carteira_trabalho = models.CharField(verbose_name="Carteira Trabalho", max_length=12, null=True, blank=True)
+    carteira_trabalho = models.CharField(verbose_name="CTPS", max_length=12, null=True, blank=True)
     endereco = models.CharField(verbose_name="Endereço", max_length=40, null=True, blank=True)
     numero = models.CharField(verbose_name="Número", max_length=255, null=True, blank=True)
     bairro = models.CharField(verbose_name="Bairro", max_length=20, null=True, blank=True)
     cidade = models.CharField(verbose_name="Cidade", max_length=30, null=True, blank=True)
     telefone = models.CharField(verbose_name="Telefone", max_length=13, null=True, blank=True)
-    banco = models.CharField(verbose_name="Banco", choices=lista_banco, max_length=15, null=True, blank=True)
+    banco = models.CharField(verbose_name="Banco", choices=LIST_BANK, max_length=15, null=True, blank=True)
     agencia = models.CharField(verbose_name="Agencia", max_length=7, null=True, blank=True)
     conta = models.CharField(verbose_name="Conta", max_length=10, null=True, blank=True)
-    # author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     def __str__(self):
@@ -38,7 +38,7 @@ class Cadastro(models.Model):
 
 
 class Contratacao(models.Model):
-    cargos_por_setor = {
+    CARGOS_POR_SETOR = {
                     'Administração': ["Gerente Financeiro", "Auxiliar Adm"],
                     'Cozinha': ["Chef", "Cozinheiro", "Cozinheiro Auxiliar"],
                     'Limpeza': ["Faxineira(o)"],
@@ -48,8 +48,11 @@ class Contratacao(models.Model):
                     'Vallet': ["Manobrista"]
                     }
     
-    SETOR_CHOICES = [(key, key) for key in cargos_por_setor.keys()]
-    CARGO_CHOICES = [(value, value) for sublist in cargos_por_setor.values() for value in sublist]
+    SETOR_CHOICES = [(key, key) for key in CARGOS_POR_SETOR.keys()]
+    CARGO_CHOICES = [(value, value) for sublist in CARGOS_POR_SETOR.values() for value in sublist]
+
+    DOC_CONTABILIDADE = [('Enviado', 'Enviado'),
+                         ('Não Enviado', 'Não Enviado')]
 
     created_at = models.DateTimeField(auto_now_add=True)
     nome_funcionario = models.ForeignKey(Cadastro, on_delete=models.PROTECT, verbose_name="Funcionário", null=False)
@@ -58,11 +61,10 @@ class Contratacao(models.Model):
     data_exame_admissional = models.DateField(verbose_name="Dt Exame Admissional", null=True, blank=True)
     data_contratacao = models.DateField(verbose_name="Data Contratação", null=False, blank=False)
     salario = models.DecimalField(verbose_name="Salário", max_digits=9, decimal_places=2, null=True, blank=True)
-    documentacao_admissional = models.CharField(verbose_name="Doc Admissional", max_length=10, null=True, blank=True)
-    contabilidade_admissional = models.CharField(verbose_name="Doc Contabilidade", max_length=10, null=True, blank=True)
-    status_admissional = models.CharField(verbose_name="Status Admissão", max_length=10, null=True, blank=True)
+    contabilidade_admissional = models.CharField(verbose_name="Doc Contabilidade", choices=DOC_CONTABILIDADE, max_length=11, null=True, blank=True)
+    status_admissional = models.BooleanField(verbose_name="Status Rescisão", default=False)
     observacao_admissional = models.CharField(verbose_name="Obs Admissional", max_length=50, null=True, blank=True)
-    # author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     # Garantir que o funcionário não seja repetido para a mesma data de contratação
@@ -70,19 +72,62 @@ class Contratacao(models.Model):
         unique_together = ('nome_funcionario', 'data_contratacao')  # Um funcionário só pode ter uma contratação por data de pagamento
 
 
+    def save(self, *args, **kwargs):
+        # Lógica para determinar o status_admissional
+        if (
+            self.contabilidade_admissional == 'Enviado' and  # A coluna contabilidade_admissional deve ter o valor 'True'
+            self.data_contratacao, self.data_exame_admissional is not None  # datas devem serem preenchidas
+        ):
+            self.status_admissional = True
+        else:
+            self.status_admissional = False
+
+        super(Contratacao, self).save(*args, **kwargs)  # Chama o método save origina
+
+
 class Rescisao(models.Model):
+    LIST_CHOICES = [('Dispensa sem justa causa', 'Dispensa sem justa causa'),
+                     ('Demissão por justa causa', 'Demissão por justa causa'),
+                     ('Pedido de demissão','Pedido de demissão'),
+                     ('Término do contrato', 'Término do contrato'),
+                     ('Rescisão indireta', 'Rescisão indireta'),
+                     ('Rescisão por culpa recíproca', 'Rescisão por culpa recíproca')
+                     ]
+    UNIFORME = [('Entregue', 'Entregue'),
+                  ('Não Entregue', 'Não Entregue')
+                  ]
+    DOC_CONTABILIDADE = [('Enviado', 'Enviado'),
+                         ('Não Enviado', 'Não Enviado')]
     created_at = models.DateTimeField(auto_now_add=True)
     nome_funcionario = models.ForeignKey(Cadastro, on_delete=models.PROTECT, verbose_name="Funcionário", null=False)
-    data_desligamento = models.DateField(verbose_name="Dt Desligamento", null=False, blank=False)
-    devolucao_uniforme = models.CharField(verbose_name="Devolução Uniforme", max_length=10, null=True, blank=True)
-    data_exame_demissional = models.DateField(verbose_name="Dt Demissional", null=True, blank=True)
-    data_homologacao = models.DateField(verbose_name="Dt Homologação", null=True, blank=True)
-    tipo_desligamento = models.CharField(verbose_name="Forma Desligammento", max_length=30, null=False, blank=False)
-    contabilidade_rescisao = models.CharField(verbose_name="Contabilidade Rescisão", max_length=10, null=True, blank=True)
-    observacao_demissional = models.CharField(verbose_name="Obs Demissional", max_length=20, null=True, blank=True)
-    status_rescisao = models.CharField(verbose_name="Status Rescisão", max_length=10, null=True, blank=True)
-    # author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    data_desligamento = models.DateField(verbose_name="Data Desligamento", null=False, blank=False)
+    devolucao_uniforme = models.CharField(verbose_name="Devolução Uniforme", choices=UNIFORME, max_length=12, null=True, blank=True)
+    data_exame_demissional = models.DateField(verbose_name="Data Exame Demissional", null=True, blank=True)
+    data_homologacao = models.DateField(verbose_name="Data Homologação", null=True, blank=True)
+    tipo_desligamento = models.CharField(verbose_name="Forma Desligamento", choices=LIST_CHOICES, max_length=30, null=False, blank=False)
+    contabilidade_rescisao = models.CharField(verbose_name="Contabilidade Documentação", choices=DOC_CONTABILIDADE, max_length=11, null=True, blank=True)
+    observacao_demissional = models.CharField(verbose_name="Observação", max_length=40, null=True, blank=True)
+    status_rescisao = models.BooleanField(verbose_name="Status Rescisão", default=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
+
+    # Garantir que o funcionário não seja repetido para a mesma data de contratação
+    class Meta:
+        unique_together = ('nome_funcionario', 'data_desligamento')  # Um funcionário só pode ter uma contratação por data de pagamento
+
+
+    def save(self, *args, **kwargs):
+        # Lógica para determinar o status_rescisao
+        if (
+            self.devolucao_uniforme == 'Entregue' and  # A coluna devolucao_uniforme deve ter o valor 'True'
+            self.data_exame_demissional is not None and  # data_exame_demissional deve ser preenchida
+            self.contabilidade_rescisao == 'Enviado'  # A coluna contabilidade_rescisao deve ter o valor 'True'
+        ):
+            self.status_rescisao = True
+        else:
+            self.status_rescisao = False
+
+        super(Rescisao, self).save(*args, **kwargs)  # Chama o método save origina
 
 
 class Pagamento(models.Model):
@@ -112,5 +157,5 @@ class Pagamento(models.Model):
     valor_pago = models.DecimalField(verbose_name="Valor Pago", max_digits=9, decimal_places=2, null=False, blank=False)
     tipo_pagamento = models.CharField(verbose_name="Tipo de Pagamento", max_length=15, choices=lista_tipo_pagamento, null=False, blank=False)
     forma_pagamento = models.CharField(verbose_name="Forma de Pagamento", max_length=15, choices=lista_forma_pagamento, null=False, blank=False)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
