@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,27 +26,6 @@ SECRET_KEY = 'django-insecure-p9a=99jkpfwt62n85v%yyeo&t^grj2_-e1c!pm9igp03%(owv_
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
-# Application definition
-# DJANGO_APPS = [
-#     'accounts',
-#     'django.contrib.admin',
-#     'django.contrib.auth',
-#     'django.contrib.contenttypes',
-#     'django.contrib.sessions',
-#     'django.contrib.messages',
-#     'django.contrib.staticfiles',
-#     ]
-
-# THIRD_PARTY_APPS = [
-#     'crispy_forms',
-#     'crispy_bootstrap5',
-# ]
-
-# MY_APPS = ['vendas.apps.VendasConfig',
-#            'compras.apps.ComprasConfig',
-#            'funcionarios.apps.FuncionariosConfig',]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -156,7 +134,6 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-LOGIN_REDIRECT_URL = '/'  # Substitua pelo caminho desejado após realizar o login
 LOGIN_URL = '/login/'  # Caminho para a página de login
-
+LOGIN_REDIRECT_URL = '/'  # Substitua pelo caminho desejado após realizar o login
 LOGOUT_REDIRECT_URL = '/login/'  # Redireciona para a página de login

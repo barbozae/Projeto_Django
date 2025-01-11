@@ -53,6 +53,7 @@
               <span class="navbar-text text-dark me-3">
                 Bem-vindo, {{ user.first_name }}!
               </span>
+              <a href="{% url 'password_change' %}" class="btn btn-outline-secondary me-2">Alterar Senha</a>
               <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
             {% else %}
               <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
@@ -76,6 +77,11 @@
         <div class="container text-center">
             <p>&copy; 2024 Restaurante. Todos os direitos reservados.</p>
             <p>
+                <a href="https://www.instagram.com/sushicasaverde/" 
+                    class="text-dark me-3"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Instagram</a>
                 <a href="#" class="text-dark me-3">Política de Privacidade</a>
                 <a href="#" class="text-dark">Termos de Uso</a>
             </p>
