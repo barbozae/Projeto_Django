@@ -3,6 +3,8 @@ from django.urls import path, include
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 # Função personalizada para logout
@@ -21,4 +23,9 @@ urlpatterns = [
                 path('', include('vendas.urls')),
                 path('', include('funcionarios.urls')),
                 path('', include('compras.urls')),
+                path('', include('menu.urls')),
             ]
+
+# Servindo arquivos de mídia em ambiente de desenvolvimento
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

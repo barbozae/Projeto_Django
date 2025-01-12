@@ -1,0 +1,137 @@
+{% extends 'global/base.html' %}
+
+{% load static %}
+
+{% block page_title %}
+    Menu
+{% endblock page_title %}
+
+{% block content %}
+    <!-- Conteúdo da página -->
+    <h1>Bem-vindo ao Menu</h1>
+    <p>Aqui você pode acessar diferentes opções do sistema.</p>
+
+{% include 'menu/carrossel.html' %}
+
+    <!-- Painel de navegação -->
+    <div class="card text-center mt-4">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="sushi-tab" data-bs-toggle="tab" href="#sushi" role="tab" aria-controls="sushi" aria-selected="true">Sushi</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="drinks-tab" data-bs-toggle="tab" href="#drinks" role="tab" aria-controls="drinks" aria-selected="false">Drinks</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="temaki-tab" data-bs-toggle="tab" href="#temaki" role="tab" aria-controls="temaki" aria-selected="false">Temaki</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="sushi" role="tabpanel" aria-labelledby="sushi-tab">
+              <h5 class="card-title">Sushi</h5>
+              <!-- informações dentro do card Sushi -->
+              <div class="row row-cols-1 row-cols-md-3 g-2">
+                <div class="row row-cols-1 row-cols-md-3 g-2">
+                  {% for item in images %}
+                    {% if item.category.name == "Sushi" %}
+                    <div class="col">
+                      <div class="card h-100" style="width: 15rem;">
+                        <!-- Exibe a imagem do banco -->
+                        <img src="{{ item.cover.url }}" class="card-img-top img-fluid" alt="{{ item.title }}">
+                        <div class="card-body">
+                          <!-- Exibe o título e a descrição -->
+                          <h5 class="card-title">{{ item.title }}</h5>
+                          <p class="card-text">{{ item.description }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    {% endif %}
+                  {% empty %}
+                    <p>Nenhum item encontrado.</p>
+                  {% endfor %}
+                </div>
+              </div>
+              <p class="card-text mt-2">
+                <strong>Descrição: </strong>
+                {% for item in images %}
+                    {% if item.category.name == "Sushi" %}
+                        {{ item.category.description }}
+                    {% endif %}
+                {% endfor %}
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="drinks" role="tabpanel" aria-labelledby="drinks-tab">
+              <h5 class="card-title">Drinks</h5>
+
+              <!-- informações dentro do card Drinks -->
+              <div class="row row-cols-1 row-cols-md-3 g-2">
+                {% for item in images %}
+                  {% if item.category.name == "Drinks" %}
+                <div class="col">
+                  <div class="card h-100" style="width: 15rem;">
+                    <!-- Exibe a imagem do banco -->
+                    <img src="{{ item.cover.url }}" class="card-img-top" alt="{{ item.title }}">
+                    <div class="card-body">
+                      <!-- Exibe o título e a descrição -->
+                      <h5 class="card-title">{{ item.title }}</h5>
+                      <p class="card-text">{{ item.description }}</p>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+              {% empty %}
+              <p>Nenhum item encontrado.</p>
+              {% endfor %}
+              </div>
+              <p class="card-text mt-2">
+                <strong>Descrição: </strong> 
+                {% for item in images %}
+                  {% if item.category.name == "Drinks" %}
+                    {{ item.category.description }}
+                  {% endif %}
+                {% endfor %}
+              </p>
+            </div>
+
+            <div class="tab-pane fade" id="temaki" role="tabpanel" aria-labelledby="temaki-tab">
+              <h5 class="card-title">Temaki</h5>
+              <!-- informações dentro do card Sushi -->
+              <div class="row row-cols-1 row-cols-md-3 g-2">
+                {% for item in images %}
+                  {% if item.category.name == "Temaki" %}
+                <div class="col">
+                  <div class="card h-100" style="width: 15rem;">
+                    <!-- Exibe a imagem do banco -->
+                    <img src="{{ item.cover.url }}" class="card-img-top" alt="{{ item.title }}">
+                    <div class="card-body">
+                      <!-- Exibe o título e a descrição -->
+                      <h5 class="card-title">{{ item.title }}</h5>
+                      <p class="card-text">{{ item.description }}</p>
+                    </div>
+                  </div>
+                </div>
+                  {% endif %}
+                {% empty %}
+                <p>Nenhum item encontrado.</p>
+                {% endfor %}
+              </div>
+              <p class="card-text mt-2">
+                <strong>Descrição: </strong>
+                {% for item in images %}
+                  {% if item.category.name == "Temaki" %}
+                    {{ item.category.description }}
+                  {% endif %}
+                {% endfor %}
+              </p>
+            </div>
+          </div>
+        </div>
+    </div>
+      
+
+
+{% endblock content %}
