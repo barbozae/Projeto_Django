@@ -10,5 +10,5 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ("title", "description", "is_published", "cover")
+    list_display = ("title", "description", "is_published", "cover", "carousel")
     search_fields = ("title",)

@@ -15,8 +15,7 @@ class Menu(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=65)
     description = models.CharField(max_length=165)
-    #TODO analisar a possibilidade em deletar coluna slug
-    slug = models.SlugField()
+    carousel = models.BooleanField(default=False)
     is_published = models.BooleanField(default=False)
     cover = models.ImageField(upload_to='menu/covers/%Y/%m/%d/')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
