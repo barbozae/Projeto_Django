@@ -139,5 +139,5 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 LOGIN_URL = '/login/'  # Caminho para a página de login
-LOGIN_REDIRECT_URL = '/'  # Substitua pelo caminho desejado após realizar o login
+LOGIN_REDIRECT_URL = '/menu/'  # Substitua pelo caminho desejado após realizar o login
 LOGOUT_REDIRECT_URL = '/login/'  # Redireciona para a página de login

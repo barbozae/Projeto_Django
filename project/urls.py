@@ -10,7 +10,7 @@ from django.conf.urls.static import static
 # Função personalizada para logout
 def custom_logout(request):
     logout(request)  # Encerra a sessão do usuário
-    return redirect('/login/')  # Redireciona para a página de login
+    return redirect('home')  # Redireciona para a página de login
 
 urlpatterns = [
                 path('admin/', admin.site.urls),

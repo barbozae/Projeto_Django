@@ -1,73 +1,107 @@
-{% extends 'global/base.html' %}
-
-{% load static %}
-
-{% block page_title %}
-    Menu
-{% endblock page_title %}
+{% include 'home.html' %}
 
 {% block content %}
-    <!-- Conteúdo da página -->
-    <h1>Bem-vindo ao Menu</h1>
-    <p>Aqui você pode acessar diferentes opções do sistema.</p>
 
-{% include 'menu/carrossel.html' %}
+    <style>
+      body {
+        background-color: #f2f5f2;
+        /* #e0e9df */
+      }
+    </style>
 
-    <!-- Painel de navegação -->
-    <div class="card text-center mt-4">
-      <div class="card-header">
-        <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-          <!-- Geração das abas dinamicamente -->
-          {% for category in categories %}
-            <li class="nav-item">
-              <a class="nav-link {% if forloop.first %}active{% endif %}" 
-              id="{{ category.name|slugify }}-tab" 
-              data-bs-toggle="tab" 
-              href="#{{ category.name|slugify }}" 
-              role="tab" aria-controls="{{ category.name|slugify }}" 
-              aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
-                {{ category.name }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="card-body">
-        <div class="tab-content" id="myTabContent">
-          <!-- Geração do conteúdo das abas dinamicamente -->
-          {% for category in categories %}
-            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
-                  id="{{ category.name|slugify }}" 
-                  role="tabpanel" 
-                  aria-labelledby="{{ category.name|slugify }}-tab">
-              <h5 class="card-title">{{ category.name }}</h5>
+  <!-- Cabeçalho -->
+  <div class="jumbotron text-center p-2 mb-4" style="background: linear-gradient(45deg, #FFFAEC, #BAD8B6, #a6d4af); color: white;">
+    <h1 class="display-6">Bem-vindo ao Nosso Menu!</h1>
+    <p class="lead">Explore nossas opções deliciosas e encontre seu prato favorito.</p>
+  </div>
+
+  <!-- Carrossel -->
+  {% include 'menu/carrossel.html' %}
+
+  
+  <style>
+    /* Cor padrão do link */
+    .custom-nav-link {
+      color: green !important;
+    }
     
-              <!-- Exibe os itens da categoria -->
-              <div class="row row-cols-1 row-cols-md-3 g-2">
-                {% for item in images %}
-                  {% if item.category == category %}
-                    <div class="col">
-                      <div class="card h-100" style="width: 15rem;">
-                        <img src="{{ item.cover.url }}" class="card-img-top img-fluid" alt="{{ item.title }}">
-                        <div class="card-body">
-                          <h5 class="card-title">{{ item.title }}</h5>
-                          <p class="card-text">{{ item.description }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  {% endif %}
-                {% empty %}
-                  <p>Nenhum item encontrado.</p>
-                {% endfor %}
-              </div>
+    /* Cor do link quando está ativo (selecionado) */
+    .custom-nav-link.active {
+      color: black !important;
+    }
+    
+    /* Opcional: cor ao passar o mouse */
+    .custom-nav-link:hover {
+      color: limegreen !important;
+    }
+    </style>
 
-              <p class="card-text mt-2">
-                <strong>Descrição: </strong> {{ category.description }}
-              </p>
-            </div>
-          {% endfor %}
+<!-- Abas do Menu -->
+<div class="card text-center mt-4 mx-auto" style="max-width: 1200px;">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs justify-content-center" id="myTab" role="tablist">
+        {% for category in categories %}
+        <li class="nav-item">
+          <a class="nav-link custom-nav-link {% if forloop.first %}active{% endif %}"
+             id="{{ category.name|slugify }}-tab" 
+             data-bs-toggle="tab" 
+             href="#{{ category.name|slugify }}" 
+             role="tab" aria-controls="{{ category.name|slugify }}" 
+             aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+            <i class="bi bi-box"></i> {{ category.name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card-body">
+      <div class="tab-content" id="myTabContent">
+        {% for category in categories %}
+        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+             id="{{ category.name|slugify }}" 
+             role="tabpanel" 
+             aria-labelledby="{{ category.name|slugify }}-tab">
+          <h5 class="card-title">{{ category.name }}</h5>
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            {% for item in images %}
+              {% if item.category == category %}
+              <div class="col">
+                <div class="card h-100" style="width: 15rem; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                  <img src="{{ item.cover.url }}" class="card-img-top img-fluid rounded" alt="{{ item.title }}">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <p class="card-text">{{ item.description }}</p>
+                    <!-- <a href="#" class="btn btn-outline-primary btn-sm">Saiba Mais</a> -->
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            {% empty %}
+            <p>Nenhum item encontrado.</p>
+            {% endfor %}
+          </div>
+          <p class="card-text mt-4">{{ category.description }}</p>
         </div>
+        {% endfor %}
       </div>
     </div>
-    
-{% endblock content %}
+  </div>
+
+  <!-- Rodapé -->
+  <footer class="bg-body-tertiary text-dark py-3 mt-5">
+    <div class="container text-center">
+        <p>&copy; 2024 Restaurante. Todos os direitos reservados.</p>
+        <p>
+          <a class="text-dark me-3"
+            href="https://www.instagram.com/sushicasaverde/" 
+            target="_blank"
+            rel="noopener noreferrer"
+            >Instagram</a>
+            <a href="#" class="text-dark me-3">Política de Privacidade</a>
+            <a href="#" class="text-dark me-3">Termos de Uso</a>
+            <a href="#" class="text-dark me-3">Sobre Nós</a>
+            <a href="#" class="text-dark me-3">Contato</a>
+        </p>
+    </div>
+  </footer>
+{% endblock %}

@@ -45,7 +45,7 @@
             {% endif %}
             <small class="form-text text-muted">{{ form.email.help_text }}</small> <!-- Mensagem de ajuda -->
           </div>
-
+          
           <!-- Campos de usuário e senha com mensagens de ajuda -->
           <div class="mb-3">
             <label for="id_username" class="form-label">Usuário</label>
@@ -79,7 +79,9 @@
             {% endif %}
             <small class="form-text text-muted">{{ form.password2.help_text }}</small> <!-- Mensagem de ajuda -->
           </div>
-
+          
+          <p>Ao se registar você esta de acordo em receber informativos e promoções por e-mail.</p>
+          
           <button type="submit" class="btn btn-primary w-100">Registrar</button>
         </form>
 
