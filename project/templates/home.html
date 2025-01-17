@@ -43,6 +43,7 @@
           <span class="navbar-text text-dark me-3">
             Bem-vindo, {{ user.first_name }}!
           </span>
+          <a href="{% url 'password_change' %}" class="btn btn-outline-secondary me-2">Alterar Senha</a>
           <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
         {% else %}
           <a href="{% url 'login' %}" class="btn btn-info">Login</a>
