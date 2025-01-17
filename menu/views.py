@@ -1,7 +1,9 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Menu, Category
 
 
+@login_required
 def menu_view(request):
     categories = Category.objects.filter(is_published=True)  # Recupera as categorias publicadas
     images = Menu.objects.filter(is_published=True, category__is_published=True)  # Itens do menu publicados e com categoria publicada
