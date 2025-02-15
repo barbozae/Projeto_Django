@@ -40,8 +40,16 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         # Recupera o contexto padrão do Django
         context = super().get_context_data(**kwargs)
 
-        # Inicializa o total_geral
-        total_geral = 0  # Inicializa antes de usar
+        # Inicializa os contadores
+        
+        venda_rodizio = 0
+        venda_dinheiro = 0
+        venda_pix = 0
+        venda_debito = 0
+        venda_credito = 0
+        venda_beneficio = 0
+        venda_total = 0
+        venda_rodizio = 0
 
         # Calculando os totais usando os métodos do modelo
         vendas = context['object_list']
@@ -52,10 +60,23 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             venda.total = venda.calcular_total()
 
             # somando todas as linhas
-            total_geral += venda.total
+            
+            venda_rodizio += venda.rodizio or 0
+            venda_dinheiro += venda.dinheiro or 0
+            venda_pix =+ venda.pix or 0
+            venda_debito =+ venda.debito or 0
+            venda_credito =+ venda.credito or 0
+            venda_beneficio += venda.beneficio
+            venda_total += venda.total
         
         # Adiciona o total geral ao contexto
-        context['vendas_total'] = total_geral
+        context['vendas_rodizio'] = venda_rodizio
+        context['vendas_dinheiro'] = venda_dinheiro
+        context['vendas_pix'] = venda_pix
+        context['vendas_debito'] = venda_debito
+        context['vendas_credito'] = venda_credito
+        context['vendas_beneficio'] = venda_beneficio
+        context['vendas_total'] = venda_total
         return context
 
 

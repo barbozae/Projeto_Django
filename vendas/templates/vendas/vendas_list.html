@@ -7,7 +7,6 @@
 {% block content %}
     <h2>Vendas</h2>
 
-    <a href="{% url 'create_vendas' %}" class="btn btn-primary mb-2">Nova Venda</a>
     <a href="{% url 'resume_vendas' %}" class="btn btn-primary mb-2">Resumo</a>
 
     <h6>Filtrar Datas</h6>
@@ -36,19 +35,63 @@
                 </select>
             </div>
 
-            <!-- Botão Buscar -->
             <div class="mb-2 ms-2 mt-4">
                 <button type="submit" class="btn btn-primary" name="buscar_vendas">Buscar</button>
-            </div>
-            
-            <!-- Botão Limpar -->
-            <div class="mb-2 ms-2 mt-4">
                 <a href="{% url 'venda_list' %}" class="btn btn-secondary">Limpar</a>
+                <a href="{% url 'create_vendas' %}" class="btn btn-success">Nova Venda</a>
             </div>
             <!-- <a href="{% url 'venda_list' %}" class="btn btn-secondary ms-2">Limpar</a> -->
         </form>
     </div>
     
+    
+    <!-- cards -->
+    <div class="d-flex justify-content-around flex-wrap mt-2">
+        <div class="card text-bg-light mb-3" style="max-width: 18rem;">
+            <div class="card-header">Rodízio</div>
+            <div class="card-body">
+                <h5 class="card-title tex-center">{{ vendas_rodizio }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+            <div class="card-header">Dinheiro</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{vendas_dinheiro}}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+            <div class="card-header">Pix</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_pix }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+            <div class="card-header">Débito</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_debito }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+            <div class="card-header">Crédito</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_credito }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
+            <div class="card-header">Benefício</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_beneficio }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-success mb-3" style="max-width: 18rem;">
+            <div class="card-header">Total Vendas</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
+            </div>
+        </div>
+    </div>
+
+
     {% if vendas_list %}
         <table class="table table-sm mt-3"> <!-- table-bordered -->
             <thead class="table-light">

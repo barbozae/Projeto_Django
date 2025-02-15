@@ -1,12 +1,110 @@
 {% extends 'global/base.html' %}
 
 {% block page_title %}
-    Vendas Resumofsddf
+    Vendas Resumo
 {% endblock page_title %}
 
 {% block content %}
-    <h2>Consegui</h2>
-
+    <h2>Resumo Vendas</h2>
     <a href="{% url 'venda_list' %}" class="btn btn-primary">Voltar</a>
+
+
+    <h6>Filtrar Datas</h6>
+    <div class="container ms-1">
+        <form action="" method="GET" class="d-flex align-items-center">
+
+            <!-- Caixa de data inicial -->
+            <div class="mb-2">
+                <label for="data_inicio" class="form-label">Data Início:</label>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+            </div>
+
+            <!-- Caixa de data final -->
+            <div class="mb-2 ms-2">
+                <label for="data_fim" class="form-label">Data Fim:</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim">
+            </div>
+
+            <!-- Filtro para Período -->
+            <div class="mb-2 ms-2">
+                <label for="periodo" class="form-label">Período:</label>
+                <select class="form-select" id="periodo" name="periodo">
+                    <option value="" {% if not request.GET.periodo %}selected{% endif %}>Todos os períodos</option>
+                    <option value="Almoço" {% if request.GET.periodo == "Almoço" %}selected{% endif %}>Almoço</option>
+                    <option value="Jantar" {% if request.GET.periodo == "Jantar" %}selected{% endif %}>Jantar</option>
+                </select>
+            </div>
+
+            <!-- Botão Buscar -->
+            <div class="mb-2 ms-2 mt-4">
+                <button type="submit" class="btn btn-primary" name="buscar_vendas">Buscar</button>
+            </div>
+            
+            <!-- Botão Limpar -->
+            <div class="mb-2 ms-2 mt-4">
+                <a href="{% url 'venda_list' %}" class="btn btn-secondary">Limpar</a>
+            </div>
+            <!-- <a href="{% url 'venda_list' %}" class="btn btn-secondary ms-2">Limpar</a> -->
+        </form>
+    </div>
+
+
+
+    <div class="card text-bg-primary mb-3" style="max-width: 18rem;">
+      <div class="card-header">Vendas</div>
+        <div class="card-body">
+          <h5 class="card-title">Primary card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+        <div class="card-header">CMV</div>
+        <div class="card-body">
+          <h5 class="card-title">Secondary card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-success mb-3" style="max-width: 18rem;">
+        <div class="card-header">Header</div>
+        <div class="card-body">
+          <h5 class="card-title">Success card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-danger mb-3" style="max-width: 18rem;">
+        <div class="card-header">Header</div>
+        <div class="card-body">
+          <h5 class="card-title">Danger card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
+        <div class="card-header">Header</div>
+        <div class="card-body">
+          <h5 class="card-title">Warning card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+        <div class="card-header">Header</div>
+        <div class="card-body">
+          <h5 class="card-title">Info card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-light mb-3" style="max-width: 18rem;">
+        <div class="card-header">Header</div>
+        <div class="card-body">
+          <h5 class="card-title">Light card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+      <div class="card text-bg-dark mb-3" style="max-width: 18rem;">
+        <div class="card-header">Header</div>
+        <div class="card-body">
+          <h5 class="card-title">Dark card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
     
 {% endblock content %}
