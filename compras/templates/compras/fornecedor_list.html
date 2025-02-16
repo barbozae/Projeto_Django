@@ -1,11 +1,35 @@
 {% extends 'global/base.html' %}
 
 {% block page_title %}
-    Fornecedor
+    Fornecedores
 {% endblock page_title %}
 
 {% block content %}
-    <h2>Fornecedor</h2>
+<h2>Fornecedores</h2>
+<div class="container ms-1">
+    <form action="" method="GET" class="d-flex align-items-center">
+
+        <div class="form-floating ms-2">
+            <select class="form-select" id="floatingSelect" name="nome_empresa[]" aria-label="Floating label select example">
+                <option value="">Selecione um fornecedor</option>
+                {% for fornecedor in fornecedores %}
+                    <option value="{{ fornecedor.nome_empresa }}" {% if fornecedor.nome_empresa in request.GET.nome_empresa %}selected{% endif %}>
+                        {{ fornecedor.nome_empresa }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label for="floatingSelect">Fornecedor</label>
+        </div>
+
+        <div class="mb-2 ms-2 mt-4">
+            <button type="submit" class="btn btn-primary" name="buscar_fornecedores">Buscar</button>
+            <a href="{% url 'fornecedor_list' %}" class="btn btn-secondary">Limpar</a>
+        </div>
+
+    </form>
+</div>
+
+
     {% if fornecedor_list %}
         <table class="table table-sm">
             <thead class="table-light">
@@ -48,6 +72,4 @@
     {% else %}
         <p>Não há registros</p>
     {% endif %}
-
-    <a href="{% url 'create_fornecedor' %}" class="btn btn-primary">Novo Fornecedor</a>
 {% endblock content %}

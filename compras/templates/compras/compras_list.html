@@ -5,7 +5,54 @@
 {% endblock page_title %}
 
 {% block content %}
-    <h2>Compras</h2>
+    <h2>Compras</h2>    
+    <h6>Filtrar Datas</h6>
+    <div class="container ms-1">
+        <form action="" method="GET" class="d-flex align-items-center">
+
+            <div class="mb-2">
+                <label for="data_inicio" class="form-label">Data Início:</label>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
+            </div>
+
+            <div class="mb-2 ms-2">
+                <label for="data_fim" class="form-label">Data Fim:</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
+            </div>
+
+            <div class="form-floating ms-2">
+                <select class="form-select" id="floatingSelect" name="fornecedor[]" aria-label="Floating label select example">
+                    <option value="">Selecione fornecedor</option>
+                    {% for fornecedor in fornecedores %}
+                        <option value="{{ fornecedor.id }}" {% if fornecedor.id|stringformat:"s" in request.GET.fornecedor %}selected{% endif %}>
+                            {{ fornecedor.nome_empresa }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Fornecedor</label>
+            </div>
+
+            <div class="form-floating ms-2">
+                <select class="form-select" id="floatingSelect" name="numero_boleto[]" aria-label="Floating label select example">
+                    <option value="">Selecione boleto</option>
+                    {% for boleto in numero_boleto %}
+                        <option value="{{ boleto }}" {% if boleto in request.GET.boleto %}selected{% endif %}>
+                            {{ boleto }}
+                        </option>
+                    {% endfor %}
+                </select>
+                    <label for="floatingSelect">Boleto</label>
+            </div>
+
+            <div class="mb-2 ms-2 mt-4">
+                <button type="submit" class="btn btn-primary" name="buscar_compras">Buscar</button>
+                <a href="{% url 'compras_list' %}" class="btn btn-secondary">Limpar</a>
+                <a href="{% url 'create_compras' %}" class="btn btn-success">Nova Compra</a>
+            </div>
+
+        </form>
+    </div>
+
     {% if compras_list %}
         <table class="table table-sm">
             <thead class="table-light">
@@ -51,6 +98,4 @@
     {% else %}
         <p>Não há registros</p>
     {% endif %}
-
-    <a href="{% url 'create_compras' %}" class="btn btn-primary">Nova Compra</a>
 {% endblock content %}

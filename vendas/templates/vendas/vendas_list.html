@@ -40,7 +40,6 @@
                 <a href="{% url 'venda_list' %}" class="btn btn-secondary">Limpar</a>
                 <a href="{% url 'create_vendas' %}" class="btn btn-success">Nova Venda</a>
             </div>
-            <!-- <a href="{% url 'venda_list' %}" class="btn btn-secondary ms-2">Limpar</a> -->
         </form>
     </div>
     
@@ -134,7 +133,7 @@
             <tfoot>
                 <tr>
                     <td colspan="9" class="text-end fw-bold">Total Geral:</td>
-                    <td class="bg-warning text-dark fw-bold text-center">
+                    <td class="bg-dark text-white fw-bold text-center">
                         {{ vendas_total }}
                     </td>
                     <td colspan="2"></td>

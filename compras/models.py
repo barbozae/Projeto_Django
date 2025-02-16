@@ -39,7 +39,7 @@ class Compras(models.Model):
                     ('Boleto', 'Boleto'),
                     ('Débito Automático', 'Débito Automático')
     ]
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     data_compra = models.DateField(verbose_name="Data da Venda", null=False, blank=False)
     data_vencimento = models.DateField(verbose_name="Data do Vencimento", null=True, blank=False)
