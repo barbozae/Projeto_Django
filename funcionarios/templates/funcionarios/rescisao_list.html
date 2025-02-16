@@ -8,6 +8,53 @@
     <h2>Funcionário</h2>
     <h3>Rescisão de Funcionário</h3>
 
+    <div class="container ms-1">
+        <form action="" method="GET" class="d-flex align-items-center">
+
+            <div class="mb-2">
+                <label for="data_inicio" class="form-label">Desligamento Início:</label>
+                <input type="date" class="form-control" id="data_inicio_rescisao" name="data_inicio_rescisao" value="{{ request.GET.data_desligamento }}">
+            </div>
+
+            <div class="mb-2 ms-2">
+                <label for="data_fim" class="form-label">Desligamento Fim:</label>
+                <input type="date" class="form-control" id="data_fim_rescisao" name="data_fim_rescisao" value="{{ request.GET.data_desligamento }}">
+            </div>
+
+            <div class="form-floating mb-2 ms-2">
+                <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
+                    <option value="">Selecione funcionário</option>
+                    {% for funcionario in rescisao_funcionarios %}
+                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                            {{ funcionario.nome_funcionario }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Funcionáro</label>
+            </div>
+
+            <div class="form-floating mb-2 ms-2">
+                <select class="form-select" id="floatingSelect" name="tipo_desligamento" aria-label="Floating label select example">
+                    <option value="">Selecione Tipo Desligamento</option>
+                    {% for funcionario in rescisao_funcionarios %}
+                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                            {{ funcionario.tipo_desligamento }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Desligamento</label>
+            </div>
+            
+            <div class="mb-3 ms-2 mt-4">
+                <button type="submit" class="btn btn-primary" name="buscar_funcionario_cadastro">Buscar</button>
+                <a href="{% url 'rescisao_list' %}" class="btn btn-secondary">Limpar</a>
+                <a href="{% url 'create_rescisao' %}" class="btn btn-success">Rescisão Funcionário</a>
+            </div>
+
+        </form>
+    </div>
+
+
     {% if rescisao_list %}
         <table class="table table-sm">
             <thead class="table-light">
@@ -59,5 +106,4 @@
         <p>Não há registros</p>
     {% endif %}
 
-    <a href="{% url 'create_rescisao' %}" class="btn btn-primary">Rescisão Funcionário</a>
 {% endblock content %}

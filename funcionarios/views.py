@@ -32,6 +32,7 @@ class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context['cadastros_funcionarios'] = Cadastro.objects.all()
         return context
 
+
 class CadastroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Cadastro
     template_name = 'funcionarios/funcionarios_form.html'  # Força o uso do template correto
@@ -78,6 +79,40 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    
+    def get_queryset(self):
+        queryset = Contratacao.objects.all()
+
+        # Captura os parâmetros da requisição GET
+        data_inicio_contratacao = self.request.GET.get('data_inicio_contratacao')
+        data_fim_contratacao = self.request.GET.get('data_fim_contratacao')
+
+        # Aplica os filtros se os parâmetros estiverem presentes
+        if data_inicio_contratacao:
+            queryset = queryset.filter(data_contratacao__gte=data_inicio_contratacao)
+        if data_fim_contratacao:
+            queryset = queryset.filter(data_contratacao__lte=data_fim_contratacao)
+
+        nome_funcionario_contratacao = self.request.GET.get('nome_funcionario')
+        if nome_funcionario_contratacao:
+            queryset = queryset.filter(id=nome_funcionario_contratacao)
+
+        setor_contratacao = self.request.GET.get('setor')
+        if setor_contratacao:
+            queryset = queryset.filter(id=setor_contratacao)
+
+        cargo_contratacao = self.request.GET.get('cargo')
+        if cargo_contratacao:
+            queryset = queryset.filter(id=cargo_contratacao)
+        return queryset
+
+    # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contratacao_funcionarios'] = Contratacao.objects.all()
+        context['contratacao_setor'] = Contratacao.objects.all()
+        context['contratacao_cargo'] = Contratacao.objects.all()
+        return context
 
 
 class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -121,6 +156,35 @@ class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
 
+    def get_queryset(self):
+        queryset = Pagamento.objects.all()
+
+        # Captura os parâmetros da requisição GET
+        data_inicio_pagamento_funcionario = self.request.GET.get('data_inicio_pagamento_funcionario')
+        data_fim_pagamento_funcionario = self.request.GET.get('data_fim_pagamento_funcionario')
+
+        # Aplica os filtros se os parâmetros estiverem presentes
+        if data_inicio_pagamento_funcionario:
+            queryset = queryset.filter(data_pagamento__gte=data_inicio_pagamento_funcionario)
+        if data_fim_pagamento_funcionario:
+            queryset = queryset.filter(data_pagamento__lte=data_fim_pagamento_funcionario)
+
+        nome_funcionario_pagamento = self.request.GET.get('nome_funcionario')
+        if nome_funcionario_pagamento:
+            queryset = queryset.filter(id=nome_funcionario_pagamento)
+
+        tipo_pagamento = self.request.GET.get('tipo_pagamento')
+        if tipo_pagamento:
+            queryset = queryset.filter(id=tipo_pagamento)
+
+        return queryset
+
+    # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pagamento_funcionarios'] = Pagamento.objects.all()
+        return context
+    
 
 class PagamentoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Pagamento
@@ -170,6 +234,34 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+
+    def get_queryset(self):
+        queryset = Rescisao.objects.all()
+
+        # Captura os parâmetros da requisição GET
+        data_inicio_rescisao = self.request.GET.get('data_inicio_rescisao')
+        data_fim_rescisao = self.request.GET.get('data_fim_rescisao')
+
+        # Aplica os filtros se os parâmetros estiverem presentes
+        if data_inicio_rescisao:
+            queryset = queryset.filter(data_desligamento__gte=data_inicio_rescisao)
+        if data_fim_rescisao:
+            queryset = queryset.filter(data_desligamento__lte=data_fim_rescisao)
+
+        tipo_desligamento = self.request.GET.get('tipo_desligamento')
+        if tipo_desligamento:
+            queryset = queryset.filter(id=tipo_desligamento)
+
+        nome_funcionario_rescisao = self.request.GET.get('nome_funcionario')
+        if nome_funcionario_rescisao:
+            queryset = queryset.filter(id=nome_funcionario_rescisao)
+        return queryset
+
+    # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rescisao_funcionarios'] = Rescisao.objects.all()
+        return context
 
 
 class RescisaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

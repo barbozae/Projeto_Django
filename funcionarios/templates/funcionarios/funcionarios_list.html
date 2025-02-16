@@ -22,26 +22,10 @@
                 </select>
                 <label for="floatingSelect">Funcionáro</label>
             </div>
-            <!-- <div class="form-floating mb-2">
-                <select class="form-select" name="nome_funcionario" id="nome_funcionario" aria-label="Selecione Funcionário">
-                    <option value="">Selecione Funcionário</option>
-                    {% for funcionario in cadastros_funcionarios %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" in request.GET.nome_funcionario %} selected {% endif %}>
-                            {{ funcionario.nome_funcionario }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <label for="floatingSelect">Funcionário</label>
-            </div> -->
-            
-
-
-
-
 
             <div class="mb-2 ms-2 mt-4">
                 <button type="submit" class="btn btn-primary" name="buscar_funcionario_cadastro">Buscar</button>
-                <a href="{% url 'funcionarios_list' %}" class="btn btn-secondary">Limpar</a>
+                <!-- <a href="{% url 'funcionarios_list' %}" class="btn btn-secondary">Limpar</a> -->
                 <a href="{% url 'create_funcionarios' %}" class="btn btn-success">Novo Funcionário</a>
             </div>
 
