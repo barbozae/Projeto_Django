@@ -8,6 +8,46 @@
     <h2>Funcionário</h2>
     <h3>Cadastro de Funcionário</h3>
 
+    <div class="container ms-1">
+        <form action="" method="GET" class="d-flex align-items-center">
+
+            <div class="form-floating mb-2">
+                <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
+                    <option value="">Selecione funcionário</option>
+                    {% for funcionario in cadastros_funcionarios %}
+                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                            {{ funcionario.nome_funcionario }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Funcionáro</label>
+            </div>
+            <!-- <div class="form-floating mb-2">
+                <select class="form-select" name="nome_funcionario" id="nome_funcionario" aria-label="Selecione Funcionário">
+                    <option value="">Selecione Funcionário</option>
+                    {% for funcionario in cadastros_funcionarios %}
+                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" in request.GET.nome_funcionario %} selected {% endif %}>
+                            {{ funcionario.nome_funcionario }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Funcionário</label>
+            </div> -->
+            
+
+
+
+
+
+            <div class="mb-2 ms-2 mt-4">
+                <button type="submit" class="btn btn-primary" name="buscar_funcionario_cadastro">Buscar</button>
+                <a href="{% url 'funcionarios_list' %}" class="btn btn-secondary">Limpar</a>
+                <a href="{% url 'create_funcionarios' %}" class="btn btn-success">Novo Funcionário</a>
+            </div>
+
+        </form>
+    </div>
+
     {% if funcionarios_list %}
         <table class="table table-sm">
             <thead class="table-light">
@@ -55,5 +95,4 @@
         <p>Não há registros</p>
     {% endif %}
 
-    <a href="{% url 'create_funcionarios' %}" class="btn btn-primary">Novo Funcionário</a>
 {% endblock content %}

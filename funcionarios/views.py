@@ -17,7 +17,20 @@ class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    
+    def get_queryset(self):
+        queryset = Cadastro.objects.all()
 
+        nome_funcionario_cadastro = self.request.GET.get('nome_funcionario')
+        if nome_funcionario_cadastro:
+            queryset = queryset.filter(id=nome_funcionario_cadastro)
+        return queryset
+
+    # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cadastros_funcionarios'] = Cadastro.objects.all()
+        return context
 
 class CadastroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Cadastro
@@ -145,6 +158,7 @@ class PagamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteVie
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+
 
 class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Rescisao
