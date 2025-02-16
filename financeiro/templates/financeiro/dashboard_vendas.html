@@ -8,18 +8,22 @@
 <h5 class="mb-4 mt-3">Dashboard Financeiro</h5>
 <div>
     <h2>Receitas e Despesas</h2>
-    <p><strong>Total de Receitas:</strong> R$ {{ total_receita }}</p>
-    <p><strong>Total de Despesas:</strong> R$ {{ total_despesas }}</p>
-    <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido }}</p>
+    <p><strong>Total de Rodízio:</strong> {{ rodizio }}</p>
+    <p><strong>Ticket Médio:</strong> R$ {{ ticket_medio|floatformat:2 }}</p>
+    <p><strong>Total de Vendas:</strong> R$ {{ total_vendas|floatformat:2 }}</p>
+    <p><strong>Total de Compras:</strong> R$ {{ total_despesas|floatformat:2 }}</p>
+    <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido|floatformat:2 }}</p>
+    <p><strong>Pagamento Funcionário:</strong> R$ {{ pagamento_funcionario|floatformat:2 }}</p>
+    <p><strong>Taxa:</strong> R$ {{ total_taxas|floatformat:2 }}</p>
 </div>
 
 <div>
     <h2>Receita por Forma de Pagamento</h2>
     <ul>
-        <li>Dinheiro: R$ {{ receita_por_forma.dinheiro }}</li>
-        <li>Pix: R$ {{ receita_por_forma.pix }}</li>
-        <li>Crédito: R$ {{ receita_por_forma.credito }}</li>
-        <li>Débito: R$ {{ receita_por_forma.debito }}</li>
+        <li>Dinheiro: R$ {{ receita_por_forma.dinheiro|floatformat:2 }}</li>
+        <li>Pix: R$ {{ receita_por_forma.pix|floatformat:2 }}</li>
+        <li>Crédito: R$ {{ receita_por_forma.credito|floatformat:2 }}</li>
+        <li>Débito: R$ {{ receita_por_forma.debito|floatformat:2 }}</li>
     </ul>
 </div>
 
