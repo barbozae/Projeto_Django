@@ -5,142 +5,142 @@
 {% endblock page_title %}
 
 {% block content %}
-    <h2>Vendas</h2>
 
-    <a href="{% url 'resume_vendas' %}" class="btn btn-primary mb-2">Resumo</a>
+<h5 class="mb-4 mt-3">Vendas</h5>
 
-    <h6>Filtrar Datas</h6>
-    <div class="container ms-1">
-        <form action="" method="GET" class="d-flex align-items-center">
+<a href="{% url 'resume_vendas' %}" class="btn btn-primary mb-2">Resumo</a>
 
-            <!-- Caixa de data inicial -->
-            <div class="mb-2">
-                <label for="data_inicio" class="form-label">Data Início:</label>
-                <input type="date" class="form-control" id="data_inicio" name="data_inicio">
-            </div>
+<div class="container">
+    <form action="" method="GET" class="d-flex align-items-center">
 
-            <!-- Caixa de data final -->
-            <div class="mb-2 ms-2">
-                <label for="data_fim" class="form-label">Data Fim:</label>
-                <input type="date" class="form-control" id="data_fim" name="data_fim">
-            </div>
+        <!-- Caixa de data inicial -->
+        <div class="mb-2 me-2">
+            <label for="data_inicio" class="form-label">Data Início:</label>
+            <input type="date" class="form-control" id="data_inicio" name="data_inicio">
+        </div>
 
-            <!-- Filtro para Período -->
-            <div class="mb-2 ms-2">
-                <label for="periodo" class="form-label">Período:</label>
-                <select class="form-select" id="periodo" name="periodo">
-                    <option value="" {% if not request.GET.periodo %}selected{% endif %}>Todos os períodos</option>
-                    <option value="Almoço" {% if request.GET.periodo == "Almoço" %}selected{% endif %}>Almoço</option>
-                    <option value="Jantar" {% if request.GET.periodo == "Jantar" %}selected{% endif %}>Jantar</option>
-                </select>
-            </div>
+        <!-- Caixa de data final -->
+        <div class="mb-2 ms-2 me-2">
+            <label for="data_fim" class="form-label">Data Fim:</label>
+            <input type="date" class="form-control" id="data_fim" name="data_fim">
+        </div>
 
-            <div class="mb-2 ms-2 mt-4">
-                <button type="submit" class="btn btn-primary" name="buscar_vendas">Buscar</button>
-                <a href="{% url 'venda_list' %}" class="btn btn-secondary">Limpar</a>
-                <a href="{% url 'create_vendas' %}" class="btn btn-success">Nova Venda</a>
-            </div>
-        </form>
-    </div>
-    
-    
-    <!-- cards -->
-    <div class="d-flex justify-content-around flex-wrap mt-2">
-        <div class="card text-bg-light mb-3" style="max-width: 18rem;">
-            <div class="card-header">Rodízio</div>
-            <div class="card-body">
-                <h5 class="card-title tex-center">{{ vendas_rodizio }}</h5>
-            </div>
+        <!-- Filtro para Período -->
+        <div class="mb-2 ms-2 me-2">
+            <label for="periodo" class="form-label">Período:</label>
+            <select class="form-select" id="periodo" name="periodo">
+                <option value="" {% if not request.GET.periodo %}selected{% endif %}>Todos os períodos</option>
+                <option value="Almoço" {% if request.GET.periodo == "Almoço" %}selected{% endif %}>Almoço</option>
+                <option value="Jantar" {% if request.GET.periodo == "Jantar" %}selected{% endif %}>Jantar</option>
+            </select>
         </div>
-        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
-            <div class="card-header">Dinheiro</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{vendas_dinheiro}}</h5>
-            </div>
+
+        <div class="ms-2 me-2 mt-4">
+            <button type="submit" class="btn btn-primary me-2" name="buscar_vendas">Buscar</button>
+            <a href="{% url 'venda_list' %}" class="btn btn-secondary me-2">Limpar</a>
+            <a href="{% url 'create_vendas' %}" class="btn btn-success me-2">Nova Venda</a>
         </div>
-        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
-            <div class="card-header">Pix</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_pix }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-            <div class="card-header">Débito</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_debito }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-            <div class="card-header">Crédito</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_credito }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
-            <div class="card-header">Benefício</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_beneficio }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-success mb-3" style="max-width: 18rem;">
-            <div class="card-header">Total Vendas</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
-            </div>
+    </form>
+</div>
+
+
+<!-- cards -->
+<div class="d-flex justify-content-around flex-wrap mt-2">
+    <div class="card text-bg-light mb-3" style="max-width: 18rem;">
+        <div class="card-header">Rodízio</div>
+        <div class="card-body">
+            <h5 class="card-title tex-center">{{ vendas_rodizio }}</h5>
         </div>
     </div>
+    <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+        <div class="card-header">Dinheiro</div>
+        <div class="card-body">
+            <h5 class="card-title">R$ {{vendas_dinheiro}}</h5>
+        </div>
+    </div>
+    <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+        <div class="card-header">Pix</div>
+        <div class="card-body">
+            <h5 class="card-title">R$ {{ vendas_pix }}</h5>
+        </div>
+    </div>
+    <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+        <div class="card-header">Débito</div>
+        <div class="card-body">
+            <h5 class="card-title">R$ {{ vendas_debito }}</h5>
+        </div>
+    </div>
+    <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+        <div class="card-header">Crédito</div>
+        <div class="card-body">
+            <h5 class="card-title">R$ {{ vendas_credito }}</h5>
+        </div>
+    </div>
+    <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
+        <div class="card-header">Benefício</div>
+        <div class="card-body">
+            <h5 class="card-title">R$ {{ vendas_beneficio }}</h5>
+        </div>
+    </div>
+    <div class="card text-bg-success mb-3" style="max-width: 18rem;">
+        <div class="card-header">Total Vendas</div>
+        <div class="card-body">
+            <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
+        </div>
+    </div>
+</div>
 
 
-    {% if vendas_list %}
-        <table class="table table-sm mt-3"> <!-- table-bordered -->
-            <thead class="table-light">
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Data</th>
-                <th scope="col">Período</th>
-                <th scope="col">Rodízio</th>
-                <th scope="col">Dinheiro</th>
-                <th scope="col">Pix</th>
-                <th scope="col">Débito</th>
-                <th scope="col">Crédito</th>
-                <th scope="col">Benefício</th>
-                <th scope="col" class="text-danger fw-bold">Total</th>
-                <th scope="col">Sócio</th>
-                <th scope="col">Ações</th>
-            </tr>
-            </thead>
-            <tbody>
-                {% for venda in vendas_list %}
-                    <tr>
-                        <th scope="row" >{{ venda.pk }}</th>
-                        <td>{{ venda.data_venda|date:"d/m/y"}}</td>
-                        <td>{{ venda.periodo}}</td>
-                        <td>{{ venda.rodizio}}</td>
-                        <td>{{ venda.dinheiro| default:"-"}}</td>
-                        <td>{{ venda.pix| default:"-" }}</td>
-                        <td>{{ venda.debito| default:"-" }}</td>
-                        <td>{{ venda.credito| default:"-" }}</td>
-                        <td>{{ venda.beneficio| default:"-" }}</td>
-                        <td class="text-dark fw-bold">{{ venda.total}}</td>
-                        <td>{{ venda.socio| default:"-" }}</td>
-                        <td>
-                            <a href="{% url 'update_vendas' pk=venda.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
-                            <a href="{% url 'delete_vendas' pk=venda.pk %}" class="btn btn-danger btn-sm">Excluir</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
+{% if vendas_list %}
+    <table class="table table-sm mt-2"> <!-- table-bordered -->
+        <thead class="table-light">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Data</th>
+            <th scope="col">Período</th>
+            <th scope="col">Rodízio</th>
+            <th scope="col">Dinheiro</th>
+            <th scope="col">Pix</th>
+            <th scope="col">Débito</th>
+            <th scope="col">Crédito</th>
+            <th scope="col">Benefício</th>
+            <th scope="col" class="text-danger fw-bold">Total</th>
+            <th scope="col">Sócio</th>
+            <th scope="col">Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for venda in vendas_list %}
                 <tr>
-                    <td colspan="9" class="text-end fw-bold">Total Geral:</td>
-                    <td class="bg-dark text-white fw-bold text-center">
-                        {{ vendas_total }}
+                    <th scope="row" >{{ venda.pk }}</th>
+                    <td>{{ venda.data_venda|date:"d/m/y"}}</td>
+                    <td>{{ venda.periodo}}</td>
+                    <td>{{ venda.rodizio}}</td>
+                    <td>{{ venda.dinheiro| default:"-"}}</td>
+                    <td>{{ venda.pix| default:"-" }}</td>
+                    <td>{{ venda.debito| default:"-" }}</td>
+                    <td>{{ venda.credito| default:"-" }}</td>
+                    <td>{{ venda.beneficio| default:"-" }}</td>
+                    <td class="text-dark fw-bold">{{ venda.total}}</td>
+                    <td>{{ venda.socio| default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'update_vendas' pk=venda.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                        <a href="{% url 'delete_vendas' pk=venda.pk %}" class="btn btn-danger btn-sm">Excluir</a>
                     </td>
-                    <td colspan="2"></td>
                 </tr>
-            </tfoot>
-        </table>
-    {% else %}
-        <p>Não há registros</p>
-    {% endif %}
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="9" class="text-end fw-bold">Total Geral:</td>
+                <td class="bg-dark text-white fw-bold text-center">
+                    {{ vendas_total }}
+                </td>
+                <td colspan="2"></td>
+            </tr>
+        </tfoot>
+    </table>
+{% else %}
+    <p>Não há registros</p>
+{% endif %}
 {% endblock content %}

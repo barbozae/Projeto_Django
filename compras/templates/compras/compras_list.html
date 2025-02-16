@@ -5,23 +5,22 @@
 {% endblock page_title %}
 
 {% block content %}
-    <h2>Compras</h2>    
-    <h6>Filtrar Datas</h6>
+    <h5 class="mb-4 mt-3">Compras</h5>
 
-    <div class="container ms-1">
+    <div class="container">
         <form action="" method="GET" class="d-flex align-items-center">
 
-            <div class="mb-2">
+            <div class="mb-2 me-2">
                 <label for="data_inicio" class="form-label">Data Início:</label>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
             </div>
 
-            <div class="mb-2 ms-2">
+            <div class="mb-2 ms-2 me-2">
                 <label for="data_fim" class="form-label">Data Fim:</label>
                 <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
             </div>
 
-            <div class="form-floating ms-2">
+            <div class="form-floating ms-2 me-2 mt-1">
                 <select class="form-select" id="floatingSelect" name="fornecedor[]" aria-label="Floating label select example">
                     <option value="">Selecione fornecedor</option>
                     {% for fornecedor in fornecedores %}
@@ -33,7 +32,7 @@
                 <label for="floatingSelect">Fornecedor</label>
             </div>
 
-            <div class="form-floating ms-2">
+            <div class="form-floating me-2 ms-2 mt-1">
                 <select class="form-select" id="floatingSelect" name="numero_boleto[]" aria-label="Floating label select example">
                     <option value="">Selecione boleto</option>
                     {% for boleto in numero_boleto %}
@@ -45,17 +44,17 @@
                     <label for="floatingSelect">Boleto</label>
             </div>
 
-            <div class="mb-2 ms-2 mt-4">
-                <button type="submit" class="btn btn-primary" name="buscar_compras">Buscar</button>
-                <a href="{% url 'compras_list' %}" class="btn btn-secondary">Limpar</a>
-                <a href="{% url 'create_compras' %}" class="btn btn-success">Nova Compra</a>
+            <div class="mb-1 ms-1 mt-2">
+                <button type="submit" class="btn btn-primary me-2" name="buscar_compras">Buscar</button>
+                <a href="{% url 'compras_list' %}" class="btn btn-secondary me-2">Limpar</a>
+                <a href="{% url 'create_compras' %}" class="btn btn-success me-2">Nova Compra</a>
             </div>
 
         </form>
     </div>
 
     {% if compras_list %}
-        <table class="table table-sm">
+        <table class="table table-sm mt-3">
             <thead class="table-light">
             <tr>
                 <th scope="col">ID</th>
