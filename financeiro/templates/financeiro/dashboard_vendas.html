@@ -1,0 +1,26 @@
+{% extends 'global/base.html' %}
+
+{% block page_title %}
+    Funcionário
+{% endblock page_title %}
+
+{% block content %}
+<h5 class="mb-4 mt-3">Dashboard Financeiro</h5>
+<div>
+    <h2>Receitas e Despesas</h2>
+    <p><strong>Total de Receitas:</strong> R$ {{ total_receita }}</p>
+    <p><strong>Total de Despesas:</strong> R$ {{ total_despesas }}</p>
+    <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido }}</p>
+</div>
+
+<div>
+    <h2>Receita por Forma de Pagamento</h2>
+    <ul>
+        <li>Dinheiro: R$ {{ receita_por_forma.dinheiro }}</li>
+        <li>Pix: R$ {{ receita_por_forma.pix }}</li>
+        <li>Crédito: R$ {{ receita_por_forma.credito }}</li>
+        <li>Débito: R$ {{ receita_por_forma.debito }}</li>
+    </ul>
+</div>
+
+{% endblock content %}

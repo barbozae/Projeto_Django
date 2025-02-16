@@ -24,6 +24,8 @@ urlpatterns = [
                 path('', include('funcionarios.urls')),
                 path('', include('compras.urls')),
                 path('', include('menu.urls')),
+
+                path('', include('financeiro.urls')),
             ]
 
 # Servindo arquivos de mídia em ambiente de desenvolvimento

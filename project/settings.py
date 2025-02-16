@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'funcionarios.apps.FuncionariosConfig',
     'users.apps.UsersConfig',
     'menu.apps.MenuConfig',
+    'financeiro.apps.FinanceiroConfig',
     ]
 
 MIDDLEWARE = [

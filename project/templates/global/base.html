@@ -46,6 +46,19 @@
                 <li><a class="dropdown-item" href="{% url 'pagamento_list' %}">Pagamento</a></li>
               </ul>
             </li>
+            <!-- Dropdown Financeiro -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Financeiro
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'dashboard_vendas' %}">Vendas</a></li>
+                <li><a class="dropdown-item" href="#">Compras</a></li>
+                <li><a class="dropdown-item" href="#">Funcionários</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Visão Geral</a></li>
+              </ul>
+            </li>
           </ul>
           <!-- Verifica se o usuário está autenticado -->
           <div class="d-flex ms-auto">
