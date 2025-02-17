@@ -41,7 +41,6 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         # Inicializa os contadores
-        
         venda_rodizio = 0
         venda_dinheiro = 0
         venda_pix = 0
@@ -60,7 +59,6 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             venda.total = venda.calcular_total()
 
             # somando todas as linhas
-            
             venda_rodizio += venda.rodizio or 0
             venda_dinheiro += venda.dinheiro or 0
             venda_pix =+ venda.pix or 0

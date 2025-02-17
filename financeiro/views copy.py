@@ -8,6 +8,8 @@ from datetime import date
 
 
 def dashboard_vendas(request):
+    vendas = Vendas.objects.all()
+
     # Calcular taxas
     def calcular_taxas_vendas():
         # Define as regras de taxas por período
@@ -95,17 +97,6 @@ def dashboard_vendas(request):
 
         return total_taxa
 
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-    periodo = request.GET.get('periodo')
-
-    vendas = Vendas.objects.all()
-    if data_inicio:
-        vendas = vendas.filter(data_venda__gte=data_inicio)
-    if data_fim:
-        vendas = vendas.filter(data_venda__lte=data_fim)
-    if periodo:
-        vendas = vendas.filter(periodo=periodo)
 
     # Agregar valores de vendas
     vendas_total = vendas.aggregate(
@@ -121,25 +112,24 @@ def dashboard_vendas(request):
     )
 
     total_vendas = (
-        (vendas_total['total_dinheiro'] or 0) +
-        (vendas_total['total_pix'] or 0) +
-        (vendas_total['total_debito'] or 0) +
-        (vendas_total['total_credito'] or 0) +
-        (vendas_total['total_beneficio'] or 0)
+        vendas_total['total_rodizio'] or 0 +
+        vendas_total['total_dinheiro'] or 0 +
+        vendas_total['total_pix'] or 0 +
+        vendas_total['total_debito'] or 0 +
+        vendas_total['total_credito'] or 0 +
+        vendas_total['total_beneficio'] or 0 +
+        vendas_total['total_socio'] or 0
     )
 
-    # Pega o total de rodízios
-    total_rodizio = vendas_total['total_rodizio'] or 0 # Garante que será 0 se for None
-    # Pegando o total de sóxios
-    total_socio = vendas_total['total_socio'] or 0
-
-    if total_vendas and total_rodizio != 0:
-        ticket_medio = total_vendas / total_rodizio
+    if vendas_total['total_rodizio'] and vendas_total['total_rodizio'] != 0:
+        ticket_medio = total_vendas / vendas_total['total_rodizio']
     else:
         ticket_medio = 0  # ou algum valor padrão
 
+
     # Calcular taxas
     total_taxas = calcular_taxas_vendas() or 0
+
 
     # Agregar valores de compras
     total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
@@ -154,12 +144,6 @@ def dashboard_vendas(request):
 
     # Dados para o contexto do template
     context = {
-        'total_dinheiro': vendas_total['total_dinheiro'] or 0,
-        'total_pix': vendas_total['total_pix'] or 0,
-        'total_debito': vendas_total['total_debito'] or 0,
-        'total_credito': vendas_total['total_credito'] or 0,
-        'total_beneficio': vendas_total['total_beneficio'] or 0,
-        'total_rodizio': total_rodizio,
         'ticket_medio': ticket_medio,
         'total_vendas': total_vendas,
         'vendas_total': vendas_total,
@@ -168,7 +152,6 @@ def dashboard_vendas(request):
         'lucro_liquido': lucro_liquido,
         'pagamento_funcionario': total_pagamento_funcionarios,
         'vendas_por_forma': vendas,
-        'total_socio': total_socio,
     }
     return render(request, 'financeiro/dashboard_vendas.html', context)
 
