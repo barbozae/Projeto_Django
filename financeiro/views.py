@@ -131,8 +131,6 @@ def dashboard_vendas(request):
     else:
         ticket_medio = 0  # ou algum valor padrão
 
-    # Calcular taxas
-    # total_taxas = calcular_taxas_vendas() or 0
     # Calcular taxas com o queryset filtrado
     total_taxas = calcular_taxas_vendas(vendas) or 0
 
@@ -178,6 +176,7 @@ def dashboard_compras(request):
     data_inicio = request.GET.get('data_inicio')
     data_fim = request.GET.get('data_fim')
     classificacao = request.GET.get('classificacao')
+    fornecedores_selecionados = request.GET.get('fornecedor')
     
     compras = Compras.objects.all()
     if data_inicio:
@@ -186,12 +185,17 @@ def dashboard_compras(request):
         compras = compras.filter(data_compra__lte=data_fim)
     if classificacao:
         compras = compras.filter(classificacao=classificacao)
+    if fornecedores_selecionados:
+        compras = compras.filter(fornecedor__id__in=fornecedores_selecionados)
 
-    total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
-    total_pago = Compras.objects.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
+    total_compras = compras.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
+    total_pago = compras.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
     cmv = compras.filter(classificacao='CMV').aggregate(total_cmv=Sum('valor_compra'))['total_cmv'] or 0
     gasto_fixo = compras.filter(classificacao='Gasto Fixo').aggregate(total_gasto_fixo=Sum('valor_compra'))['total_gasto_fixo'] or 0
     gasto_variavel = compras.filter(classificacao='Gasto Variável').aggregate(total_gasto_variavel=Sum('valor_compra'))['total_gasto_variavel'] or 0
+
+    # Obter todos os fornecedores únicos para o filtro
+    fornecedores = Compras.objects.values('fornecedor__id', 'fornecedor__nome_empresa').distinct()
 
     # Dados para o contexto do template
     context = {
@@ -201,6 +205,8 @@ def dashboard_compras(request):
         'total_gasto_fixo': gasto_fixo,
         'total_gasto_variavel': gasto_variavel,
         'compras': compras, # usar quando for exibir a tabela de compras
+        'fornecedores_selecionados': fornecedores_selecionados, # lista de fornecedores selecionados
+        'fornecedores': fornecedores
     }
 
     return render(request, 'financeiro/dashboard_compras.html', context)
