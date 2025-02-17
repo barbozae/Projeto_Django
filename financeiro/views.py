@@ -9,7 +9,7 @@ from datetime import date
 
 def dashboard_vendas(request):
     # Calcular taxas
-    def calcular_taxas_vendas():
+    def calcular_taxas_vendas(vendas_queryset):
         # Define as regras de taxas por período
         taxas = [
             {
@@ -76,20 +76,14 @@ def dashboard_vendas(request):
         for taxa in taxas:
             cond = When(
                 data_venda__range=(taxa["inicio"], taxa["fim"]),
-                then=Sum(
-                    sum(
-                        F(campo) * valor
-                        for campo, valor in taxa["taxas"].items()
-                    )
-                ),
+                then=sum(F(campo) * valor for campo, valor in taxa["taxas"].items())
             )
             conditions.append(cond)
 
         # Calcula o total de taxas
-        total_taxa = Vendas.objects.aggregate(
-            total_taxa=ExpressionWrapper(
-                Case(*conditions, output_field=DecimalField(max_digits=10, decimal_places=2)),
-                output_field=DecimalField(max_digits=10, decimal_places=2)
+        total_taxa = vendas_queryset.aggregate(
+            total_taxa=Sum(
+                Case(*conditions, output_field=DecimalField(max_digits=10, decimal_places=2))
             )
         )["total_taxa"]
 
@@ -117,7 +111,6 @@ def dashboard_vendas(request):
         total_beneficio=Sum('alelo') + Sum('american_express') + Sum('hiper') + Sum('sodexo') + 
                         Sum('ticket_rest') + Sum('vale_refeicao') + Sum('dinersclub'),
         total_socio=Sum('socio')
-
     )
 
     total_vendas = (
@@ -139,7 +132,9 @@ def dashboard_vendas(request):
         ticket_medio = 0  # ou algum valor padrão
 
     # Calcular taxas
-    total_taxas = calcular_taxas_vendas() or 0
+    # total_taxas = calcular_taxas_vendas() or 0
+    # Calcular taxas com o queryset filtrado
+    total_taxas = calcular_taxas_vendas(vendas) or 0
 
     # Agregar valores de compras
     total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0

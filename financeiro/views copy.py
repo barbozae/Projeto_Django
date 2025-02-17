@@ -97,7 +97,6 @@ def dashboard_vendas(request):
 
         return total_taxa
 
-
     # Agregar valores de vendas
     vendas_total = vendas.aggregate(
         total_rodizio=Sum('rodizio'),
@@ -108,7 +107,6 @@ def dashboard_vendas(request):
         total_beneficio=Sum('alelo') + Sum('american_express') + Sum('hiper') + Sum('sodexo') + 
                         Sum('ticket_rest') + Sum('vale_refeicao') + Sum('dinersclub'),
         total_socio=Sum('socio')
-
     )
 
     total_vendas = (
@@ -126,10 +124,8 @@ def dashboard_vendas(request):
     else:
         ticket_medio = 0  # ou algum valor padrão
 
-
     # Calcular taxas
     total_taxas = calcular_taxas_vendas() or 0
-
 
     # Agregar valores de compras
     total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
