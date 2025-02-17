@@ -1,0 +1,115 @@
+<!-- Adicione o Font Awesome no <head> -->
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> -->
+
+    <!-- Menu com Ícones -->
+    <!-- <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action active">
+            <i class="fas fa-home me-2"></i> Início
+        </a>
+        <a href="#" class="list-group-item list-group-item-action">
+            <i class="fas fa-info-circle me-2"></i> Sobre
+        </a>
+        <a href="#" class="list-group-item list-group-item-action">
+            <i class="fas fa-cogs me-2"></i> Serviços
+        </a>
+        <a href="#" class="list-group-item list-group-item-action">
+            <i class="fas fa-briefcase me-2"></i> Portfólio
+        </a>
+        <a href="#" class="list-group-item list-group-item-action">
+            <i class="fas fa-envelope me-2"></i> Contato
+        </a>
+    </div> -->
+
+
+    
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            transition: margin-left 0.3s; /* Transição suave para o conteúdo */
+        }
+        .list-group {
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-right: 1px solid #dee2e6;
+            position: fixed; /* Fixa o menu na tela */
+            height: 100%; /* Faz o menu ocupar toda a altura da tela */
+            overflow-y: auto; /* Permite rolagem se o conteúdo exceder a altura */
+            transition: transform 0.3s; /* Transição suave para ocultar/exibir */
+        }
+        .list-group.hidden {
+            transform: translateX(-100%); /* Move o menu para fora da tela */
+        }
+        .list-group-item {
+            padding: 10px;
+            text-decoration: none;
+            color: #000;
+            display: flex;
+            align-items: center;
+        }
+        .list-group-item:hover {
+            background-color: #e9ecef;
+        }
+        .content {
+            margin-left: 220px; /* Espaço para o menu fixo */
+            padding: 20px;
+            flex-grow: 1; /* Permite que o conteúdo ocupe o restante do espaço */
+            transition: margin-left 0.3s; /* Transição suave para o conteúdo */
+        }
+        .content.shift {
+            margin-left: 20px; /* Reduz a margem quando o menu está oculto */
+        }
+        .toggle-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<button class="toggle-button" id="toggleButton">Toggle Menu</button>
+<div class="list-group" id="menu">
+    <a href="#" class="list-group-item list-group-item-action active">
+        <i class="fas fa-home me-2"></i> Início
+    </a>
+    <a href="#" class="list-group-item list-group-item-action">
+        <i class="fas fa-info-circle me-2"></i> Sobre
+    </a>
+    <a href="#" class="list-group-item list-group-item-action">
+        <i class="fas fa-cogs me-2"></i> Serviços
+    </a>
+    <a href="#" class="list-group-item list-group-item-action">
+        <i class="fas fa-briefcase me-2"></i> Portfólio
+    </a>
+    <a href="#" class="list-group-item list-group-item-action">
+        <i class="fas fa-envelope me-2"></i> Contato
+    </a>
+</div>
+<div class="content" id="content">
+    <h1>Conteúdo Principal</h1>
+    <p>Este é o conteúdo principal da página. Role para ver mais.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p>Adicione mais conteúdo aqui para testar a rolagem.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p>Adicione mais conteúdo aqui para testar a rolagem.</p>
+</div>
+
+<script>
+    const toggleButton = document.getElementById('toggleButton');
+    const menu = document.getElementById('menu');
+    const content = document.getElementById('content');
+
+    toggleButton.addEventListener('click', () => {
+        menu.classList.toggle('hidden'); // Alterna a classe 'hidden' no menu
+        content.classList.toggle('shift'); // Alterna a classe 'shift' no conteúdo
+    });
+</script>

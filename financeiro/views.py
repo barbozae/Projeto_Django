@@ -3,7 +3,7 @@ from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
 from django.db import models
-from django.db.models import Sum, F, ExpressionWrapper, DecimalField, Case, When
+from django.db.models import Sum, F, DecimalField, Case, When
 from datetime import date
 
 
@@ -139,10 +139,17 @@ def dashboard_vendas(request):
     # Agregar valores de compras
     total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
 
-    # Agregar valores de pagamentos dos funcionários
-    total_pagamento_funcionarios = Pagamento.objects.aggregate(
-        total_pagamento_funcionarios=models.Sum('valor_pago')
-        )['total_pagamento_funcionarios'] or 0
+    pagamentos = Pagamento.objects.all()
+
+    if data_inicio:
+        pagamentos = pagamentos.filter(data_pagamento__gte=data_inicio)
+    if data_fim:
+        pagamentos = pagamentos.filter(data_pagamento__lte=data_fim)
+
+    # Calcular o total de pagamentos dos funcionários filtrados
+    total_pagamento_funcionarios = pagamentos.aggregate(
+        total_pagamento_funcionarios=Sum('valor_pago')
+    )['total_pagamento_funcionarios'] or 0
 
     # Lucro líquido
     lucro_liquido = total_vendas - total_compras - total_pagamento_funcionarios
@@ -167,9 +174,53 @@ def dashboard_vendas(request):
     }
     return render(request, 'financeiro/dashboard_vendas.html', context)
 
-
 def dashboard_compras(request):
-    ...
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    classificacao = request.GET.get('classificacao')
+    
+    compras = Compras.objects.all()
+    if data_inicio:
+        compras = compras.filter(data_compra__gte=data_inicio)
+    if data_fim:
+        compras = compras.filter(data_compra__lte=data_fim)
+    if classificacao:
+        compras = compras.filter(classificacao=classificacao)
+
+    total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
+    total_pago = Compras.objects.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
+    cmv = compras.filter(classificacao='CMV').aggregate(total_cmv=Sum('valor_compra'))['total_cmv'] or 0
+    gasto_fixo = compras.filter(classificacao='Gasto Fixo').aggregate(total_gasto_fixo=Sum('valor_compra'))['total_gasto_fixo'] or 0
+    gasto_variavel = compras.filter(classificacao='Gasto Variável').aggregate(total_gasto_variavel=Sum('valor_compra'))['total_gasto_variavel'] or 0
+
+    # Dados para o contexto do template
+    context = {
+        'total_compras': total_compras,
+        'total_pago': total_pago,
+        'total_cmv': cmv,
+        'total_gasto_fixo': gasto_fixo,
+        'total_gasto_variavel': gasto_variavel,
+        'compras': compras, # usar quando for exibir a tabela de compras
+    }
+
+    return render(request, 'financeiro/dashboard_compras.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def dashboard_funcionarios(request):
     ...
