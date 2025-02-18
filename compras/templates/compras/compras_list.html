@@ -54,7 +54,7 @@
     </div>
 
     {% if compras_list %}
-        <table class="table table-sm mt-3">
+        <table class="table table-sm table-striped table-hover mt-3"> <!-- table-bordered -->
             <thead class="table-light">
             <tr>
                 <th scope="col">ID</th>
@@ -96,6 +96,10 @@
             </tbody>
         </table>
     {% else %}
-        <p>Não há registros</p>
+        <div class="container">
+            <div class="alert alert-warning mt-3" role="alert">
+                Não há compras para o filtro selecionado.
+            </div>
+        </div>
     {% endif %}
 {% endblock content %}

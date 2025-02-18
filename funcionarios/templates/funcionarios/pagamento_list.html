@@ -54,37 +54,41 @@
 </div>
 
 {% if pagamento_list %}
-    <table class="table table-sm mt-3">
-        <thead class="table-light">
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Nome</th>
-            <th scope="col">Data Pagamento</th>
-            <th scope="col">Valor Pago</th>
-            <th scope="col">Tipo Pagamento</th>
-            <th scope="col">Forma Pagamento</th>
-            <th scope="col">Ações</th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for pagamento in pagamento_list %}
-                <tr>
-                    <th scope="row" >{{ pagamento.pk }}</th>
-                    <td>{{ pagamento.nome_funcionario }}</td>
-                    <td>{{ pagamento.data_pagamento| date:"d/m/y"| default:"-" }}</td>
-                    <td>{{ pagamento.valor_pago| default:"-" }}</td>
-                    <td>{{ pagamento.tipo_pagamento| default:"-" }}</td>
-                    <td>{{ pagamento.forma_pagamento| default:"-" }}</td>
-                    <td>
-                        <a href="{% url 'update_payment' pk=pagamento.pk %}" class="btn btn-secondary btn-sm">Editar</a>
-                        <a href="{% url 'delete_payment' pk=pagamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<table class="table table-sm table-striped table-hover mt-3"> <!-- table-bordered -->
+    <thead class="table-light">
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Nome</th>
+        <th scope="col">Data Pagamento</th>
+        <th scope="col">Valor Pago</th>
+        <th scope="col">Tipo Pagamento</th>
+        <th scope="col">Forma Pagamento</th>
+        <th scope="col">Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for pagamento in pagamento_list %}
+            <tr>
+                <th scope="row" >{{ pagamento.pk }}</th>
+                <td>{{ pagamento.nome_funcionario }}</td>
+                <td>{{ pagamento.data_pagamento| date:"d/m/y"| default:"-" }}</td>
+                <td>{{ pagamento.valor_pago| default:"-" }}</td>
+                <td>{{ pagamento.tipo_pagamento| default:"-" }}</td>
+                <td>{{ pagamento.forma_pagamento| default:"-" }}</td>
+                <td>
+                    <a href="{% url 'update_payment' pk=pagamento.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                    <a href="{% url 'delete_payment' pk=pagamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% else %}
-    <p>Não há registros</p>
+<div class="container">
+    <div class="alert alert-warning mt-3" role="alert">
+        Não há pagamentos para o filtro selecionado.
+    </div>
+</div>
 {% endif %}
 
 {% endblock content %}

@@ -43,55 +43,53 @@
     </form>
 </div>
 
-
-<!-- cards -->
-<div class="d-flex justify-content-around flex-wrap mt-2">
-    <div class="card text-bg-light mb-3" style="max-width: 18rem;">
-        <div class="card-header">Rodízio</div>
-        <div class="card-body">
-            <h5 class="card-title tex-center">{{ vendas_rodizio }}</h5>
-        </div>
-    </div>
-    <div class="card text-bg-info mb-3" style="max-width: 18rem;">
-        <div class="card-header">Dinheiro</div>
-        <div class="card-body">
-            <h5 class="card-title">R$ {{vendas_dinheiro}}</h5>
-        </div>
-    </div>
-    <div class="card text-bg-info mb-3" style="max-width: 18rem;">
-        <div class="card-header">Pix</div>
-        <div class="card-body">
-            <h5 class="card-title">R$ {{ vendas_pix }}</h5>
-        </div>
-    </div>
-    <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-        <div class="card-header">Débito</div>
-        <div class="card-body">
-            <h5 class="card-title">R$ {{ vendas_debito }}</h5>
-        </div>
-    </div>
-    <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-        <div class="card-header">Crédito</div>
-        <div class="card-body">
-            <h5 class="card-title">R$ {{ vendas_credito }}</h5>
-        </div>
-    </div>
-    <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
-        <div class="card-header">Benefício</div>
-        <div class="card-body">
-            <h5 class="card-title">R$ {{ vendas_beneficio }}</h5>
-        </div>
-    </div>
-    <div class="card text-bg-success mb-3" style="max-width: 18rem;">
-        <div class="card-header">Total Vendas</div>
-        <div class="card-body">
-            <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
-        </div>
-    </div>
-</div>
-
-
 {% if vendas_list %}
+    <!-- cards -->
+    <div class="d-flex justify-content-around flex-wrap mt-2">
+        <div class="card text-bg-light mb-3" style="max-width: 18rem;">
+            <div class="card-header">Rodízio</div>
+            <div class="card-body">
+                <h5 class="card-title tex-center">{{ vendas_rodizio }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+            <div class="card-header">Dinheiro</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{vendas_dinheiro}}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
+            <div class="card-header">Pix</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_pix }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+            <div class="card-header">Débito</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_debito }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+            <div class="card-header">Crédito</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_credito }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
+            <div class="card-header">Benefício</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ vendas_beneficio }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-success mb-3" style="max-width: 18rem;">
+            <div class="card-header">Total Vendas</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
+            </div>
+        </div>
+    </div>
+
     <table class="table table-sm table-striped table-hover mt-2"> <!-- table-bordered -->
         <thead class="table-light">
         <tr>
@@ -141,6 +139,10 @@
         </tfoot>
     </table>
 {% else %}
-    <p>Não há registros</p>
+    <div class="container">
+        <div class="alert alert-warning mt-3" role="alert">
+            Não há vendas para o filtro selecionado.
+        </div>
+    </div>
 {% endif %}
 {% endblock content %}

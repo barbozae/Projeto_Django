@@ -5,137 +5,147 @@
 {% endblock page_title %}
 
 {% block content %}
-<h5 class="mb-4 mt-3" style="color: green;">Dashboard Compras</h5>
+    <h5 class="mb-4 mt-3" style="color: green;">Dashboard Compras</h5>
 
-<div class="container">
-    <form action="" method="GET" class="d-flex align-items-center">
-        <div class="mb-2 me-2">
-            <label for="data_inicio" class="form-label">Data Início:</label>
-            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
-            <small class="form-text text-muted">Data da compra</small>
-        </div>
-
-        <div class="mb-2 ms-2 me-2">
-            <label for="data_fim" class="form-label">Data Fim:</label>
-            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
-            <small class="form-text text-muted">Data da compra</small>
-        </div>
-
-
-        <div class="form-floating mb-2 me-2">
-            <select class="form-select" id="floatingSelect" name="fornecedor" aria-label="Floating label select example">
-                <option value="">Selecione um fornecedor</option>
-                {% for fornecedor in fornecedores %}
-                    <option value="{{ fornecedor.fornecedor__id }}" {% if fornecedor.fornecedor_id|stringformat:"s" in fornecedores_selecionados %} selected {% endif %}>
-                        {{ fornecedor.fornecedor__nome_empresa }}
-                    </option>
-                {% endfor %}
-            </select>
-            <label for="floatingSelect">Fornecedor</label>
-        </div>
-
-        <div class="mb-2 ms-2 me-2">
-            <button type="submit" class="btn btn-outline-primary me-2" name="buscar_fornecedores">Buscar</button>
-            <a href="{% url 'dashboard_compras' %}" class="btn btn-outline-secondary me-2">Limpar</a>
-        </div>
-
-    </form>
-</div>
-
-<div class="container-fluid">
-    <div class="row">
-        <!-- Coluna dos Cards -->
-        <div class="col-md-2 mt-3">
-
-            <div class="card text-bg-warning mb-3" style="max-width: 12rem;">
-                <div class="card-header">CMV</div>
-                <div class="card-body">
-                    <h5 class="card-title">R$ {{ total_cmv|floatformat:2 }}</h5>
-                    <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
-                </div>
+    <div class="container">
+        <form action="" method="GET" class="d-flex align-items-center">
+            
+            <div class="mb-2 me-2">
+                <label for="data_inicio" class="form-label">Data Início:</label>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+                <small class="form-text text-muted">Data da compra</small>
             </div>
 
-            <div class="card text-bg-secondary mb-3" style="max-width: 12rem;">
-                <div class="card-header">Gasto Variável</div>
-                <div class="card-body">
-                    <h5 class="card-title">R$ {{ total_gasto_variavel|floatformat:2 }}</h5>
-                    <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
-                </div>
+            <div class="mb-2 ms-2 me-2">
+                <label for="data_fim" class="form-label">Data Fim:</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                <small class="form-text text-muted">Data da compra</small>
             </div>
 
-            <div class="card text-bg-success mb-3" style="max-width: 12rem;">
-                <div class="card-header">Gasto Fixo</div>
-                <div class="card-body">
-                    <h5 class="card-title">R$ {{ total_gasto_fixo|floatformat:2 }}</h5>
-                    <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
-                </div>
+            <div class="form-floating mb-2 me-2">
+                <select class="form-select" id="floatingSelect" name="fornecedor" aria-label="Floating label select example">
+                    <option value="">Selecione um fornecedor</option>
+                    {% for fornecedor in fornecedores %}
+                        <option value="{{ fornecedor.fornecedor__id }}" {% if fornecedor.fornecedor_id|stringformat:"s" in fornecedores_selecionados %} selected {% endif %}>
+                            {{ fornecedor.fornecedor__nome_empresa }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Fornecedor</label>
             </div>
-            <div class="card text-bg-dark mb-3" style="max-width: 12rem;">
-                <div class="card-header">Total Compra</div>
-                <div class="card-body">
-                    <h5 class="card-title">R$ {{ total_compras|floatformat:2 }}</h5>
-                    <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
-                </div>
-            </div>
-            <div class="card text-bg-primary mb-3" style="max-width: 12rem;">
-                <div class="card-header">Total Pago</div>
-                <div class="card-body">
-                    <h5 class="card-title">R$ {{ total_pago|floatformat:2 }}</h5>
-                    <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
-                </div>
-            </div>
-        </div>
 
-        <!-- Coluna da Tabela -->
-        <div class="col-md-10 mt-2">
-            <div class="table-responsive">
-                <table class="table table-sm mt-2">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Data Compra</th>
-                            <th scope="col">Vencimento</th>
-                            <th scope="col">Pagamento</th>
-                            <th scope="col">Fornecedor</th>
-                            <th scope="col">Valor Compra</th>
-                            <th scope="col">Valor Pago</th>
-                            <th scope="col">N° Boleto</th>
-                            <th scope="col">Grupo</th>
-                            <th scope="col">Produto</th>
-                            <th scope="col">Classificação</th>
-                            <th scope="col">Forma Pagamento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for compras in compras %}
-                            <tr>
-                                <th scope="row">{{ compras.pk }}</th>
-                                <td>{{ compras.data_compra|date:"d/m/y" }}</td>
-                                <td>{{ compras.data_vencimento|date:"d/m/y" }}</td>
-                                <td>{{ compras.data_pagamento|date:"d/m/y" }}</td>
-                                <td>{{ compras.fornecedor }}</td>
-                                <td>{{ compras.valor_compra|floatformat:2|default:"-" }}</td>
-                                <td>{{ compras.valor_pago|floatformat:2|default:"-" }}</td>
-                                <td>{{ compras.numero_boleto|default:"-" }}</td>
-                                <td>{{ compras.grupo_produto|default:"-" }}</td>
-                                <td>{{ compras.produto|default:"-" }}</td>
-                                <td>{{ compras.classificacao|default:"-" }}</td>
-                                <td>{{ compras.forma_pagamento|default:"-" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="5" class="text-end fw-bold">Total:</td>
-                            <td class="bg-dark text-white fw-bold text-center">R$ {{ total_compras|floatformat:2 }}</td>
-                            <td class="bg-dark text-white fw-bold text-center">R$ {{ total_pago|floatformat:2 }}</td>
-                        </tr>
-                    </tfoot>
-                </table>
+            <div class="mb-2 ms-2 me-2">
+                <button type="submit" class="btn btn-outline-primary me-2" name="buscar_fornecedores">Buscar</button>
+                <a href="{% url 'dashboard_compras' %}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
-        </div>
+
+        </form>
     </div>
-</div>
 
+    {% if compras %}
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Coluna dos Cards -->
+                <div class="col-md-2 mt-3">
+
+                    <div class="card text-bg-warning mb-3" style="max-width: 12rem;">
+                        <div class="card-header">CMV</div>
+                        <div class="card-body">
+                            <h5 class="card-title">R$ {{ total_cmv|floatformat:2 }}</h5>
+                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                        </div>
+                    </div>
+
+                    <div class="card text-bg-secondary mb-3" style="max-width: 12rem;">
+                        <div class="card-header">Gasto Variável</div>
+                        <div class="card-body">
+                            <h5 class="card-title">R$ {{ total_gasto_variavel|floatformat:2 }}</h5>
+                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                        </div>
+                    </div>
+
+                    <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+                        <div class="card-header">Gasto Fixo</div>
+                        <div class="card-body">
+                            <h5 class="card-title">R$ {{ total_gasto_fixo|floatformat:2 }}</h5>
+                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                        </div>
+                    </div>
+
+                    <div class="card text-bg-dark mb-3" style="max-width: 12rem;">
+                        <div class="card-header">Total Compra</div>
+                        <div class="card-body">
+                            <h5 class="card-title">R$ {{ total_compras|floatformat:2 }}</h5>
+                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                        </div>
+                    </div>
+
+                    <div class="card text-bg-primary mb-3" style="max-width: 12rem;">
+                        <div class="card-header">Total Pago</div>
+                        <div class="card-body">
+                            <h5 class="card-title">R$ {{ total_pago|floatformat:2 }}</h5>
+                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Coluna da Tabela -->
+                <div class="col-md-10 mt-2">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped table-hover mt-2"> <!-- table-bordered -->
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Data Compra</th>
+                                    <th scope="col">Vencimento</th>
+                                    <th scope="col">Pagamento</th>
+                                    <th scope="col">Fornecedor</th>
+                                    <th scope="col">Valor Compra</th>
+                                    <th scope="col">Valor Pago</th>
+                                    <th scope="col">N° Boleto</th>
+                                    <th scope="col">Grupo</th>
+                                    <th scope="col">Produto</th>
+                                    <th scope="col">Classificação</th>
+                                    <th scope="col">Forma Pagamento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for compras in compras %}
+                                    <tr>
+                                        <th scope="row">{{ compras.pk }}</th>
+                                        <td>{{ compras.data_compra|date:"d/m/y" }}</td>
+                                        <td>{{ compras.data_vencimento|date:"d/m/y" }}</td>
+                                        <td>{{ compras.data_pagamento|date:"d/m/y" }}</td>
+                                        <td>{{ compras.fornecedor }}</td>
+                                        <td>{{ compras.valor_compra|floatformat:2|default:"-" }}</td>
+                                        <td>{{ compras.valor_pago|floatformat:2|default:"-" }}</td>
+                                        <td>{{ compras.numero_boleto|default:"-" }}</td>
+                                        <td>{{ compras.grupo_produto|default:"-" }}</td>
+                                        <td>{{ compras.produto|default:"-" }}</td>
+                                        <td>{{ compras.classificacao|default:"-" }}</td>
+                                        <td>{{ compras.forma_pagamento|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5" class="text-end fw-bold">Total:</td>
+                                    <td class="bg-dark text-white fw-bold text-center">R$ {{ total_compras|floatformat:2 }}</td>
+                                    <td class="bg-dark text-white fw-bold text-center">R$ {{ total_pago|floatformat:2 }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="container">
+            <div class="alert alert-warning mt-3" role="alert">
+                Não há compras para o filtro selecionadocadastradas.
+            </div>
+        </div>
+    {% endif %}
 
 {% endblock content %}

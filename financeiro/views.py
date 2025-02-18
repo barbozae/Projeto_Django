@@ -211,25 +211,45 @@ def dashboard_compras(request):
 
     return render(request, 'financeiro/dashboard_compras.html', context)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def dashboard_funcionarios(request):
-    ...
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    funcionario_selecionados = request.GET.get('nome_funcionario')
+    tipo_pagamento = request.GET.get('tipo_pagamento')
+    forma_pagamento = request.GET.get('forma_pagamento')
+    
+    funcionarios = Pagamento.objects.all()
+    if data_inicio:
+        funcionarios = funcionarios.filter(data_pagamento__gte=data_inicio)
+    if data_fim:
+        funcionarios = funcionarios.filter(data_pagamento__lte=data_fim)
+    if tipo_pagamento:
+        funcionarios = funcionarios.filter(tipo_pagamento=tipo_pagamento)
+    if funcionario_selecionados:
+        funcionarios = funcionarios.filter(nome_funcionario__id__in=funcionario_selecionados)
+    if forma_pagamento:
+        funcionarios = funcionarios.filter(forma_pagamento=forma_pagamento)
+
+    total_pagamentos = funcionarios.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
+
+    # Obter todos os fornecedores únicos para o filtro
+    nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
+
+    # Dados para o contexto do template
+    context = {
+        'funcionarios': funcionarios, # usar quando for exibir a tabela de funcionarios
+        'nome_funcionario': nome_funcionario, # lista de funcionarios selecionados
+        'funcionario_selecionados': funcionario_selecionados, # lista de funcionarios selecionados
+        'total_pagamentos': total_pagamentos,
+        
+    }
+
+    return render(request, 'financeiro/dashboard_funcionarios.html', context)
+
+
+
+
+
 
 def dashboard_resumo(request):
     ...
