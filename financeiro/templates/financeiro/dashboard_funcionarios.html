@@ -11,37 +11,52 @@
         <form action="" method="GET" class="d-flex align-items-center">
 
             <div class="mb-2 me-2">
-                <label for="data_inicio" class="form-label">Data Início:</label>
+                <small for="data_inicio" class="form-text">Data Início:</small>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
             </div>
-
+            
             <div class="mb-2 ms-2 me-2">
-                <label for="data_fim" class="form-label">Data Fim:</label>
+                <small for="data_fim" class="form-text">Data Fim:</small>
                 <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_inicio }}">
             </div>
 
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
-                <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
-                    <option value="">Selecione todos funcionário</option>
-                    {% for funcionario in funcionarios %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
-                            {{ funcionario.nome_funcionario }}
+                <select class="form-select" id="floatingSelect" name="nome_funcionario">
+                    <option value="">Selecione funcionário</option>
+                    {% for funcionario in nome_funcionario %}
+                        <option value="{{ funcionario.nome_funcionario__id }}" 
+                            {% if funcionario.nome_funcionario__id|stringformat:"s" in funcionario_selecionados %} selected {% endif %}>
+                            {{ funcionario.nome_funcionario__nome_funcionario }}
                         </option>
                     {% endfor %}
                 </select>
-                <label for="floatingSelect">Funcionáro</label>
+                <label for="floatingSelect">Funcionário</label>
             </div>
             
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="tipo_pagamento" aria-label="Floating label select example">
-                    <option value="">Selecione todos pagamentos</option>
-                    {% for funcionario in funcionarios %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
-                            {{ funcionario.tipo_pagamento }}
+                    <option value="">Selecione pagamento</option>
+                    {% for tipo in tipos_pagamento %}
+                        <option value="{{ tipo.tipo_pagamento }}" 
+                            {% if tipo.tipo_pagamento == tipo_pagamento_selecionado %} selected {% endif %}>
+                            {{ tipo.tipo_pagamento }}
                         </option>
                     {% endfor %}
                 </select>
                 <label for="floatingSelect">Tipo Pagamento</label>
+            </div>
+
+            <div class="form-floating mb-2 ms-2 me-2 mt-2">
+                <select class="form-select" id="floatingSelect" name="forma_pagamento" aria-label="Floating label select example">
+                    <option value="">Selecione forma pagamento</option>
+                    {% for tipo in forma_pagamento %}
+                        <option value="{{ tipo.forma_pagamento }}" 
+                            {% if tipo.forma_pagamento == forma_pagamento_selecionado %} selected {% endif %}>
+                            {{ tipo.forma_pagamento }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <label for="floatingSelect">Forma Pagamento</label>
             </div>
 
             <div class="mb-2 ms-2 mt-3">

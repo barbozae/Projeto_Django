@@ -176,7 +176,7 @@ def dashboard_compras(request):
     data_inicio = request.GET.get('data_inicio')
     data_fim = request.GET.get('data_fim')
     classificacao = request.GET.get('classificacao')
-    fornecedores_selecionados = request.GET.get('fornecedor')
+    fornecedores_selecionados = request.GET.getlist('fornecedor')
     
     compras = Compras.objects.all()
     if data_inicio:
@@ -225,22 +225,27 @@ def dashboard_funcionarios(request):
         funcionarios = funcionarios.filter(data_pagamento__lte=data_fim)
     if tipo_pagamento:
         funcionarios = funcionarios.filter(tipo_pagamento=tipo_pagamento)
-    if funcionario_selecionados:
-        funcionarios = funcionarios.filter(nome_funcionario__id__in=funcionario_selecionados)
     if forma_pagamento:
         funcionarios = funcionarios.filter(forma_pagamento=forma_pagamento)
+    if funcionario_selecionados:
+        funcionarios = funcionarios.filter(nome_funcionario__id__in=funcionario_selecionados)
 
     total_pagamentos = funcionarios.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
 
     # Obter todos os fornecedores únicos para o filtro
     nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
+    tipos_pagamento = Pagamento.objects.values('tipo_pagamento').distinct()
+    forma_pagamento = Pagamento.objects.values('forma_pagamento').distinct()
 
     # Dados para o contexto do template
     context = {
         'funcionarios': funcionarios, # usar quando for exibir a tabela de funcionarios
-        'nome_funcionario': nome_funcionario, # lista de funcionarios selecionados
-        'funcionario_selecionados': funcionario_selecionados, # lista de funcionarios selecionados
-        'total_pagamentos': total_pagamentos,
+        'nome_funcionario': nome_funcionario, # lista de todos funcionarios para o filtro
+        'funcionario_selecionados': funcionario_selecionados, # Lista de IDs dos funcionários selecionados
+        'forma_pagamento': forma_pagamento,
+        'total_pagamentos': total_pagamentos,  # Total dos pagamentos
+        'tipos_pagamento': tipos_pagamento,  # Lista de tipos de pagamento únicos
+        'tipo_pagamento_selecionado': tipo_pagamento,  # Tipo de pagamento selecionado
         
     }
 
