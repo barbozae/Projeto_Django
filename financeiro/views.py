@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views import View
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
@@ -7,9 +8,117 @@ from django.db.models import Sum, F, DecimalField, Case, When
 from datetime import date
 
 
-def dashboard_vendas(request):
-    # Calcular taxas
-    def calcular_taxas_vendas(vendas_queryset):
+class FiltrosFinanceiro:
+    def __init__(self, data_inicio=None, data_fim=None, campo_data='data_venda', 
+                 periodo=None, 
+                 fornecedor=None, classificacao=None,
+                 funcionario = None, tipo_pagamento = None, forma_pagamento = None,
+                   **kwargs):
+        # Geral
+        self.data_inicio = data_inicio
+        self.data_fim = data_fim
+        self.campo_data = campo_data  # Define qual campo de data será filtrado (padrão é 'data_compra')
+        
+        # Vendas
+        self.periodo = periodo
+        
+        # Compras
+        self.fornecedor = fornecedor
+        self.classificacao = classificacao
+        
+        # Funcionarios
+        self.funcionario = funcionario
+        self.tipo_pagamento = tipo_pagamento
+        self.forma_pagamento = forma_pagamento
+
+        self.kwargs = kwargs  # Outros filtros adicionais passados como kwargs
+
+    def aplicar_filtros(self, queryset):
+        if self.data_inicio:
+            queryset = queryset.filter(**{f"{self.campo_data}__gte": self.data_inicio})
+        if self.data_fim:
+            queryset = queryset.filter(**{f"{self.campo_data}__lte": self.data_fim})
+
+        if self.periodo:  # Aplicando o filtro de período
+            queryset = queryset.filter(periodo__in=self.periodo)
+
+        if self.fornecedor:
+            # Remove valores vazios da lista de fornecedores
+            fornecedores_validos = [f for f in self.fornecedor if f]
+            if fornecedores_validos:
+                queryset = queryset.filter(fornecedor__id__in=fornecedores_validos)
+
+        if self.classificacao:
+            # Remove valores vazios da lista de classificações
+            classificacoes_validas = [c for c in self.classificacao if c]
+            if classificacoes_validas:
+                queryset = queryset.filter(classificacao__in=classificacoes_validas)
+        
+        if self.funcionario:
+            funcionarios_validos = [f for f in self.funcionario if f]
+            if funcionarios_validos:
+                queryset = queryset.filter(nome_funcionario__id__in=funcionarios_validos)
+
+        if self.tipo_pagamento:
+            tipo_pagamentos_validos = [t for t in self.tipo_pagamento if t]
+            if tipo_pagamentos_validos:
+                queryset = queryset.filter(tipo_pagamento__in=tipo_pagamentos_validos)
+
+        if self.forma_pagamento:
+            forma_pagamentos_validos = [f for f in self.forma_pagamento if f]
+            if forma_pagamentos_validos:
+                queryset = queryset.filter(forma_pagamento__in=forma_pagamentos_validos)
+        
+        # Adicionando outros filtros passados como kwargs
+        for key, value in self.kwargs.items():
+            if value:
+                queryset = queryset.filter(**{key: value})
+
+        return queryset
+
+class DashboardBaseView(View):
+    def calcular_totais_vendas(self, vendas_queryset):
+        vendas_total = vendas_queryset.aggregate(
+            total_rodizio=Sum('rodizio'),
+            total_dinheiro=Sum('dinheiro'),
+            total_pix=Sum('pix'),
+            total_debito=Sum('debito_mastercard') + Sum('debito_visa') + Sum('debito_elo'),
+            total_credito=Sum('credito_mastercard') + Sum('credito_visa') + Sum('credito_elo'),
+            total_beneficio=Sum('alelo') + Sum('american_express') + Sum('hiper') + Sum('sodexo') + 
+                            Sum('ticket_rest') + Sum('vale_refeicao') + Sum('dinersclub'),
+            total_socio=Sum('socio')
+        )
+
+        total_vendas = (
+            (vendas_total['total_dinheiro'] or 0) +
+            (vendas_total['total_pix'] or 0) +
+            (vendas_total['total_debito'] or 0) +
+            (vendas_total['total_credito'] or 0) +
+            (vendas_total['total_beneficio'] or 0)
+        )
+
+        total_rodizio = vendas_total['total_rodizio'] or 0
+        total_socio = vendas_total['total_socio'] or 0
+
+        if total_vendas and total_rodizio != 0:
+            ticket_medio = total_vendas / total_rodizio
+        else:
+            ticket_medio = 0
+
+        return {
+            'total_dinheiro': vendas_total['total_dinheiro'],
+            'total_pix': vendas_total['total_pix'],
+            'total_debito': vendas_total['total_debito'],
+            'total_credito': vendas_total['total_credito'],
+            'total_beneficio': vendas_total['total_beneficio'],
+            'total_socio': vendas_total['total_socio'],
+            'total_vendas': total_vendas,
+            'total_rodizio': total_rodizio,
+            'ticket_medio': ticket_medio,
+            'vendas_total': vendas_total,
+        }
+
+    def calcular_taxas_vendas(self, vendas_queryset):
         # Define as regras de taxas por período
         taxas = [
             {
@@ -89,172 +198,161 @@ def dashboard_vendas(request):
 
         return total_taxa
 
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-    periodo = request.GET.get('periodo')
+    def calcular_totais_compras(self, compras_queryset):
+        total_compras = compras_queryset.aggregate(total_despesas=Sum('valor_compra'))['total_despesas'] or 0
+        total_pago = compras_queryset.aggregate(total_despesas=Sum('valor_pago'))['total_despesas'] or 0
+        cmv = compras_queryset.filter(classificacao='CMV').aggregate(total_cmv=Sum('valor_compra'))['total_cmv'] or 0
+        gasto_fixo = compras_queryset.filter(classificacao='Gasto Fixo').aggregate(total_gasto_fixo=Sum('valor_compra'))['total_gasto_fixo'] or 0
+        gasto_variavel = compras_queryset.filter(classificacao='Gasto Variável').aggregate(total_gasto_variavel=Sum('valor_compra'))['total_gasto_variavel'] or 0
 
-    vendas = Vendas.objects.all()
-    if data_inicio:
-        vendas = vendas.filter(data_venda__gte=data_inicio)
-    if data_fim:
-        vendas = vendas.filter(data_venda__lte=data_fim)
-    if periodo:
-        vendas = vendas.filter(periodo=periodo)
+        return {
+            'total_compras': total_compras,
+            'total_pago': total_pago,
+            'total_cmv': cmv,
+            'total_gasto_fixo': gasto_fixo,
+            'total_gasto_variavel': gasto_variavel,
+        }
 
-    # Agregar valores de vendas
-    vendas_total = vendas.aggregate(
-        total_rodizio=Sum('rodizio'),
-        total_dinheiro=Sum('dinheiro'),
-        total_pix=Sum('pix'),
-        total_debito=Sum('debito_mastercard') + Sum('debito_visa') + Sum('debito_elo'),
-        total_credito=Sum('credito_mastercard') + Sum('credito_visa') + Sum('credito_elo'),
-        total_beneficio=Sum('alelo') + Sum('american_express') + Sum('hiper') + Sum('sodexo') + 
-                        Sum('ticket_rest') + Sum('vale_refeicao') + Sum('dinersclub'),
-        total_socio=Sum('socio')
-    )
+    def calcular_totais_pagamentos(self, pagamentos_queryset):
+        total_pagamentos = pagamentos_queryset.aggregate(total_despesas=Sum('valor_pago'))['total_despesas'] or 0
+        return total_pagamentos
 
-    total_vendas = (
-        (vendas_total['total_dinheiro'] or 0) +
-        (vendas_total['total_pix'] or 0) +
-        (vendas_total['total_debito'] or 0) +
-        (vendas_total['total_credito'] or 0) +
-        (vendas_total['total_beneficio'] or 0)
-    )
+class DashboardVendasView(DashboardBaseView):    
+    def get(self, request):
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+        periodo = request.GET.get('periodo')
 
-    # Pega o total de rodízios
-    total_rodizio = vendas_total['total_rodizio'] or 0 # Garante que será 0 se for None
-    # Pegando o total de sóxios
-    total_socio = vendas_total['total_socio'] or 0
-
-    if total_vendas and total_rodizio != 0:
-        ticket_medio = total_vendas / total_rodizio
-    else:
-        ticket_medio = 0  # ou algum valor padrão
-
-    # Calcular taxas com o queryset filtrado
-    total_taxas = calcular_taxas_vendas(vendas) or 0
-
-    # Agregar valores de compras
-    total_compras = Compras.objects.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
-
-    pagamentos = Pagamento.objects.all()
-
-    if data_inicio:
-        pagamentos = pagamentos.filter(data_pagamento__gte=data_inicio)
-    if data_fim:
-        pagamentos = pagamentos.filter(data_pagamento__lte=data_fim)
-
-    # Calcular o total de pagamentos dos funcionários filtrados
-    total_pagamento_funcionarios = pagamentos.aggregate(
-        total_pagamento_funcionarios=Sum('valor_pago')
-    )['total_pagamento_funcionarios'] or 0
-
-    # Lucro líquido
-    lucro_liquido = total_vendas - total_compras - total_pagamento_funcionarios
-
-    # Dados para o contexto do template
-    context = {
-        'total_dinheiro': vendas_total['total_dinheiro'] or 0,
-        'total_pix': vendas_total['total_pix'] or 0,
-        'total_debito': vendas_total['total_debito'] or 0,
-        'total_credito': vendas_total['total_credito'] or 0,
-        'total_beneficio': vendas_total['total_beneficio'] or 0,
-        'total_rodizio': total_rodizio,
-        'ticket_medio': ticket_medio,
-        'total_vendas': total_vendas,
-        'vendas_total': vendas_total,
-        'total_taxas': total_taxas,
-        'total_despesas': total_compras,
-        'lucro_liquido': lucro_liquido,
-        'pagamento_funcionario': total_pagamento_funcionarios,
-        'vendas_por_forma': vendas,
-        'total_socio': total_socio,
-    }
-    return render(request, 'financeiro/dashboard_vendas.html', context)
-
-def dashboard_compras(request):
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-    classificacao = request.GET.get('classificacao')
-    fornecedores_selecionados = request.GET.getlist('fornecedor')
-    
-    compras = Compras.objects.all()
-    if data_inicio:
-        compras = compras.filter(data_compra__gte=data_inicio)
-    if data_fim:
-        compras = compras.filter(data_compra__lte=data_fim)
-    if classificacao:
-        compras = compras.filter(classificacao=classificacao)
-    if fornecedores_selecionados:
-        compras = compras.filter(fornecedor__id__in=fornecedores_selecionados)
-
-    total_compras = compras.aggregate(total_despesas=models.Sum('valor_compra'))['total_despesas'] or 0
-    total_pago = compras.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
-    cmv = compras.filter(classificacao='CMV').aggregate(total_cmv=Sum('valor_compra'))['total_cmv'] or 0
-    gasto_fixo = compras.filter(classificacao='Gasto Fixo').aggregate(total_gasto_fixo=Sum('valor_compra'))['total_gasto_fixo'] or 0
-    gasto_variavel = compras.filter(classificacao='Gasto Variável').aggregate(total_gasto_variavel=Sum('valor_compra'))['total_gasto_variavel'] or 0
-
-    # Obter todos os fornecedores únicos para o filtro
-    fornecedores = Compras.objects.values('fornecedor__id', 'fornecedor__nome_empresa').distinct()
-
-    # Dados para o contexto do template
-    context = {
-        'total_compras': total_compras,
-        'total_pago': total_pago,
-        'total_cmv': cmv,
-        'total_gasto_fixo': gasto_fixo,
-        'total_gasto_variavel': gasto_variavel,
-        'compras': compras, # usar quando for exibir a tabela de compras
-        'fornecedores_selecionados': fornecedores_selecionados, # lista de fornecedores selecionados
-        'fornecedores': fornecedores
-    }
-
-    return render(request, 'financeiro/dashboard_compras.html', context)
-
-def dashboard_funcionarios(request):
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-    funcionario_selecionados = request.GET.get('nome_funcionario')
-    tipo_pagamento = request.GET.get('tipo_pagamento')
-    forma_pagamento = request.GET.get('forma_pagamento')
-    
-    funcionarios = Pagamento.objects.all()
-    if data_inicio:
-        funcionarios = funcionarios.filter(data_pagamento__gte=data_inicio)
-    if data_fim:
-        funcionarios = funcionarios.filter(data_pagamento__lte=data_fim)
-    if tipo_pagamento:
-        funcionarios = funcionarios.filter(tipo_pagamento=tipo_pagamento)
-    if forma_pagamento:
-        funcionarios = funcionarios.filter(forma_pagamento=forma_pagamento)
-    if funcionario_selecionados:
-        funcionarios = funcionarios.filter(nome_funcionario__id__in=funcionario_selecionados)
-
-    total_pagamentos = funcionarios.aggregate(total_despesas=models.Sum('valor_pago'))['total_despesas'] or 0
-
-    # Obter todos os fornecedores únicos para o filtro
-    nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
-    tipos_pagamento = Pagamento.objects.values('tipo_pagamento').distinct()
-    forma_pagamento = Pagamento.objects.values('forma_pagamento').distinct()
-
-    # Dados para o contexto do template
-    context = {
-        'funcionarios': funcionarios, # usar quando for exibir a tabela de funcionarios
-        'nome_funcionario': nome_funcionario, # lista de todos funcionarios para o filtro
-        'funcionario_selecionados': funcionario_selecionados, # Lista de IDs dos funcionários selecionados
-        'forma_pagamento': forma_pagamento,
-        'total_pagamentos': total_pagamentos,  # Total dos pagamentos
-        'tipos_pagamento': tipos_pagamento,  # Lista de tipos de pagamento únicos
-        'tipo_pagamento_selecionado': tipo_pagamento,  # Tipo de pagamento selecionado
+        vendas = Vendas.objects.all()
+        filtros = FiltrosFinanceiro(
+            data_inicio=data_inicio, 
+            data_fim=data_fim, 
+            periodo=periodo)
         
-    }
+        # Aplicar filtros no queryset de vendas
+        vendas_filtradas = filtros.aplicar_filtros(vendas)
 
-    return render(request, 'financeiro/dashboard_funcionarios.html', context)
+        totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
+        total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
+
+        total_compras = self.calcular_totais_compras(Compras.objects.all())['total_compras']
+        total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
+
+        lucro_liquido = totais_vendas['total_vendas'] - total_compras - total_pagamento_funcionarios
+
+        context = {
+            **totais_vendas,
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+            'campo_data': 'data_venda',
+            'periodo': periodo,
+            'total_taxas': total_taxas,
+            'total_despesas': total_compras,
+            'lucro_liquido': lucro_liquido,
+            'pagamento_funcionario': total_pagamento_funcionarios,
+            'vendas_por_forma': vendas_filtradas,
+        }
+        return render(request, 'financeiro/dashboard_vendas.html', context)
+
+class DashboardComprasView(DashboardBaseView):
+    def get(self, request):
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+        classificacao_selecionado = request.GET.getlist('classificacao')
+        fornecedores_selecionado = request.GET.getlist('fornecedor')
+
+        compras = Compras.objects.all()
+        filtros = FiltrosFinanceiro(
+            data_inicio=data_inicio, 
+            data_fim=data_fim, 
+            campo_data='data_compra',
+            classificacao=classificacao_selecionado,
+            fornecedor=fornecedores_selecionado)
+
+        # Aplique os filtros na queryset
+        compras_filtradas = filtros.aplicar_filtros(compras)
+
+        totais_compras = self.calcular_totais_compras(compras_filtradas)
+        fornecedores = Compras.objects.values('fornecedor__id', 'fornecedor__nome_empresa').distinct() #nesse caso estamos pegando o id por ser chave estrangeira
+        classificacao = Compras.objects.values('classificacao').distinct()
+
+        context = {
+            **totais_compras,
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+            'campo_data': 'data_compra',
+            'compras': compras_filtradas,
+            'fornecedores_selecionados': fornecedores_selecionado,
+            'fornecedores': fornecedores,
+            'classificacao_selecionado': classificacao_selecionado,
+            'classificacao': classificacao,
+        }
+        return render(request, 'financeiro/dashboard_compras.html', context)
+
+class DashboardFuncionariosView(DashboardBaseView):
+    def get(self, request):
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+        funcionario_selecionado = request.GET.getlist('nome_funcionario')
+        tipo_pagamento_selecionado = request.GET.getlist('tipo_pagamento')
+        forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
 
 
+        print("Data Início:", data_inicio)
+        print("Data Fim:", data_fim)
+        print("Funcionários Selecionados:", funcionario_selecionado)
+        print("Tipos de Pagamento Selecionados:", tipo_pagamento_selecionado)
+        print("Formas de Pagamento Selecionadas:", forma_pagamento_selecionado)
 
+        funcionarios = Pagamento.objects.all()
 
+        filtros = FiltrosFinanceiro(
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+            campo_data='data_pagamento',
+            funcionario=funcionario_selecionado,
+            tipo_pagamento=tipo_pagamento_selecionado,
+            forma_pagamento=forma_pagamento_selecionado
+            )
+        
+        # Aplicar filtros no queryset de funcionários
+        funcionarios_filtrado = filtros.aplicar_filtros(funcionarios)
+        print("Funcionários Filtrados:", funcionarios_filtrado)
+        total_pagamentos = self.calcular_totais_pagamentos(funcionarios_filtrado)
+        print("Total Pagamentos:", total_pagamentos)
+        nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
+        tipos_pagamento = Pagamento.objects.values('tipo_pagamento').distinct()
+        formas_pagamento = Pagamento.objects.values('forma_pagamento').distinct()
 
+        context = {
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+            'campo_data': 'data_pagamento',
+            'funcionarios': funcionarios_filtrado,
+            'nome_funcionarios': nome_funcionario,
+            'funcionario_selecionados': funcionario_selecionado,
+            'tipo_pagamento_selecionado': tipo_pagamento_selecionado,
+            'forma_pagamento_selecionado': forma_pagamento_selecionado,
+            'total_pagamentos': total_pagamentos,
+            'tipos_pagamento': tipos_pagamento,
+            'formas_pagamento': formas_pagamento,
+        }
+        return render(request, 'financeiro/dashboard_funcionarios.html', context)
 
-def dashboard_resumo(request):
-    ...
+class DashboardResumoView(DashboardBaseView):
+    def get(self, request):
+        vendas = Vendas.objects.all()
+        totais_vendas = self.calcular_totais_vendas(vendas)
+
+        total_compras = self.calcular_totais_compras(Compras.objects.all())['total_compras']
+        total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
+
+        lucro_liquido = totais_vendas['total_vendas'] - total_compras - total_pagamento_funcionarios
+
+        context = {
+            'total_vendas': totais_vendas['total_vendas'],
+            'total_compras': total_compras,
+            'total_pagamento_funcionarios': total_pagamento_funcionarios,
+            'lucro_liquido': lucro_liquido,
+        }
+        return render(request, 'financeiro/dashboard_resumo.html', context)

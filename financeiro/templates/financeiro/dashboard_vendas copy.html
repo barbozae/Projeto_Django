@@ -13,21 +13,21 @@
 
         <div class="mb-2 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
-            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
+            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
         </div>
 
         <div class="mb-2 ms-2 me-2">
             <small for="data_fim" class="form-text">Data Fim:</small>
-            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
+            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
         </div>
 
         <!-- Filtro para Período -->
         <div class="mb-2 ms-2 me-2">
             <small for="periodo" class="form-text">Período:</small>
             <select class="form-select" id="periodo" name="periodo">
-                <option value="" {% if periodo == "" %}selected{% endif %}>Todos os períodos</option>
-                <option value="Almoço" {% if periodo == "Almoço" %}selected{% endif %}>Almoço</option>
-                <option value="Jantar" {% if periodo == "Jantar" %}selected{% endif %}>Jantar</option>
+                <option value="" {% if not request.GET.periodo %}selected{% endif %}>Todos os períodos</option>
+                <option value="Almoço" {% if request.GET.periodo == "Almoço" %}selected{% endif %}>Almoço</option>
+                <option value="Jantar" {% if request.GET.periodo == "Jantar" %}selected{% endif %}>Jantar</option>
             </select>
         </div>
         <div class="mb-1 ms-1 mt-2">
@@ -70,7 +70,7 @@
         <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
             <div class="card-header">Débito</div>
             <div class="card-body">
-                <h5 class="card-title">R$ {{total_debito|floatformat:2 }}</h5>
+                <h5 class="card-title">R$ {{ total_debito|floatformat:2 }}</h5>
             </div>
         </div>
         <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
