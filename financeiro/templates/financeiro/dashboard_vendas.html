@@ -85,24 +85,21 @@
                 <h5 class="card-title">R$ {{ total_beneficio|floatformat:2 }}</h5>
             </div>
         </div>
-        <div class="card text-bg-success mb-3" style="max-width: 18rem;">
-            <div class="card-header">Total Vendas</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ total_vendas|floatformat:2}}</h5>
-            </div>
-        </div>
+        
         <div class="card text-bg-danger mb-3" style="max-width: 18rem;">
             <div class="card-header">Taxa</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ total_taxas|floatformat:2}}</h5>
             </div>
         </div>
-        <div class="card text-bg-dark mb-3" style="max-width: 18rem;">
-            <div class="card-header"><strong>Lucro</strong></div>
+
+        <div class="card text-bg-success mb-3" style="max-width: 18rem;">
+            <div class="card-header">Total Vendas</div>
             <div class="card-body">
-                <h5 class="card-title">R$ {{ lucro_liquido|floatformat:2}}</h5>
+                <h5 class="card-title">R$ {{ total_vendas|floatformat:2}}</h5>
             </div>
         </div>
+
     </div>
 
     <div class="table-responsive">

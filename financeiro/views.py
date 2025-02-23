@@ -272,8 +272,6 @@ class DashboardVendasView(DashboardBaseView):
         total_compras = self.calcular_totais_compras(Compras.objects.all())
         total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
 
-        lucro_liquido = totais_vendas['total_vendas'] - total_compras - total_pagamento_funcionarios
-
         context = {
             **totais_vendas,
             'data_inicio': data_inicio,
@@ -282,7 +280,6 @@ class DashboardVendasView(DashboardBaseView):
             'periodo': periodo,
             'total_taxas': total_taxas,
             'total_despesas': total_compras,
-            'lucro_liquido': lucro_liquido,
             'pagamento_funcionario': total_pagamento_funcionarios,
             'vendas_por_forma': vendas_filtradas,
         }
@@ -379,15 +376,13 @@ class DashboardFuncionariosView(DashboardBaseView):
 class DashboardResumoView(DashboardBaseView):
     def get(self, request):
         # Filtros e dados de vendas
-        data_inicio_vendas = request.GET.get('data_inicio_vendas')
-        data_fim_vendas = request.GET.get('data_fim_vendas')
-        periodo_vendas = request.GET.get('periodo_vendas')
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
 
         vendas = Vendas.objects.all()
         filtros_vendas = FiltrosFinanceiro(
-            data_inicio=data_inicio_vendas, 
-            data_fim=data_fim_vendas, 
-            periodo=periodo_vendas
+            data_inicio=data_inicio, 
+            data_fim=data_fim, 
         )
         vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
@@ -446,6 +441,9 @@ class DashboardResumoView(DashboardBaseView):
 
         # Contexto para o template
         context = {
+            # Dados de filtro
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
             # Dados de vendas
             'totais_vendas': totais_vendas['total_vendas'],
             'lucro_liquido': lucro_liquido,
@@ -453,7 +451,6 @@ class DashboardResumoView(DashboardBaseView):
             # 'total_taxas_vendas': total_taxas_vendas,
             # 'data_inicio_vendas': data_inicio_vendas,
             # 'data_fim_vendas': data_fim_vendas,
-            # 'periodo_vendas': periodo_vendas,
 
             # Dados de compras
             'totais_compras': totais_compras['total_compras'],
