@@ -3,8 +3,8 @@ from django.views import View
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
-from django.db import models
 from django.db.models import Sum, F, DecimalField, Case, When
+from decimal import Decimal
 from datetime import date
 
 
@@ -215,7 +215,41 @@ class DashboardBaseView(View):
 
     def calcular_totais_pagamentos(self, pagamentos_queryset):
         total_pagamentos = pagamentos_queryset.aggregate(total_despesas=Sum('valor_pago'))['total_despesas'] or 0
+        # rescisao = pagamentos_queryset.filter(tipo_pagamento='Rescisão').aggregate(total_rescisao=Sum('valor_pago'))['total_rescisao'] or 0
+        # return {
+        #     'total_pagamentos': total_pagamentos,
+        #     'total_rescisao': rescisao
+        # }
         return total_pagamentos
+
+    def calcular_contas_vencidas(self, compras_queryset):
+        # Filtra as compras com data de vencimento menor que a data atual e onde valor_pago é zero ou não existe
+        compras_vencidas_nao_pagas = compras_queryset.filter(
+            data_vencimento__lt=date.today(),  # Vencidas
+            data_pagamento__isnull=True  # Não pagas (data_pagamento é None)
+        )
+
+        # Soma o valor total das compras vencidas e não pagas
+        total_compras_vencidas = compras_vencidas_nao_pagas.aggregate(
+            total_vencidas_nao_pagas=Sum('valor_compra')
+        )['total_vencidas_nao_pagas'] or 0
+
+        return total_compras_vencidas
+    
+    def calcular_contas_dentro_do_prazo(self, compras_queryset):
+        # Filtra as compras com data de vencimento maior ou igual à data atual e onde data_pagamento está vazio
+        compras_dentro_do_prazo = compras_queryset.filter(
+            data_vencimento__gte=date.today(),  # Dentro do prazo (vencimento maior ou igual a hoje)
+            data_pagamento__isnull=True  # Não pagas (data_pagamento é None)
+        )
+
+        # Soma o valor total das compras não pagas dentro do prazo
+        total_compras_dentro_do_prazo = compras_dentro_do_prazo.aggregate(
+            total_nao_pagas_dentro_do_prazo=Sum('valor_compra')
+        )['total_nao_pagas_dentro_do_prazo'] or 0
+
+        return total_compras_dentro_do_prazo
+
 
 class DashboardVendasView(DashboardBaseView):    
     def get(self, request):
@@ -235,7 +269,7 @@ class DashboardVendasView(DashboardBaseView):
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
         total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
 
-        total_compras = self.calcular_totais_compras(Compras.objects.all())['total_compras']
+        total_compras = self.calcular_totais_compras(Compras.objects.all())
         total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
 
         lucro_liquido = totais_vendas['total_vendas'] - total_compras - total_pagamento_funcionarios
@@ -344,25 +378,107 @@ class DashboardFuncionariosView(DashboardBaseView):
 
 class DashboardResumoView(DashboardBaseView):
     def get(self, request):
-        data_inicio = request.GET.get('data_inicio')
-        data_fim = request.GET.get('data_fim')
-        
+        # Filtros e dados de vendas
+        data_inicio_vendas = request.GET.get('data_inicio_vendas')
+        data_fim_vendas = request.GET.get('data_fim_vendas')
+        periodo_vendas = request.GET.get('periodo_vendas')
 
-
-
-        
         vendas = Vendas.objects.all()
-        totais_vendas = self.calcular_totais_vendas(vendas)
+        filtros_vendas = FiltrosFinanceiro(
+            data_inicio=data_inicio_vendas, 
+            data_fim=data_fim_vendas, 
+            periodo=periodo_vendas
+        )
+        vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
+        totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
+        fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
+        total_taxas_vendas = self.calcular_taxas_vendas(vendas_filtradas) or 0
 
-        total_compras = self.calcular_totais_compras(Compras.objects.all())['total_compras']
-        total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
 
-        lucro_liquido = totais_vendas['total_vendas'] - total_compras - total_pagamento_funcionarios
+        # Filtros e dados de compras
+        data_inicio_compras = request.GET.get('data_inicio_compras')
+        data_fim_compras = request.GET.get('data_fim_compras')
+        classificacao_selecionada = request.GET.getlist('classificacao_compras')
+        fornecedores_selecionados = request.GET.getlist('fornecedor_compras')
 
+        compras = Compras.objects.all()
+        filtros_compras = FiltrosFinanceiro(
+            data_inicio=data_inicio_compras, 
+            data_fim=data_fim_compras, 
+            campo_data='data_compra',
+            classificacao=classificacao_selecionada,
+            fornecedor=fornecedores_selecionados,
+        )
+        compras_filtradas = filtros_compras.aplicar_filtros(compras)
+        totais_compras = self.calcular_totais_compras(compras_filtradas)
+        total_compras_vencidas = self.calcular_contas_vencidas(compras_filtradas)
+        # Calcular o total das contas não pagas dentro do prazo
+        total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
+
+        # Filtros e dados de pagamentos de funcionários
+        data_inicio_funcionarios = request.GET.get('data_inicio_funcionarios')
+        data_fim_funcionarios = request.GET.get('data_fim_funcionarios')
+        funcionario_selecionado = request.GET.getlist('nome_funcionario')
+        tipo_pagamento_selecionado = request.GET.getlist('tipo_pagamento')
+        forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
+
+        funcionarios = Pagamento.objects.all()
+        filtros_funcionarios = FiltrosFinanceiro(
+            data_inicio=data_inicio_funcionarios,
+            data_fim=data_fim_funcionarios,
+            campo_data='data_pagamento',
+            funcionario=funcionario_selecionado,
+            tipo_pagamento=tipo_pagamento_selecionado,
+            forma_pagamento=forma_pagamento_selecionado,
+        )
+
+        funcionarios_filtrados = filtros_funcionarios.aplicar_filtros(funcionarios)
+        total_pagamentos_funcionarios = self.calcular_totais_pagamentos(funcionarios_filtrados)
+        total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
+
+        total_rescisao = (
+        funcionarios_filtrados.filter(tipo_pagamento='Rescisão')
+        .aggregate(total=Sum('valor_pago'))['total'] or 0
+    )
+
+        # Cálculo do lucro líquido
+        lucro_liquido = totais_vendas['total_vendas'] - totais_compras['total_compras'] - total_pagamentos_funcionarios
+
+        # Contexto para o template
         context = {
-            'total_vendas': totais_vendas['total_vendas'],
-            'total_compras': total_compras,
-            'total_pagamento_funcionarios': total_pagamento_funcionarios,
+            # Dados de vendas
+            'totais_vendas': totais_vendas['total_vendas'],
+            'lucro_liquido': lucro_liquido,
+            'fundo_caixa': fundo_caixa,
+            # 'total_taxas_vendas': total_taxas_vendas,
+            # 'data_inicio_vendas': data_inicio_vendas,
+            # 'data_fim_vendas': data_fim_vendas,
+            # 'periodo_vendas': periodo_vendas,
+
+            # Dados de compras
+            'totais_compras': totais_compras['total_compras'],
+            'total_pago_compras': totais_compras['total_pago'],
+            # 'data_inicio_compras': data_inicio_compras,
+            # 'data_fim_compras': data_fim_compras,
+            'cmv': totais_compras['total_cmv'],
+            'gasto_fixo': totais_compras['total_gasto_fixo'],
+            'gasto_variavel': totais_compras['total_gasto_variavel'],
+            'total_compras_vencidas': total_compras_vencidas,
+            'total_compras_dentro_do_prazo': total_compras_dentro_do_prazo,
+            # 'classificacao_selecionada': classificacao_selecionada,
+            # 'fornecedores_selecionados': fornecedores_selecionados,
+
+            # Dados de pagamentos de funcionários
+            'total_pagamentos_funcionarios': total_pagamentos_funcionarios,
+            'data_inicio_funcionarios': data_inicio_funcionarios,
+            'data_fim_funcionarios': data_fim_funcionarios,
+            'funcionario_selecionado': funcionario_selecionado,
+            'tipo_pagamento_selecionado': tipo_pagamento_selecionado,
+            'forma_pagamento_selecionado': forma_pagamento_selecionado,
+            'total_rescisao': total_rescisao,
+
+            # Lucro líquido
             'lucro_liquido': lucro_liquido,
         }
+
         return render(request, 'financeiro/dashboard_resumo.html', context)

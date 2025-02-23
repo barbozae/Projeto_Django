@@ -22,46 +22,102 @@
 
             <div class="mb-2 ms-2 mt-3">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
-                <a href="{% url 'dashboard_funcionarios' %}" class="btn btn-outline-secondary me-2">Limpar</a>
+                <a href="{% url 'dashboard_resumo' %}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
 
         </form>
     </div>
     <!-- Cards -->
-    <div class="d-flex justify-content-around flex-wrap mt-2">
+    <div class="d-flex justify-content-around flex-wrap mt-3">
 
         <div class="card text-bg-success mb-3" style="max-width: 12rem;">
             <div class="card-header">Total Vendas</div>
             <div class="card-body">
-                <h5 class="card-title">R$ {{ total_vendas|floatformat:2}}</h5>
-            </div>
-        </div>
-
-        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
-            <div class="card-header">Ticket Médio</div>
-            <div class="card-body">
-                <h5 class="card-title text-center">{{ ticket_medio|floatformat:2 }}</h5>
+                <h5 class="card-title">R$ {{ totais_vendas|floatformat:2}}</h5>
             </div>
         </div>
 
         <div class="card text-bg-dark mb-3" style="max-width: 12rem;">
             <div class="card-header">Total Compra</div>
             <div class="card-body">
-                <h5 class="card-title">R$ {{ total_compras|floatformat:2 }}</h5>
+                <h5 class="card-title">R$ {{ totais_compras|floatformat:2 }}</h5>
             </div>
         </div>
 
         <div class="card text-bg-primary mb-3" style="max-width: 12rem;">
             <div class="card-header">Total Pago</div>
             <div class="card-body">
-                <h5 class="card-title">R$ {{ total_pago|floatformat:2 }}</h5>
+                <h5 class="card-title">R$ {{ total_pago_compras|floatformat:2 }}</h5>
+            </div>
+        </div>
+        
+        <div class="card text-bg-danger mb-3" style="max-width: 12rem;">
+            <div class="card-header">Conta Vencidas</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ total_compras_vencidas|floatformat:2 }}</h5>
+            </div>
+        </div>
+        
+        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+            <div class="card-header">Em Vencimento</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ total_compras_dentro_do_prazo|floatformat:2 }}</h5>
+            </div>
+        </div>
+        
+        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+            <div class="card-header">Fundo de Caixa</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ fundo_caixa|floatformat:2 }}</h5>
             </div>
         </div>
 
         <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+            <div class="card-header">Lucro</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ lucro_liquido|floatformat:2 }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="my-3">
+
+    <!-- Linha 2 dos cards -->
+    <div class="d-flex justify-content-around flex-wrap mt-3">
+
+        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+            <div class="card-header">CMV</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ cmv|floatformat:2}}</h5>
+            </div>
+        </div>
+
+        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+            <div class="card-header">Gasto Fixo</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ gasto_fixo|floatformat:2}}</h5>
+            </div>
+        </div>
+        
+        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+            <div class="card-header">Gasto Variável</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ gasto_variavel|floatformat:2}}</h5>
+            </div>
+        </div>
+        
+        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
             <div class="card-header">Funcionários</div>
             <div class="card-body">
-                <h5 class="card-title text-center">{{ 00.00|floatformat:2 }}</h5>
+                <h5 class="card-title">R$ {{ total_pagamentos_funcionarios|floatformat:2}}</h5>
+            </div>
+        </div>
+        
+        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+            <div class="card-header">Rescisão</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ total_rescisao|floatformat:2 }}</h5>
             </div>
         </div>
 
