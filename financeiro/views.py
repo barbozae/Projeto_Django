@@ -391,15 +391,13 @@ class DashboardResumoView(DashboardBaseView):
 
 
         # Filtros e dados de compras
-        data_inicio_compras = request.GET.get('data_inicio_compras')
-        data_fim_compras = request.GET.get('data_fim_compras')
         classificacao_selecionada = request.GET.getlist('classificacao_compras')
         fornecedores_selecionados = request.GET.getlist('fornecedor_compras')
 
         compras = Compras.objects.all()
         filtros_compras = FiltrosFinanceiro(
-            data_inicio=data_inicio_compras, 
-            data_fim=data_fim_compras, 
+            data_inicio=data_inicio, 
+            data_fim=data_fim, 
             campo_data='data_compra',
             classificacao=classificacao_selecionada,
             fornecedor=fornecedores_selecionados,
