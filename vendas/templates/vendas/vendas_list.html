@@ -45,7 +45,7 @@
 
 {% if vendas_list %}
     <!-- cards -->
-    <div class="d-flex justify-content-around flex-wrap mt-2">
+    <!-- <div class="d-flex justify-content-around flex-wrap mt-2">
         <div class="card text-bg-light mb-3" style="max-width: 18rem;">
             <div class="card-header">Rodízio</div>
             <div class="card-body">
@@ -88,7 +88,7 @@
                 <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <table class="table table-sm table-striped table-hover mt-2"> <!-- table-bordered -->
         <thead class="table-light">
@@ -128,15 +128,6 @@
                 </tr>
             {% endfor %}
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="9" class="text-end fw-bold">Total Geral:</td>
-                <td class="bg-dark text-white fw-bold text-center">
-                    {{ vendas_total }}
-                </td>
-                <td colspan="2"></td>
-            </tr>
-        </tfoot>
     </table>
 {% else %}
     <div class="container">

@@ -297,13 +297,6 @@ class DashboardFuncionariosView(DashboardBaseView):
         tipo_pagamento_selecionado = request.GET.getlist('tipo_pagamento')
         forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
 
-
-        print("Data Início:", data_inicio)
-        print("Data Fim:", data_fim)
-        print("Funcionários Selecionados:", funcionario_selecionado)
-        print("Tipos de Pagamento Selecionados:", tipo_pagamento_selecionado)
-        print("Formas de Pagamento Selecionadas:", forma_pagamento_selecionado)
-
         funcionarios = Pagamento.objects.all()
 
         filtros = FiltrosFinanceiro(
@@ -317,9 +310,15 @@ class DashboardFuncionariosView(DashboardBaseView):
         
         # Aplicar filtros no queryset de funcionários
         funcionarios_filtrado = filtros.aplicar_filtros(funcionarios)
-        print("Funcionários Filtrados:", funcionarios_filtrado)
+        tipo_pagamentos_agrupados = funcionarios_filtrado.values('tipo_pagamento').annotate(total_valor_pago=Sum('valor_pago'))
+        forma_pagamentos_agrupados = funcionarios_filtrado.values('forma_pagamento').annotate(total_valor_pago=Sum('valor_pago'))
+        
+        # Totais de pagamentos
         total_pagamentos = self.calcular_totais_pagamentos(funcionarios_filtrado)
-        print("Total Pagamentos:", total_pagamentos)
+        total_tipo_pagamento = sum(item['total_valor_pago'] for item in tipo_pagamentos_agrupados)
+        total_forma_pagamento = sum(item['total_valor_pago'] for item in forma_pagamentos_agrupados)
+
+        # Dados para o filtro
         nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
         tipos_pagamento = Pagamento.objects.values('tipo_pagamento').distinct()
         formas_pagamento = Pagamento.objects.values('forma_pagamento').distinct()
@@ -336,11 +335,22 @@ class DashboardFuncionariosView(DashboardBaseView):
             'total_pagamentos': total_pagamentos,
             'tipos_pagamento': tipos_pagamento,
             'formas_pagamento': formas_pagamento,
+            'tipo_pagamentos_agrupados': tipo_pagamentos_agrupados,
+            'forma_pagamentos_agrupados': forma_pagamentos_agrupados,
+            'total_tipo_pagamento': total_tipo_pagamento,
+            'total_forma_pagamento': total_forma_pagamento,
         }
         return render(request, 'financeiro/dashboard_funcionarios.html', context)
 
 class DashboardResumoView(DashboardBaseView):
     def get(self, request):
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+        
+
+
+
+        
         vendas = Vendas.objects.all()
         totais_vendas = self.calcular_totais_vendas(vendas)
 

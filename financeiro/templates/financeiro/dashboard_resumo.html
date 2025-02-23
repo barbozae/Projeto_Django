@@ -1,12 +1,69 @@
 {% extends 'global/base.html' %}
 
 {% block page_title %}
-    Dashboard Resumo
+    Dashboard Visão Geral
 {% endblock page_title %}
 
 {% block content %}
+    <h5 class="mb-4 mt-3" style="color: green;">Dashboard Visão Geral</h5>
 
-<h5 class="mb-4 mt-3" style="color: green;">Dashboard Visão Geral</h5>
+    <div class="container">
+        <form action="" method="GET" class="d-flex align-items-center">
 
+            <div class="mb-2 me-2">
+                <small for="data_inicio" class="form-text">Data Início:</small>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+            </div>
+            
+            <div class="mb-2 ms-2 me-2">
+                <small for="data_fim" class="form-text">Data Fim:</small>
+                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
+            </div>
 
+            <div class="mb-2 ms-2 mt-3">
+                <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
+                <a href="{% url 'dashboard_funcionarios' %}" class="btn btn-outline-secondary me-2">Limpar</a>
+            </div>
+
+        </form>
+    </div>
+    <!-- Cards -->
+    <div class="d-flex justify-content-around flex-wrap mt-2">
+
+        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+            <div class="card-header">Total Vendas</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ total_vendas|floatformat:2}}</h5>
+            </div>
+        </div>
+
+        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+            <div class="card-header">Ticket Médio</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">{{ ticket_medio|floatformat:2 }}</h5>
+            </div>
+        </div>
+
+        <div class="card text-bg-dark mb-3" style="max-width: 12rem;">
+            <div class="card-header">Total Compra</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ total_compras|floatformat:2 }}</h5>
+            </div>
+        </div>
+
+        <div class="card text-bg-primary mb-3" style="max-width: 12rem;">
+            <div class="card-header">Total Pago</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ total_pago|floatformat:2 }}</h5>
+            </div>
+        </div>
+
+        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+            <div class="card-header">Funcionários</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">{{ 00.00|floatformat:2 }}</h5>
+            </div>
+        </div>
+
+    </div>
 {% endblock content %}
