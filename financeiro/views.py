@@ -389,7 +389,6 @@ class DashboardResumoView(DashboardBaseView):
         fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
         total_taxas_vendas = self.calcular_taxas_vendas(vendas_filtradas) or 0
 
-
         # Filtros e dados de compras
         classificacao_selecionada = request.GET.getlist('classificacao_compras')
         fornecedores_selecionados = request.GET.getlist('fornecedor_compras')
@@ -417,8 +416,8 @@ class DashboardResumoView(DashboardBaseView):
 
         funcionarios = Pagamento.objects.all()
         filtros_funcionarios = FiltrosFinanceiro(
-            data_inicio=data_inicio_funcionarios,
-            data_fim=data_fim_funcionarios,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
             campo_data='data_pagamento',
             funcionario=funcionario_selecionado,
             tipo_pagamento=tipo_pagamento_selecionado,
@@ -427,7 +426,7 @@ class DashboardResumoView(DashboardBaseView):
 
         funcionarios_filtrados = filtros_funcionarios.aplicar_filtros(funcionarios)
         total_pagamentos_funcionarios = self.calcular_totais_pagamentos(funcionarios_filtrados)
-        total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
+        # total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
 
         total_rescisao = (
         funcionarios_filtrados.filter(tipo_pagamento='Rescisão')

@@ -1,0 +1,92 @@
+<div class="col-md-10 mt-2">
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover mt-2">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Data Compra</th>
+                    <th scope="col">Vencimento</th>
+                    <th scope="col">Pagamento</th>
+                    <th scope="col">Fornecedor</th>
+                    <th scope="col">Valor Compra</th>
+                    <th scope="col">Valor Pago</th>
+                    <th scope="col">N° Boleto</th>
+                    <th scope="col">Grupo</th>
+                    <th scope="col">Produto</th>
+                    <th scope="col">Classificação</th>
+                    <th scope="col">Forma Pagamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for compra in compras %}
+                    <tr>
+                        <th scope="row">{{ compra.pk }}</th>
+                        <td>{{ compra.data_compra|date:"d/m/y" }}</td>
+                        <td>{{ compra.data_vencimento|date:"d/m/y" }}</td>
+                        <td>{{ compra.data_pagamento|date:"d/m/y" }}</td>
+                        <td>{{ compra.fornecedor }}</td>
+                        <td>{{ compra.valor_compra|floatformat:2|default:"-" }}</td>
+                        <td>{{ compra.valor_pago|floatformat:2|default:"-" }}</td>
+                        <td>{{ compra.numero_boleto|default:"-" }}</td>
+                        <td>{{ compra.grupo_produto|default:"-" }}</td>
+                        <td>{{ compra.produto|default:"-" }}</td>
+                        <td>{{ compra.classificacao|default:"-" }}</td>
+                        <td>{{ compra.forma_pagamento|default:"-" }}</td>
+                    </tr>
+                    <tr class="detail-row" style="display: none;">
+                        <td colspan="12">
+                            <div class="detail-content">
+                                <h6>Detalhes da Compra:</h6>
+                                <ul>
+                                    <li><strong>Quantidade:</strong> {{ compra.qtd|default:"-" }}</li>
+                                    <li><strong>Observação:</strong> {{ compra.observacao|default:"-" }}</li>
+                                    <li><strong>Autor:</strong> {{ compra.author.username|default:"-" }}</li>
+                                    <li><strong>Atualizado em:</strong> {{ compra.dt_atualizado|date:"d/m/y H:i" }}</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-end fw-bold">Total:</td>
+                    <td class="bg-dark text-white fw-bold text-center">R$ {{ total_compras|floatformat:2 }}</td>
+                    <td class="bg-dark text-white fw-bold text-center">R$ {{ total_pago|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<style>
+    .detail-row {
+        background-color: #f9f9f9;
+    }
+    .detail-content {
+        padding: 10px;
+        margin-left: 20px;
+    }
+    .detail-content ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    .detail-content ul li {
+        margin-bottom: 5px;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
+
+        rows.forEach(row => {
+            row.addEventListener("click", function() {
+                const detailRow = this.nextElementSibling;
+                if (detailRow && detailRow.classList.contains("detail-row")) {
+                    detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                }
+            });
+        });
+    });
+</script>

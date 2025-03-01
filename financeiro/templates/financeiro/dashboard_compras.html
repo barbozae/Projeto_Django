@@ -99,57 +99,10 @@
                             <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
                         </div>
                     </div>
-
                 </div>
-
                 <!-- Coluna da Tabela -->
-                <div class="col-md-10 mt-2">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-striped table-hover mt-2"> <!-- table-bordered -->
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Data Compra</th>
-                                    <th scope="col">Vencimento</th>
-                                    <th scope="col">Pagamento</th>
-                                    <th scope="col">Fornecedor</th>
-                                    <th scope="col">Valor Compra</th>
-                                    <th scope="col">Valor Pago</th>
-                                    <th scope="col">N° Boleto</th>
-                                    <th scope="col">Grupo</th>
-                                    <th scope="col">Produto</th>
-                                    <th scope="col">Classificação</th>
-                                    <th scope="col">Forma Pagamento</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for compras in compras %}
-                                    <tr>
-                                        <th scope="row">{{ compras.pk }}</th>
-                                        <td>{{ compras.data_compra|date:"d/m/y" }}</td>
-                                        <td>{{ compras.data_vencimento|date:"d/m/y" }}</td>
-                                        <td>{{ compras.data_pagamento|date:"d/m/y" }}</td>
-                                        <td>{{ compras.fornecedor }}</td>
-                                        <td>{{ compras.valor_compra|floatformat:2|default:"-" }}</td>
-                                        <td>{{ compras.valor_pago|floatformat:2|default:"-" }}</td>
-                                        <td>{{ compras.numero_boleto|default:"-" }}</td>
-                                        <td>{{ compras.grupo_produto|default:"-" }}</td>
-                                        <td>{{ compras.produto|default:"-" }}</td>
-                                        <td>{{ compras.classificacao|default:"-" }}</td>
-                                        <td>{{ compras.forma_pagamento|default:"-" }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="5" class="text-end fw-bold">Total:</td>
-                                    <td class="bg-dark text-white fw-bold text-center">R$ {{ total_compras|floatformat:2 }}</td>
-                                    <td class="bg-dark text-white fw-bold text-center">R$ {{ total_pago|floatformat:2 }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
+                <!-- Tabela de compras -->
+                {% include 'financeiro/table/tabela_compras.html' %}
             </div>
         </div>
     {% else %}
@@ -159,5 +112,4 @@
             </div>
         </div>
     {% endif %}
-
 {% endblock content %}

@@ -30,49 +30,50 @@
     <!-- Cards -->
     <div class="d-flex justify-content-around flex-wrap mt-3">
 
-        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-success shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Total Vendas</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ totais_vendas|floatformat:2}}</h5>
             </div>
         </div>
 
-        <div class="card text-bg-dark mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-dark shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Total Compra</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ totais_compras|floatformat:2 }}</h5>
             </div>
         </div>
 
-        <div class="card text-bg-primary mb-3" style="max-width: 12rem;">
+
+        <div class="card shadow mb-3" style="max-width: 12rem; background-color: #9c27b0; color: white; border-color: #9c27b0;">
             <div class="card-header">Total Pago</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ total_pago_compras|floatformat:2 }}</h5>
             </div>
         </div>
         
-        <div class="card text-bg-danger mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-danger shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Conta Vencidas</div>
             <div class="card-body">
                 <h5 class="card-title text-center">R$ {{ total_compras_vencidas|floatformat:2 }}</h5>
             </div>
         </div>
         
-        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-light shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Em Vencimento</div>
             <div class="card-body">
                 <h5 class="card-title text-center">R$ {{ total_compras_dentro_do_prazo|floatformat:2 }}</h5>
             </div>
         </div>
         
-        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-light shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Fundo de Caixa</div>
             <div class="card-body">
                 <h5 class="card-title text-center">R$ {{ fundo_caixa|floatformat:2 }}</h5>
             </div>
         </div>
 
-        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-light shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Lucro</div>
             <div class="card-body">
                 <h5 class="card-title text-center">R$ {{ lucro_liquido|floatformat:2 }}</h5>
@@ -85,36 +86,37 @@
 
     <!-- Linha 2 dos cards -->
     <div class="d-flex justify-content-around flex-wrap mt-3">
+    <!-- <div class="d-fluid justify-content-start flex-wrap mt-3"> -->
 
-        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-warning shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">CMV</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ cmv|floatformat:2}}</h5>
             </div>
         </div>
 
-        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-success shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Gasto Fixo</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ gasto_fixo|floatformat:2}}</h5>
             </div>
         </div>
         
-        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+        <div class="card text-bg-info shadow mb-3" style="max-width: 12rem;">
             <div class="card-header">Gasto Variável</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ gasto_variavel|floatformat:2}}</h5>
             </div>
         </div>
         
-        <div class="card text-bg-success mb-3" style="max-width: 12rem;">
+        <div class="card shadow mb-3" style="max-width: 12rem; background-color: #de8439; color: white; border-color: #fd7e14;">
             <div class="card-header">Funcionários</div>
             <div class="card-body">
                 <h5 class="card-title">R$ {{ total_pagamentos_funcionarios|floatformat:2}}</h5>
             </div>
         </div>
         
-        <div class="card text-bg-light mb-3" style="max-width: 12rem;">
+        <div class="card shadow mb-3" style="max-width: 12rem; background-color: #de8439; color: white; border: #de8439;">
             <div class="card-header">Rescisão</div>
             <div class="card-body">
                 <h5 class="card-title text-center">R$ {{ total_rescisao|floatformat:2 }}</h5>
@@ -122,4 +124,5 @@
         </div>
 
     </div>
+    
 {% endblock content %}
