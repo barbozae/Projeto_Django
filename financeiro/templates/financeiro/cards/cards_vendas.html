@@ -1,0 +1,86 @@
+<div class="card text-bg-light mb-3" style="max-width: 18rem;">
+    <div class="card-header">Rodízio</div>
+    <div class="card-body">
+        <h5 class="card-title tex-center">{{ total_rodizio }}</h5>
+    </div>
+</div>
+<div class="card text-bg-light mb-3" style="max-width: 18rem;">
+    <div class="card-header">Ticket Médio</div>
+    <div class="card-body">
+        <h5 class="card-title text-center">{{ ticket_medio|floatformat:2 }}</h5>
+    </div>
+</div>
+<div class="card text-bg-info mb-3" style="max-width: 18rem;">
+    <div class="card-header">Dinheiro</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{ total_dinheiro|floatformat:2 }}</h5>
+        <p class="card-text">
+            <strong>
+                <em>{{ taxa_dinheiro|floatformat:2 }}%</em>
+            </strong>
+        </p>
+    </div>
+</div>
+<div class="card text-bg-info mb-3" style="max-width: 18rem;">
+    <div class="card-header">Pix</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{ total_pix|floatformat:2 }}</h5>
+        <p class="card-text">
+            <strong>
+                <em>{{ taxa_pix|floatformat:2 }}%</em>
+            </strong>
+        </p>
+    </div>
+</div>
+<div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+    <div class="card-header">Débito</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{total_debito|floatformat:2 }}</h5>
+        <p class="card-text">
+            <strong>
+                <em>{{ taxa_debito|floatformat:2 }}%</em>
+            </strong>
+        </p>
+    </div>
+</div>
+<div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
+    <div class="card-header">Crédito</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{ total_credito|floatformat:2 }}</h5>
+        <p class="card-text">
+            <strong>
+                <em>{{ taxa_credito|floatformat:2 }}%</em>
+            </strong>
+        </p>
+    </div>
+</div>
+<div class="card text-bg-warning mb-3" style="max-width: 18rem;">
+    <div class="card-header">Benefício</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{ total_beneficio|floatformat:2 }}</h5>
+        <p class="card-text">
+            <strong>
+                <em>{{ taxa_beneficio|floatformat:2 }}%</em>
+            </strong>
+        </p>
+    </div>
+</div>
+
+<div class="card text-bg-danger mb-3" style="max-width: 18rem;">
+    <div class="card-header">Taxa</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{ total_taxas|floatformat:2}}</h5>
+        <p class="card-text">
+            <strong>
+                <em>{{ taxa_total_taxa|floatformat:2 }}%</em>
+            </strong>
+        </p>
+    </div>
+</div>
+
+<div class="card text-bg-success mb-3" style="max-width: 18rem;">
+    <div class="card-header">Total Vendas</div>
+    <div class="card-body">
+        <h5 class="card-title">R$ {{ total_vendas|floatformat:2}}</h5>
+    </div>
+</div>
