@@ -54,7 +54,7 @@
     </div>
 
     {% if compras_list %}
-        <table class="table table-sm table-striped table-hover mt-3"> <!-- table-bordered -->
+        <!-- <table class="table table-sm table-striped table-hover mt-3">
             <thead class="table-light">
             <tr>
                 <th scope="col">ID</th>
@@ -94,7 +94,97 @@
                     </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table> -->
+
+
+
+
+
+    <table class="table table-sm table-striped table-hover mt-3">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data Compra</th>
+                <th scope="col">Vencimento</th>
+                <th scope="col">Pagamento</th>
+                <th scope="col">Fornecedor</th>
+                <th scope="col">Valor Compra</th>
+                <th scope="col">Valor Pago</th>
+                <th scope="col">N° Boleto</th>
+                <th scope="col">Grupo</th>
+                <th scope="col">Produto</th>
+                <th scope="col">Classificação</th>
+                <th scope="col">Forma Pagamento</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for compras in compras_list %}
+                <tr>
+                    <th scope="row" >{{ compras.pk }}</th>
+                    <td>{{ compras.data_compra| date:"d/m/y"}}</td>
+                    <td>{{ compras.data_vencimento| date:"d/m/y"}}</td>
+                    <td>{{ compras.data_pagamento| date:"d/m/y"}}</td>
+                    <td>{{ compras.fornecedor }}</td>
+                    <td>{{ compras.valor_compra| floatformat:2| default:"-" }}</td>
+                    <td>{{ compras.valor_pago| floatformat:2| default:"-" }}</td>
+                    <td>{{ compras.numero_boleto| default:"-" }}</td>
+                    <td>{{ compras.grupo_produto| default:"-" }}</td>
+                    <td>{{ compras.produto| default:"-" }}</td>
+                    <td>{{ compras.classificacao| default:"-" }}</td>
+                    <td>{{ compras.forma_pagamento| default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'update_compras' pk=compras.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                        <a href="{% url 'delete_compras' pk=compras.pk %}" class="btn btn-danger btn-sm" >Excluir</a>
+                    </td>
+                </tr>
+                <tr class="detail-row" style="display: none;">
+                    <td colspan="12">
+                        <div class="detail-content">
+                            <ul>
+                                <li><strong>Quantidade:</strong> {{ compras.qtd|default:"-" }}</li>
+                                <li><strong>Observação:</strong> {{ compras.observacao|default:"-" }}</li>
+                                <li><strong>Autor:</strong> {{ compras.author.username|default:"-" }}</li>
+                                <li><strong>Atualizado em:</strong> {{ compras.dt_atualizado|date:"d/m/y H:i" }}</li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <style>
+        .detail-row {
+            background-color: #f9f9f9;
+        }
+        .detail-content {
+            padding: 10px;
+            margin-left: 20px;
+        }
+        .detail-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .detail-content ul li {
+            margin-bottom: 5px;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
+    
+            rows.forEach(row => {
+                row.addEventListener("click", function() {
+                    const detailRow = this.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains("detail-row")) {
+                        detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                    }
+                });
+            });
+        });
+    </script>
+
     {% else %}
         <div class="container">
             <div class="alert alert-warning mt-3" role="alert">

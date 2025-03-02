@@ -13,19 +13,16 @@
 <div class="container">
     <form action="" method="GET" class="d-flex align-items-center">
 
-        <!-- Caixa de data inicial -->
         <div class="mb-2 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
             <input type="date" class="form-control" id="data_inicio" name="data_inicio">
         </div>
 
-        <!-- Caixa de data final -->
         <div class="mb-2 ms-2 me-2">
             <small for="data_fim" class="form-text">Data Fim:</small>
             <input type="date" class="form-control" id="data_fim" name="data_fim">
         </div>
 
-        <!-- Filtro para Período -->
         <div class="mb-2 ms-2 me-2">
             <label for="periodo" class="form-label">Período:</label>
             <select class="form-select" id="periodo" name="periodo">
@@ -44,52 +41,6 @@
 </div>
 
 {% if vendas_list %}
-    <!-- cards -->
-    <!-- <div class="d-flex justify-content-around flex-wrap mt-2">
-        <div class="card text-bg-light mb-3" style="max-width: 18rem;">
-            <div class="card-header">Rodízio</div>
-            <div class="card-body">
-                <h5 class="card-title tex-center">{{ vendas_rodizio }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
-            <div class="card-header">Dinheiro</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{vendas_dinheiro}}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-info mb-3" style="max-width: 18rem;">
-            <div class="card-header">Pix</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_pix }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-            <div class="card-header">Débito</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_debito }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-secondary mb-3" style="max-width: 18rem;">
-            <div class="card-header">Crédito</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_credito }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-warning mb-3" style="max-width: 18rem;">
-            <div class="card-header">Benefício</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{ vendas_beneficio }}</h5>
-            </div>
-        </div>
-        <div class="card text-bg-success mb-3" style="max-width: 18rem;">
-            <div class="card-header">Total Vendas</div>
-            <div class="card-body">
-                <h5 class="card-title">R$ {{vendas_total|floatformat:2}}</h5>
-            </div>
-        </div>
-    </div> -->
-
     <table class="table table-sm table-striped table-hover mt-2">
         <thead class="table-light">
         <tr>
@@ -124,11 +75,65 @@
                     <td>
                         <a href="{% url 'update_vendas' pk=venda.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
                         <a href="{% url 'delete_vendas' pk=venda.pk %}" class="btn btn-danger btn-sm">Excluir</a>
-                    </td>
+                </td>
+                    <tr class="detail-row" style="display: none;">
+                        <td colspan="3">
+                            <div class="detail-content">
+                                <ul>
+                                    <li><strong>Débito Visa:</strong> {{ venda.debito_visa|default:"-" }}</li>
+                                    <li><strong>Débito Mastercard:</strong> {{ venda.debito_mastercard|default:"-" }}</li>
+                                    <li><strong>Débito Elo:</strong> {{ venda.debito_elo|default:"-" }}</li>
+                                    <li><strong>Crédito Mastercard:</strong> {{ venda.credito_mastercard|default:"-" }}</li>
+                                    <li><strong>Crédito Visa:</strong> {{ venda.credito_visa|default:"-" }}</li>
+                                    <li><strong>Crédito Elo:</strong> {{ venda.credito_elo|default:"-" }}</li>
+                                    <li><strong>Alelo:</strong> {{ venda.alelo|default:"-" }}</li>
+                                    <li><strong>American Express:</strong> {{ venda.american_express|default:"-" }}</li>
+                                    <li><strong>Hiper:</strong> {{ venda.hiper|default:"-" }}</li>
+                                    <li><strong>Sodexo:</strong> {{ venda.sodexo|default:"-" }}</li>
+                                    <li><strong>Ticket Rest:</strong> {{ venda.ticket_rest|default:"-" }}</li>
+                                    <li><strong>Vale Refeição:</strong> {{ venda.vale_refeicao|default:"-" }}</li>
+                                    <li><strong>DinersClub:</strong> {{ venda.dinersclub|default:"-" }}</li>
+                                    <li><strong>Autor:</strong> {{ venda.author.username|default:"-" }}</li>
+                                    <li><strong>Atualizado em:</strong> {{ venda.dt_atualizado|date:"d/m/y H:i" }}</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    <style>
+        .detail-row {
+            background-color: #f9f9f9;
+        }
+        .detail-content {
+            padding: 10px;
+            margin-left: 20px;
+        }
+        .detail-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .detail-content ul li {
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
+
+            rows.forEach(row => {
+                row.addEventListener("click", function() {
+                    const detailRow = this.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains("detail-row")) {
+                        detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                    }
+                });
+            });
+        });
+    </script>
 {% else %}
     <div class="container">
         <div class="alert alert-warning mt-3" role="alert">
@@ -136,4 +141,5 @@
         </div>
     </div>
 {% endif %}
+
 {% endblock content %}

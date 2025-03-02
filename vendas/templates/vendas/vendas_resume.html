@@ -13,19 +13,16 @@
     <div class="container ms-1">
         <form action="" method="GET" class="d-flex align-items-center">
 
-            <!-- Caixa de data inicial -->
             <div class="mb-2">
                 <label for="data_inicio" class="form-label">Data Início:</label>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio">
             </div>
 
-            <!-- Caixa de data final -->
             <div class="mb-2 ms-2">
                 <label for="data_fim" class="form-label">Data Fim:</label>
                 <input type="date" class="form-control" id="data_fim" name="data_fim">
             </div>
 
-            <!-- Filtro para Período -->
             <div class="mb-2 ms-2">
                 <label for="periodo" class="form-label">Período:</label>
                 <select class="form-select" id="periodo" name="periodo">
@@ -35,20 +32,15 @@
                 </select>
             </div>
 
-            <!-- Botão Buscar -->
             <div class="mb-2 ms-2 mt-4">
                 <button type="submit" class="btn btn-primary" name="buscar_vendas">Buscar</button>
             </div>
             
-            <!-- Botão Limpar -->
             <div class="mb-2 ms-2 mt-4">
                 <a href="{% url 'venda_list' %}" class="btn btn-secondary">Limpar</a>
             </div>
-            <!-- <a href="{% url 'venda_list' %}" class="btn btn-secondary ms-2">Limpar</a> -->
         </form>
     </div>
-
-
 
     <div class="card text-bg-primary mb-3" style="max-width: 18rem;">
       <div class="card-header">Vendas</div>
