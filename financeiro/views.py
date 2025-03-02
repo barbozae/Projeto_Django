@@ -101,6 +101,12 @@ class DashboardBaseView(View):
         total_rodizio = vendas_total['total_rodizio'] or 0
         total_socio = vendas_total['total_socio'] or 0
 
+        taxa_dinheiro = vendas_total['total_dinheiro'] / total_vendas * 100 if total_vendas != 0 else 0
+        taxa_pix = vendas_total['total_pix'] / total_vendas * 100 if total_vendas != 0 else 0
+        taxa_debito = vendas_total['total_debito'] / total_vendas * 100 if total_vendas != 0 else 0
+        taxa_credito = vendas_total['total_credito'] / total_vendas * 100 if total_vendas != 0 else 0
+        taxa_beneficio = vendas_total['total_beneficio'] / total_vendas * 100 if total_vendas != 0 else 0
+
         if total_vendas and total_rodizio != 0:
             ticket_medio = total_vendas / total_rodizio
         else:
@@ -117,6 +123,11 @@ class DashboardBaseView(View):
             'total_rodizio': total_rodizio,
             'ticket_medio': ticket_medio,
             'vendas_total': vendas_total,
+            'taxa_dinheiro': taxa_dinheiro,
+            'taxa_pix': taxa_pix,
+            'taxa_debito': taxa_debito,
+            'taxa_credito': taxa_credito,
+            'taxa_beneficio': taxa_beneficio,
         }
 
     def calcular_taxas_vendas(self, vendas_queryset):
@@ -216,11 +227,6 @@ class DashboardBaseView(View):
 
     def calcular_totais_pagamentos(self, pagamentos_queryset):
         total_pagamentos = pagamentos_queryset.aggregate(total_despesas=Sum('valor_pago'))['total_despesas'] or 0
-        # rescisao = pagamentos_queryset.filter(tipo_pagamento='Rescisão').aggregate(total_rescisao=Sum('valor_pago'))['total_rescisao'] or 0
-        # return {
-        #     'total_pagamentos': total_pagamentos,
-        #     'total_rescisao': rescisao
-        # }
         return total_pagamentos
 
     def calcular_contas_vencidas(self, compras_queryset):
@@ -269,6 +275,8 @@ class DashboardVendasView(DashboardBaseView):
 
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
         total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
+        # Calcular a taxa percentual de total_taxa em relação ao total_vendas
+        taxa_total_taxa = (total_taxas / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
 
         total_compras = self.calcular_totais_compras(Compras.objects.all())
         total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
@@ -280,6 +288,7 @@ class DashboardVendasView(DashboardBaseView):
             'campo_data': 'data_venda',
             'periodo': periodo,
             'total_taxas': total_taxas,
+            'taxa_total_taxa': taxa_total_taxa,
             'total_despesas': total_compras,
             'pagamento_funcionario': total_pagamento_funcionarios,
             'vendas_por_forma': vendas_filtradas,
