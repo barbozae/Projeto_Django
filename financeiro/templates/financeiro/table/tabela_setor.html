@@ -1,0 +1,16 @@
+<table class="table table-sm mt-3">
+    <thead class="table-light">
+        <tr>
+            <th scope="col">Setor</th>
+            <th scope="col">Valor Pago</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pagamento in pagamentos_por_setor %}
+            <tr>
+                <td>{{ pagamento.nome_funcionario__contratacao__setor|default:"-" }}</td>
+                <td>R$ {{ pagamento.total_valor_pago|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

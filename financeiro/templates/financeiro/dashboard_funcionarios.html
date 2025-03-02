@@ -73,40 +73,20 @@
             <div class="col-md-3 me-4">
                 {% if funcionarios %}
                     <!-- Tabela Tipo Pagamento -->
-                    <table class="table table-sm mt-3">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">Tipo Pagamento</th>
-                                <th scope="col">Valor Pago</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pagamento in tipo_pagamentos_agrupados %}
-                                <tr>
-                                    <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
-                                    <td>R$ {{ pagamento.total_valor_pago|floatformat:2 }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-    
+                    {% include 'financeiro/table/tabela_tipo_pagamento.html' %}
+
+                    <!-- Linha divisória -->
+                    <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
                     <!-- Tabela Forma Pagamento -->
-                    <table class="table table-sm mt-3">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">Forma Pagamento</th>
-                                <th scope="col">Valor Pago</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pagamento in forma_pagamentos_agrupados %}
-                                <tr>
-                                    <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
-                                    <td>R$ {{ pagamento.total_valor_pago|floatformat:2 }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% include 'financeiro/table/tabela_forma_pagamento.html' %}
+
+                    <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
+                    <!-- Tabela por cargo -->
+                    {% include 'financeiro/table/tabela_cargo.html' %}
+
+                    <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
+                    <!-- Tabela por setor -->
+                    {% include 'financeiro/table/tabela_setor.html' %}
                 {% else %}
                     <div class="container">
                         <div class="alert alert-warning mt-3" role="alert">
@@ -150,6 +130,39 @@
                             </tr>
                         </tfoot>
                     </table>
+
+                    <style>
+                        .detail-row {
+                            background-color: #f9f9f9;
+                        }
+                        .detail-content {
+                            padding: 10px;
+                            margin-left: 20px;
+                        }
+                        .detail-content ul {
+                            list-style-type: none;
+                            padding-left: 0;
+                        }
+                        .detail-content ul li {
+                            margin-bottom: 5px;
+                        }
+                    </style>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
+                    
+                            rows.forEach(row => {
+                                row.addEventListener("click", function() {
+                                    const detailRow = this.nextElementSibling;
+                                    if (detailRow && detailRow.classList.contains("detail-row")) {
+                                        detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                                    }
+                                });
+                            });
+                        });
+                    </script>
+
+
                 {% else %}
                     <div class="container">
                         <div class="alert alert-warning mt-3" role="alert">

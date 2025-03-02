@@ -76,6 +76,7 @@ class FiltrosFinanceiro:
 
         return queryset
 
+
 class DashboardBaseView(View):
     def calcular_totais_vendas(self, vendas_queryset):
         vendas_total = vendas_queryset.aggregate(
@@ -285,6 +286,7 @@ class DashboardVendasView(DashboardBaseView):
         }
         return render(request, 'financeiro/dashboard_vendas.html', context)
 
+
 class DashboardComprasView(DashboardBaseView):
     def get(self, request):
         data_inicio = request.GET.get('data_inicio')
@@ -320,6 +322,7 @@ class DashboardComprasView(DashboardBaseView):
         }
         return render(request, 'financeiro/dashboard_compras.html', context)
 
+
 class DashboardFuncionariosView(DashboardBaseView):
     def get(self, request):
         data_inicio = request.GET.get('data_inicio')
@@ -354,6 +357,36 @@ class DashboardFuncionariosView(DashboardBaseView):
         tipos_pagamento = Pagamento.objects.values('tipo_pagamento').distinct()
         formas_pagamento = Pagamento.objects.values('forma_pagamento').distinct()
 
+
+
+
+
+
+# Agregar valores pagos por cargo
+        pagamentos_por_cargo = (
+            Pagamento.objects.select_related('nome_funcionario')
+            .values('nome_funcionario__contratacao__cargo')
+            .annotate(total_valor_pago=Sum('valor_pago'))
+            .order_by('nome_funcionario__contratacao__cargo')
+        )
+
+        # Agregar valores pagos por setor
+        pagamentos_por_setor = (
+            Pagamento.objects.select_related('nome_funcionario')
+            .values('nome_funcionario__contratacao__setor')
+            .annotate(total_valor_pago=Sum('valor_pago'))
+            .order_by('nome_funcionario__contratacao__setor')
+        )
+
+        # Agrupar pagamentos por tipo de pagamento e funcionário
+        funcionarios_por_tipo = (
+            funcionarios_filtrado.values('tipo_pagamento', 'nome_funcionario__nome_funcionario')
+            .annotate(total_valor_pago=Sum('valor_pago'))
+            .order_by('tipo_pagamento', 'nome_funcionario__nome_funcionario')
+        )
+
+
+
         context = {
             'data_inicio': data_inicio,
             'data_fim': data_fim,
@@ -370,8 +403,12 @@ class DashboardFuncionariosView(DashboardBaseView):
             'forma_pagamentos_agrupados': forma_pagamentos_agrupados,
             'total_tipo_pagamento': total_tipo_pagamento,
             'total_forma_pagamento': total_forma_pagamento,
+            'pagamentos_por_cargo': pagamentos_por_cargo,
+            'pagamentos_por_setor': pagamentos_por_setor,
+            'funcionarios_por_tipo': funcionarios_por_tipo,
         }
         return render(request, 'financeiro/dashboard_funcionarios.html', context)
+
 
 class DashboardResumoView(DashboardBaseView):
     def get(self, request):

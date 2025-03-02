@@ -1,0 +1,16 @@
+<table class="table table-sm mt-3">
+    <thead class="table-light">
+        <tr>
+            <th scope="col">Forma Pagamento</th>
+            <th scope="col">Valor Pago</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pagamento in forma_pagamentos_agrupados %}
+            <tr>
+                <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
+                <td>R$ {{ pagamento.total_valor_pago|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,33 @@
+<table class="table table-sm mt-3">
+    <thead class="table-light">
+        <tr>
+            <th scope="col">Tipo Pagamento</th>
+            <th scope="col">Valor Pago</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pagamento in tipo_pagamentos_agrupados %}
+            <!-- Linha principal do tipo de pagamento -->
+            <tr class="clickable-row" data-target="#detail-{{ forloop.counter }}">
+                <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
+                <td>R$ {{ pagamento.total_valor_pago|floatformat:2 }}</td>
+            </tr>
+            <!-- Linha de detalhes (inicialmente oculta) -->
+            <tr id="detail-{{ forloop.counter }}" class="detail-row" style="display: none;">
+                <td colspan="2">
+                    <div class="detail-content">
+                        <ul>
+                            <!-- Filtra funcionários por tipo de pagamento -->
+                            {% for funcionario in funcionarios_por_tipo %}
+                                {% if funcionario.tipo_pagamento == pagamento.tipo_pagamento %}
+                                    <li><strong>Nome:</strong> {{ funcionario.nome_funcionario__nome_funcionario|default:"-" }}</li>
+                                    <li><strong>Valor Pago:</strong> R$ {{ funcionario.total_valor_pago|floatformat:2 }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
