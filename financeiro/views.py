@@ -216,6 +216,10 @@ class DashboardBaseView(View):
         cmv = compras_queryset.filter(classificacao='CMV').aggregate(total_cmv=Sum('valor_compra'))['total_cmv'] or 0
         gasto_fixo = compras_queryset.filter(classificacao='Gasto Fixo').aggregate(total_gasto_fixo=Sum('valor_compra'))['total_gasto_fixo'] or 0
         gasto_variavel = compras_queryset.filter(classificacao='Gasto Variável').aggregate(total_gasto_variavel=Sum('valor_compra'))['total_gasto_variavel'] or 0
+        # Taxas
+        taxa_cmv = round(cmv / total_compras * 100, 2) if total_compras != 0 else 0
+        taxa_gasto_fixo = round(gasto_fixo / total_compras * 100, 2) if total_compras != 0 else 0
+        taxa_gasto_variavel = round(gasto_variavel / total_compras * 100, 2) if total_compras != 0 else 0
 
         return {
             'total_compras': total_compras,
@@ -223,6 +227,9 @@ class DashboardBaseView(View):
             'total_cmv': cmv,
             'total_gasto_fixo': gasto_fixo,
             'total_gasto_variavel': gasto_variavel,
+            'taxa_cmv': taxa_cmv,
+            'taxa_gasto_fixo': taxa_gasto_fixo,
+            'taxa_gasto_variavel': taxa_gasto_variavel,
         }
 
     def calcular_totais_pagamentos(self, pagamentos_queryset):
@@ -457,7 +464,7 @@ class DashboardResumoView(DashboardBaseView):
         vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
         fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
-        total_taxas_vendas = self.calcular_taxas_vendas(vendas_filtradas) or 0
+        # total_taxas_vendas = self.calcular_taxas_vendas(vendas_filtradas) or 0
 
         # Filtros e dados de compras
         classificacao_selecionada = request.GET.getlist('classificacao_compras')

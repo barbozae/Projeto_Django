@@ -7,6 +7,7 @@
 {% block content %}
     <h5 class="mb-4 mt-3" style="color: green;">Dashboard Compras</h5>
 
+    <!-- Filtro -->
     <div class="container">
         <form action="" method="GET" class="d-flex align-items-center">
             
@@ -53,7 +54,11 @@
 
         </form>
     </div>
-<strong> Incluir coluna ação na tabela para contas vencidas</strong>
+
+<strong>
+    <em>Incluir coluna ação na tabela para contas vencidas</em>
+</strong>
+
     {% if compras %}
         <div class="container-fluid">
             <div class="row">
@@ -64,7 +69,11 @@
                         <div class="card-header">CMV</div>
                         <div class="card-body">
                             <h5 class="card-title">R$ {{ total_cmv|floatformat:2 }}</h5>
-                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                            <p class="card-text">
+                                <strong>
+                                    <em>{{ taxa_cmv }}%</em>
+                                </strong>
+                            </p>
                         </div>
                     </div>
 
@@ -72,7 +81,11 @@
                         <div class="card-header">Gasto Variável</div>
                         <div class="card-body">
                             <h5 class="card-title">R$ {{ total_gasto_variavel|floatformat:2 }}</h5>
-                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                            <p class="card-text">
+                                <strong>
+                                    <em>{{ taxa_gasto_variavel }}%</em>
+                                </strong>
+                            </p>
                         </div>
                     </div>
 
@@ -80,7 +93,11 @@
                         <div class="card-header">Gasto Fixo</div>
                         <div class="card-body">
                             <h5 class="card-title">R$ {{ total_gasto_fixo|floatformat:2 }}</h5>
-                            <!-- <p class="card-text">colocar as maiores porcentagens dos grupos.</p> -->
+                            <p class="card-text">
+                                <strong>
+                                    <em>{{ taxa_gasto_fixo }}%</em>
+                                </strong>
+                            </p>
                         </div>
                     </div>
 
