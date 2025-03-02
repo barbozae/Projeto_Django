@@ -461,7 +461,6 @@ class DashboardResumoView(DashboardBaseView):
         vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
         fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
-        # total_taxas_vendas = self.calcular_taxas_vendas(vendas_filtradas) or 0
 
         # Filtros e dados de compras
         classificacao_selecionada = request.GET.getlist('classificacao_compras')
@@ -480,6 +479,38 @@ class DashboardResumoView(DashboardBaseView):
         total_compras_vencidas = self.calcular_contas_vencidas(compras_filtradas)
         # Calcular o total das contas não pagas dentro do prazo
         total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
+
+
+
+
+
+
+
+        # Agregar dados por classificação, tipo de produto e produto
+        gastos_por_classificacao = compras_filtradas.values('classificacao').annotate(total_valor=Sum('valor_compra')).order_by('classificacao')
+        gastos_por_grupo_produto = compras_filtradas.values('classificacao', 'grupo_produto').annotate(total_valor=Sum('valor_compra')).order_by('classificacao', 'grupo_produto')
+        gastos_por_produto = compras_filtradas.values('classificacao', 'grupo_produto', 'produto').annotate(total_valor=Sum('valor_compra')).order_by('classificacao', 'grupo_produto', 'produto')
+
+# Calcular taxas percentuais
+        for classificacao in gastos_por_classificacao:
+            classificacao['taxa_percentual'] = (classificacao['total_valor'] / totais_compras['total_compras'] * 100) if totais_compras['total_compras'] != 0 else 0
+
+        for grupo_produto in gastos_por_grupo_produto:
+            for classificacao in gastos_por_classificacao:
+                if grupo_produto['classificacao'] == classificacao['classificacao']:
+                    grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / classificacao['total_valor'] * 100) if classificacao['total_valor'] != 0 else 0
+
+        for produto in gastos_por_produto:
+            for grupo_produto in gastos_por_grupo_produto:
+                if produto['classificacao'] == grupo_produto['classificacao'] and produto['grupo_produto'] == grupo_produto['grupo_produto']:
+                    produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
+
+        
+
+
+
+
+
 
         # Filtros e dados de pagamentos de funcionários
         data_inicio_funcionarios = request.GET.get('data_inicio_funcionarios')
@@ -537,6 +568,9 @@ class DashboardResumoView(DashboardBaseView):
             'gasto_variavel': totais_compras['total_gasto_variavel'],
             'total_compras_vencidas': total_compras_vencidas,
             'total_compras_dentro_do_prazo': total_compras_dentro_do_prazo,
+            'gastos_por_classificacao': gastos_por_classificacao,
+            'gastos_por_grupo_produto': gastos_por_grupo_produto,
+            'gastos_por_produto': gastos_por_produto,
 
             # Dados de pagamentos de funcionários
             'total_pagamentos_funcionarios': total_pagamentos_funcionarios,

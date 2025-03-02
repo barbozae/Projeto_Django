@@ -37,9 +37,17 @@
     <!-- Linha divisória -->
     <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
 
-    <!-- Linha 2 dos cards -->
-    <div class="d-flex justify-content-around flex-wrap mt-3">
-        {% include 'financeiro/cards/cards_resumo_2.html' %}
+    <!-- Cards e Tabela de Resumo lado a lado -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 d-flex flex-column align-items-start mt-3">
+                <!-- Cards de resumo -->
+                {% include 'financeiro/cards/cards_resumo_2.html' %}
+            </div>
+            <div class="col-md-6 d-flex flex-column align-items-start mt-3">
+                <!-- Tabela de resumo -->
+                {% include 'financeiro/table/tabela_resumo.html' %}
+            </div>
+        </div>
     </div>
-    
 {% endblock content %}
