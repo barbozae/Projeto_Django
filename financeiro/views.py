@@ -389,16 +389,14 @@ class DashboardFuncionariosView(DashboardBaseView):
 
         # Agregar valores pagos por cargo
         pagamentos_por_cargo = (
-            Pagamento.objects.select_related('nome_funcionario')
-            .values('nome_funcionario__contratacao__cargo')
+            funcionarios_filtrado.values('nome_funcionario__contratacao__cargo')
             .annotate(total_valor_pago=Sum('valor_pago'))
             .order_by('nome_funcionario__contratacao__cargo')
         )
 
         # Listar funcionários e seus valores pagos, agrupados por cargo
         funcionarios_por_cargo = (
-            Pagamento.objects.select_related('nome_funcionario')
-            .values(
+            funcionarios_filtrado.values(
                 'nome_funcionario__contratacao__cargo',
                 'nome_funcionario__nome_funcionario',
                 'valor_pago'
@@ -408,15 +406,14 @@ class DashboardFuncionariosView(DashboardBaseView):
 
         # Agregar valores pagos por setor
         pagamentos_por_setor = (
-            Pagamento.objects.select_related('nome_funcionario')
-            .values('nome_funcionario__contratacao__setor')
+            funcionarios_filtrado.values('nome_funcionario__contratacao__setor')
             .annotate(total_valor_pago=Sum('valor_pago'))
             .order_by('nome_funcionario__contratacao__setor')
         )
 
+        # Listar funcionários e seus valores pagos, agrupados por cargo
         funcionario_por_setor = (
-            Pagamento.objects.select_related('nome_funcionario')
-            .values(
+            funcionarios_filtrado.values(
                 'nome_funcionario__contratacao__setor',
                 'nome_funcionario__nome_funcionario',
                 'valor_pago'
@@ -503,18 +500,24 @@ class DashboardResumoView(DashboardBaseView):
 
         funcionarios_filtrados = filtros_funcionarios.aplicar_filtros(funcionarios)
         total_pagamentos_funcionarios = self.calcular_totais_pagamentos(funcionarios_filtrados)
-        # total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
+        
+        taxa_pagamentos_funcionarios = total_pagamentos_funcionarios / totais_vendas['total_vendas'] * 100 if totais_vendas['total_vendas'] != 0 else 0
+        taxa_pagamentos_funcionarios = round(taxa_pagamentos_funcionarios, 2)
 
         total_rescisao = (
         funcionarios_filtrados.filter(tipo_pagamento='Rescisão')
         .aggregate(total=Sum('valor_pago'))['total'] or 0
     )
 
+        taxa_rescisao = total_rescisao / totais_vendas['total_vendas'] * 100 if totais_vendas['total_vendas'] != 0 else 0
+        taxa_rescisao = round(taxa_rescisao, 2)
+
         # Cálculo do lucro líquido
         lucro_liquido = totais_vendas['total_vendas'] - totais_compras['total_compras'] - total_pagamentos_funcionarios
 
         # Contexto para o template
         context = {
+            **totais_compras,
             # Dados de filtro
             'data_inicio': data_inicio,
             'data_fim': data_fim,
@@ -522,22 +525,15 @@ class DashboardResumoView(DashboardBaseView):
             'totais_vendas': totais_vendas['total_vendas'],
             'lucro_liquido': lucro_liquido,
             'fundo_caixa': fundo_caixa,
-            # 'total_taxas_vendas': total_taxas_vendas,
-            # 'data_inicio_vendas': data_inicio_vendas,
-            # 'data_fim_vendas': data_fim_vendas,
 
             # Dados de compras
             'totais_compras': totais_compras['total_compras'],
             'total_pago_compras': totais_compras['total_pago'],
-            # 'data_inicio_compras': data_inicio_compras,
-            # 'data_fim_compras': data_fim_compras,
             'cmv': totais_compras['total_cmv'],
             'gasto_fixo': totais_compras['total_gasto_fixo'],
             'gasto_variavel': totais_compras['total_gasto_variavel'],
             'total_compras_vencidas': total_compras_vencidas,
             'total_compras_dentro_do_prazo': total_compras_dentro_do_prazo,
-            # 'classificacao_selecionada': classificacao_selecionada,
-            # 'fornecedores_selecionados': fornecedores_selecionados,
 
             # Dados de pagamentos de funcionários
             'total_pagamentos_funcionarios': total_pagamentos_funcionarios,
@@ -547,6 +543,8 @@ class DashboardResumoView(DashboardBaseView):
             'tipo_pagamento_selecionado': tipo_pagamento_selecionado,
             'forma_pagamento_selecionado': forma_pagamento_selecionado,
             'total_rescisao': total_rescisao,
+            'taxa_rescisao': taxa_rescisao,
+            'taxa_pagamentos_funcionarios': taxa_pagamentos_funcionarios,
 
             # Lucro líquido
             'lucro_liquido': lucro_liquido,
