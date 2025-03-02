@@ -514,6 +514,8 @@ class DashboardResumoView(DashboardBaseView):
 
         # Cálculo do lucro líquido
         lucro_liquido = totais_vendas['total_vendas'] - totais_compras['total_compras'] - total_pagamentos_funcionarios
+        taxa_lucro = lucro_liquido / totais_vendas['total_vendas'] * 100 if totais_vendas['total_vendas'] != 0 else 0
+        taxa_lucro = round(taxa_lucro, 2)
 
         # Contexto para o template
         context = {
@@ -524,6 +526,7 @@ class DashboardResumoView(DashboardBaseView):
             # Dados de vendas
             'totais_vendas': totais_vendas['total_vendas'],
             'lucro_liquido': lucro_liquido,
+            'taxa_lucro': taxa_lucro,
             'fundo_caixa': fundo_caixa,
 
             # Dados de compras

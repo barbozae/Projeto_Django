@@ -42,7 +42,10 @@
 </div>
 
 <div class="card text-bg-light shadow mb-3" style="max-width: 12rem;">
-    <div class="card-header">Lucro</div>
+    <div class="card-header">
+        Lucro - <em>{{ taxa_lucro }}%</em>
+
+    </div>
     <div class="card-body">
         <h5 class="card-title text-center">R$ {{ lucro_liquido|floatformat:2 }}</h5>
     </div>
