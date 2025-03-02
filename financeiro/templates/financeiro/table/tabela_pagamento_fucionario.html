@@ -1,0 +1,30 @@
+<table class="table table-sm table-striped table-hover mt-4"> <!-- table-bordered -->
+    <thead class="table-light">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nome</th>
+            <th scope="col">Data Pagamento</th>
+            <th scope="col">Valor Pago</th>
+            <th scope="col">Tipo Pagamento</th>
+            <th scope="col">Forma Pagamento</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for funcionario in funcionarios %}
+            <tr>
+                <th scope="row">{{ funcionario.pk }}</th>
+                <td>{{ funcionario.nome_funcionario }}</td>
+                <td>{{ funcionario.data_pagamento|date:"d/m/y"|default:"-" }}</td>
+                <td>{{ funcionario.valor_pago|default:"-" }}</td>
+                <td>{{ funcionario.tipo_pagamento|default:"-" }}</td>
+                <td>{{ funcionario.forma_pagamento|default:"-" }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3" class="text-end fw-bold">Total:</td>
+            <td class="bg-dark text-white fw-bold">R$ {{ total_pagamentos|floatformat:2 }}</td>
+        </tr>
+    </tfoot>
+</table>

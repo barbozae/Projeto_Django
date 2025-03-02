@@ -7,9 +7,26 @@
     </thead>
     <tbody>
         {% for pagamento in pagamentos_por_setor %}
-            <tr>
+            <!-- Linha principal do tipo de pagamento -->
+            <tr class="clickable-row" data-target="#detail-{{ forloop.counter }}">
                 <td>{{ pagamento.nome_funcionario__contratacao__setor|default:"-" }}</td>
                 <td>R$ {{ pagamento.total_valor_pago|floatformat:2 }}</td>
+            </tr>
+            <!-- Linha de detalhes (inicialmente oculta) -->
+            <tr id="detail-{{ forloop.counter }}" class="detail-row" style="display: none;">
+                <td colspan="2">
+                    <div class="detail-content">
+                        <ul>
+                            <!-- Filtra funcionários por tipo de pagamento -->
+                            {% for funcionario in funcionario_por_setor %}
+                                {% if funcionario.nome_funcionario__contratacao__setor == pagamento.nome_funcionario__contratacao__setor %}
+                                    <li><strong>Nome:</strong> {{ funcionario.nome_funcionario__nome_funcionario|default:"-" }}</li>
+                                    <li><strong>Valor Pago:</strong> R$ {{ funcionario.valor_pago|floatformat:2 }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </td>
             </tr>
         {% endfor %}
     </tbody>

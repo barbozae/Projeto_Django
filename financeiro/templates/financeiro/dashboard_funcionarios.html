@@ -6,7 +6,7 @@
 
 {% block content %}
     <h5 class="mb-4 mt-3" style="color: green;">Dashboard Funcionários</h5>
-
+    <!-- Filtros -->
     <div class="container">
         <form action="" method="GET" class="d-flex align-items-center">
 
@@ -67,110 +67,71 @@
         </form>
     </div>
 
+    <!-- Tabelas -->
     <div class="container-fluid mt-3">
         <div class="row">
-            <!-- Primeira Coluna -->
-            <div class="col-md-3 me-4">
-                {% if funcionarios %}
-                    <!-- Tabela Tipo Pagamento -->
-                    {% include 'financeiro/table/tabela_tipo_pagamento.html' %}
+            {% if funcionarios %}
+                <!-- Primeira Coluna -->
+                <div class="col-md-3 me-4">
+                        <!-- Tabela Tipo Pagamento -->
+                        {% include 'financeiro/table/tabela_tipo_pagamento.html' %}
 
-                    <!-- Linha divisória -->
-                    <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
-                    <!-- Tabela Forma Pagamento -->
-                    {% include 'financeiro/table/tabela_forma_pagamento.html' %}
+                        <!-- Linha divisória -->
+                        <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
+                        <!-- Tabela Forma Pagamento -->
+                        {% include 'financeiro/table/tabela_forma_pagamento.html' %}
 
-                    <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
-                    <!-- Tabela por cargo -->
-                    {% include 'financeiro/table/tabela_cargo.html' %}
+                        <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
+                        <!-- Tabela por cargo -->
+                        {% include 'financeiro/table/tabela_cargo.html' %}
 
-                    <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
-                    <!-- Tabela por setor -->
-                    {% include 'financeiro/table/tabela_setor.html' %}
-                {% else %}
-                    <div class="container">
-                        <div class="alert alert-warning mt-3" role="alert">
-                            Não há lançamentos para o filtro selecionado.
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-    
-            <!-- Segunda Coluna -->
-            <div class="col-md-8">
-                {% if funcionarios %}
+                        <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
+                        <!-- Tabela por setor -->
+                        {% include 'financeiro/table/tabela_setor.html' %}
+                </div>
+        
+                <!-- Segunda Coluna -->
+                <div class="col-md-8">
+                    {% include 'financeiro/table/tabela_pagamento_fucionario.html' %}
+                </div>
+
+                <style>
+                    .detail-row {
+                        background-color: #f9f9f9;
+                    }
+                    .detail-content {
+                        padding: 10px;
+                        margin-left: 20px;
+                    }
+                    .detail-content ul {
+                        list-style-type: none;
+                        padding-left: 0;
+                    }
+                    .detail-content ul li {
+                        margin-bottom: 5px;
+                    }
+                </style>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
                 
-                    <table class="table table-sm table-striped table-hover mt-4"> <!-- table-bordered -->
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Nome</th>
-                                <th scope="col">Data Pagamento</th>
-                                <th scope="col">Valor Pago</th>
-                                <th scope="col">Tipo Pagamento</th>
-                                <th scope="col">Forma Pagamento</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for funcionario in funcionarios %}
-                                <tr>
-                                    <th scope="row">{{ funcionario.pk }}</th>
-                                    <td>{{ funcionario.nome_funcionario }}</td>
-                                    <td>{{ funcionario.data_pagamento|date:"d/m/y"|default:"-" }}</td>
-                                    <td>{{ funcionario.valor_pago|default:"-" }}</td>
-                                    <td>{{ funcionario.tipo_pagamento|default:"-" }}</td>
-                                    <td>{{ funcionario.forma_pagamento|default:"-" }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="text-end fw-bold">Total:</td>
-                                <td class="bg-dark text-white fw-bold">R$ {{ total_pagamentos|floatformat:2 }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-
-                    <style>
-                        .detail-row {
-                            background-color: #f9f9f9;
-                        }
-                        .detail-content {
-                            padding: 10px;
-                            margin-left: 20px;
-                        }
-                        .detail-content ul {
-                            list-style-type: none;
-                            padding-left: 0;
-                        }
-                        .detail-content ul li {
-                            margin-bottom: 5px;
-                        }
-                    </style>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
-                    
-                            rows.forEach(row => {
-                                row.addEventListener("click", function() {
-                                    const detailRow = this.nextElementSibling;
-                                    if (detailRow && detailRow.classList.contains("detail-row")) {
-                                        detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
-                                    }
-                                });
+                        rows.forEach(row => {
+                            row.addEventListener("click", function() {
+                                const detailRow = this.nextElementSibling;
+                                if (detailRow && detailRow.classList.contains("detail-row")) {
+                                    detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                                }
                             });
                         });
-                    </script>
-
-
-                {% else %}
-                    <div class="container">
-                        <div class="alert alert-warning mt-3" role="alert">
-                            Não há lançamentos para o filtro selecionado.
-                        </div>
+                    });
+                </script>
+            {% else %}
+                <div class="container">
+                    <div class="alert alert-warning mt-3" role="alert">
+                        Não há lançamentos para o filtro selecionado.
                     </div>
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock content %}
