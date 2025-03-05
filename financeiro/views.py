@@ -3,9 +3,10 @@ from django.views import View
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
-from django.db.models import Sum, F, DecimalField, Case, When
+from django.db.models import Sum, F, DecimalField, Case, When, Q
 from decimal import Decimal
 from datetime import date
+from django.utils import timezone
 
 
 class FiltrosFinanceiro:
@@ -305,10 +306,14 @@ class DashboardVendasView(DashboardBaseView):
 
 class DashboardComprasView(DashboardBaseView):
     def get(self, request):
+        today = timezone.now().date()
         data_inicio = request.GET.get('data_inicio')
         data_fim = request.GET.get('data_fim')
         classificacao_selecionado = request.GET.getlist('classificacao')
         fornecedores_selecionado = request.GET.getlist('fornecedor')
+
+        #TODO Widget RADIO 
+        filtrar_vencidas = request.GET.get('filtrar_vencidas') == 'on'
 
         compras = Compras.objects.all()
         filtros = FiltrosFinanceiro(
@@ -317,9 +322,16 @@ class DashboardComprasView(DashboardBaseView):
             campo_data='data_compra',
             classificacao=classificacao_selecionado,
             fornecedor=fornecedores_selecionado)
-
+        
         # Aplique os filtros na queryset
         compras_filtradas = filtros.aplicar_filtros(compras)
+
+#TODO CORRIGIR O WIDGET RADIO
+        #TODO Filtrar compras vencidas se o switch estiver marcado
+        if filtrar_vencidas:
+            compras_filtradas = compras_filtradas.filter(
+                Q(data_vencimento__lt=today) & Q(data_pagamento__isnull=True)
+            )
 
         totais_compras = self.calcular_totais_compras(compras_filtradas)
         fornecedores = Compras.objects.values('fornecedor__id', 'fornecedor__nome_empresa').distinct() #nesse caso estamos pegando o id por ser chave estrangeira
@@ -327,6 +339,7 @@ class DashboardComprasView(DashboardBaseView):
 
         context = {
             **totais_compras,
+            'today': today,
             'data_inicio': data_inicio,
             'data_fim': data_fim,
             'campo_data': 'data_compra',
@@ -335,6 +348,7 @@ class DashboardComprasView(DashboardBaseView):
             'fornecedores': fornecedores,
             'classificacao_selecionado': classificacao_selecionado,
             'classificacao': classificacao,
+            'filtrar_vencidas': filtrar_vencidas, #Filtro de radio
         }
         return render(request, 'financeiro/dashboard_compras.html', context)
 
@@ -480,18 +494,21 @@ class DashboardResumoView(DashboardBaseView):
         # Calcular o total das contas não pagas dentro do prazo
         total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
 
-
-
-
-
-
-
         # Agregar dados por classificação, tipo de produto e produto
-        gastos_por_classificacao = compras_filtradas.values('classificacao').annotate(total_valor=Sum('valor_compra')).order_by('classificacao')
-        gastos_por_grupo_produto = compras_filtradas.values('classificacao', 'grupo_produto').annotate(total_valor=Sum('valor_compra')).order_by('classificacao', 'grupo_produto')
-        gastos_por_produto = compras_filtradas.values('classificacao', 'grupo_produto', 'produto').annotate(total_valor=Sum('valor_compra')).order_by('classificacao', 'grupo_produto', 'produto')
+        gastos_por_classificacao = compras_filtradas.values(
+                                                            'classificacao').annotate(
+                                                                total_valor=Sum('valor_compra')).order_by(
+                                                                    'classificacao')
+        gastos_por_grupo_produto = compras_filtradas.values(
+                                                            'classificacao', 'grupo_produto').annotate(
+                                                                total_valor=Sum('valor_compra')).order_by(
+                                                                    'classificacao', 'grupo_produto')
+        gastos_por_produto = compras_filtradas.values(
+                                                    'classificacao', 'grupo_produto', 'produto').annotate(
+                                                        total_valor=Sum('valor_compra')).order_by(
+                                                            'classificacao', 'grupo_produto', 'produto')
 
-# Calcular taxas percentuais
+        # Calcular taxas percentuais
         for classificacao in gastos_por_classificacao:
             classificacao['taxa_percentual'] = (classificacao['total_valor'] / totais_compras['total_compras'] * 100) if totais_compras['total_compras'] != 0 else 0
 
@@ -504,13 +521,6 @@ class DashboardResumoView(DashboardBaseView):
             for grupo_produto in gastos_por_grupo_produto:
                 if produto['classificacao'] == grupo_produto['classificacao'] and produto['grupo_produto'] == grupo_produto['grupo_produto']:
                     produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
-
-        
-
-
-
-
-
 
         # Filtros e dados de pagamentos de funcionários
         data_inicio_funcionarios = request.GET.get('data_inicio_funcionarios')

@@ -93,11 +93,8 @@
                         <td>{{ contratacao.data_exame_admissional|date:"d/m/y"}}</td>
                         <td>{{ contratacao.data_contratacao|date:"d/m/y" }}</td>
                         <td>{{ contratacao.salario| default:"-" }}</td>
-                        <!-- <td>{{ contratacao.documentacao_admissional| default:"-" }}</td> -->
                         <td>{{ contratacao.contabilidade_admissional| default:"-" }}</td>
                         <td>{{ contratacao.observacao_admissional| default:"-" }}</td>
-                        <!-- <td>{{ contratacao.status_admissional| default:"-" }}</td> -->
-
                         <td>
                             <span 
                             class="btn btn-sm 
@@ -108,7 +105,6 @@
                             {% endif %}"
                             >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                         </td>
-
                         <td>
                             <a href="{% url 'update_contratacao' pk=contratacao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
                         </td>

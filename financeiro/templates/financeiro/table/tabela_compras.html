@@ -1,4 +1,4 @@
-<div class="col-md-10 mt-2">
+<div class="col-md-12 mt-2">
     <div class="table-responsive">
         <table class="table table-sm table-striped table-hover mt-2">
             <thead class="table-light">
@@ -10,11 +10,12 @@
                     <th scope="col">Fornecedor</th>
                     <th scope="col">Valor Compra</th>
                     <th scope="col">Valor Pago</th>
-                    <th scope="col">N° Boleto</th>
+                    <th scope="col">Boleto</th>
                     <th scope="col">Grupo</th>
                     <th scope="col">Produto</th>
                     <th scope="col">Classificação</th>
-                    <th scope="col">Forma Pagamento</th>
+                    <th scope="col">Pagamento</th>
+                    <th scope="col">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +33,17 @@
                         <td>{{ compra.produto|default:"-" }}</td>
                         <td>{{ compra.classificacao|default:"-" }}</td>
                         <td>{{ compra.forma_pagamento|default:"-" }}</td>
+                        <td>
+                            <span 
+                                class="btn btn-sm 
+                                {% if compra.data_vencimento < today and not compra.data_pagamento %}
+                                    btn-danger
+                                {% else %}
+                                    btn-success
+                                {% endif %}"
+                                >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>
+                        </td>
                     </tr>
                     <tr class="detail-row" style="display: none;">
                         <td colspan="12">

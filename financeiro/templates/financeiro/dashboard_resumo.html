@@ -38,16 +38,18 @@
     <hr class="my-3" style="border-color: rgb(6, 160, 96); border-width: 3px;">
 
     <!-- Cards e Tabela de Resumo lado a lado -->
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-md-6 d-flex flex-column align-items-start mt-3">
+            <div class="col-md-2 d-flex flex-column align-items-start mt-3">
                 <!-- Cards de resumo -->
                 {% include 'financeiro/cards/cards_resumo_2.html' %}
             </div>
-            <div class="col-md-6 d-flex flex-column align-items-start mt-3">
+            
+            <div class="col-md-5 mt-1">
                 <!-- Tabela de resumo -->
                 {% include 'financeiro/table/tabela_resumo.html' %}
             </div>
         </div>
     </div>
+    
 {% endblock content %}

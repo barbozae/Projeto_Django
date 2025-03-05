@@ -1,28 +1,31 @@
 <table class="table table-sm mt-3 table-bordered nivel-1">
     <thead class="table-light">
         <tr>
-            <th scope="col">Classificação</th>
-            <th scope="col">Valor Total</th>
-            <th scope="col">Taxa Percentual</th>
+            <th scope="col" class="col-classificacao">Classificação</th>
+            <th scope="col" class="col-valor-total">Valor Total</th>
+            <th scope="col" class="col-taxa-percentual">Taxa Percentual</th>
         </tr>
     </thead>
     <tbody>
         {% for classificacao in gastos_por_classificacao %}
             <!-- Linha principal da classificação -->
             <tr class="clickable-row" data-target="#grupo-produto-{{ forloop.counter }}">
-                <td>{{ classificacao.classificacao|default:"-" }}</td>
+                <td>
+                    <span class="expand-icon">+</span>
+                    {{ classificacao.classificacao|default:"-" }}
+                </td>
                 <td>R$ {{ classificacao.total_valor|floatformat:2 }}</td>
                 <td>{{ classificacao.taxa_percentual|floatformat:2 }}%</td>
             </tr>
             <!-- Linha de detalhes do grupo de produto (inicialmente oculta) -->
             <tr id="grupo-produto-{{ forloop.counter }}" class="detail-row" style="display: none;">
                 <td colspan="3">
-                    <table class="table table-sm mt-3 table-bordered nivel-2">
+                    <table class="table table-sm mt-3 table-bordered nivel-2 w-100">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col">Grupo de Produto</th>
-                                <th scope="col">Valor Total</th>
-                                <th scope="col">Taxa Percentual</th>
+                                <th scope="col" class="col-classificacao">Grupo de Produto</th>
+                                <th scope="col" class="col-valor-total">Valor Total</th>
+                                <th scope="col" class="col-taxa-percentual">Taxa Percentual</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -30,19 +33,22 @@
                                 {% if grupo_produto.classificacao == classificacao.classificacao %}
                                     <!-- Linha principal do grupo de produto -->
                                     <tr class="clickable-row" data-target="#produto-{{ forloop.counter }}">
-                                        <td>{{ grupo_produto.grupo_produto|default:"-" }}</td>
+                                        <td>
+                                            <span class="expand-icon">+</span>
+                                            {{ grupo_produto.grupo_produto|default:"-" }}
+                                        </td>
                                         <td>R$ {{ grupo_produto.total_valor|floatformat:2 }}</td>
                                         <td>{{ grupo_produto.taxa_percentual|floatformat:2 }}%</td>
                                     </tr>
                                     <!-- Linha de detalhes do produto (inicialmente oculta) -->
                                     <tr id="produto-{{ forloop.counter }}" class="detail-row" style="display: none;">
                                         <td colspan="3">
-                                            <table class="table table-sm mt-3 table-bordered nivel-3">
+                                            <table class="table table-sm mt-3 table-bordered nivel-3 w-100">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th scope="col">Produto</th>
-                                                        <th scope="col">Valor Total</th>
-                                                        <th scope="col">Taxa Percentual</th>
+                                                        <th scope="col" class="col-classificacao">Produto</th>
+                                                        <th scope="col" class="col-valor-total">Valor Total</th>
+                                                        <th scope="col" class="col-taxa-percentual">Taxa Percentual</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -75,10 +81,13 @@
         rows.forEach(function(row) {
             row.addEventListener('click', function() {
                 var target = document.querySelector(row.getAttribute('data-target'));
+                var icon = row.querySelector('.expand-icon');
                 if (target.style.display === 'none') {
                     target.style.display = 'table-row';
+                    icon.textContent = '-';
                 } else {
                     target.style.display = 'none';
+                    icon.textContent = '+';
                 }
             });
         });
@@ -100,6 +109,10 @@
     }
     .clickable-row {
         cursor: pointer;
+    }
+    .expand-icon {
+        cursor: pointer;
+        margin-right: 5px;
     }
     .nivel-1 {
         border-color: #28a745; /* Cor da borda para o nível 1 */
@@ -124,5 +137,17 @@
     .nivel-3 th, .nivel-3 td {
         border-color: #5a5656; /* Cor da borda para o nível 3 */
         border-width: 2px;
+    }
+    .w-100 {
+        width: 100%;
+    }
+    .col-classificacao {
+        width: 40%;
+    }
+    .col-valor-total {
+        width: 30%;
+    }
+    .col-taxa-percentual {
+        width: 30%;
     }
 </style>

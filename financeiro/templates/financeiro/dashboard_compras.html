@@ -9,7 +9,7 @@
 
     <!-- Filtro -->
     <div class="container">
-        <form action="" method="GET" class="d-flex align-items-center">
+        <form id="filtro-form" action="" method="GET" class="d-flex align-items-center">
             
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Data Início:</small>
@@ -51,22 +51,22 @@
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_compras">Buscar</button>
                 <a href="{% url 'dashboard_compras' %}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
+            
+            <!-- switch para filtrar contas vencidas -->
+            <div class="form-check form-switch mb-2 me-2">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="filtrar_vencidas" {% if filtrar_vencidas %}checked{% endif %} onchange="document.getElementById('filtro-form').submit();">
+                <label class="form-check-label" for="flexSwitchCheckDefault">Filtrar contas Vencidas</label>
+            </div>
 
         </form>
     </div>
 
-<strong>
-    <em>Incluir coluna ação na tabela para contas vencidas</em>
-</strong>
-
     {% if compras %}
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Coluna dos Cards -->
+        <div>
+            <div class="justify-content-around flex-wrap mt-3">
                 {% include 'financeiro/cards/cards_compras.html' %}
-                
-                <!-- Coluna da Tabela -->
-                <!-- Tabela de compras -->
+            </div>
+            <div class="mt-3">
                 {% include 'financeiro/table/tabela_compras.html' %}
             </div>
         </div>
