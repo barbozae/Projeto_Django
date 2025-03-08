@@ -6,6 +6,13 @@ from django.urls import reverse_lazy
 from .models import Cadastro, Contratacao, Pagamento, Rescisao
 
 
+
+
+#TODO não permitir realizar rescisão do mesmo ID mais de uma vez
+
+
+
+
 class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Cadastro
     template_name = 'funcionarios/funcionarios_list.html'  # Garante que o template correto será usado
@@ -138,6 +145,19 @@ class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    
+    # com essas duas funções abaixo eu tenho apenas a lista de funcionarios que não foram cadastrados
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filtra os funcionários cadastrados que não foram contratados ainda
+        contratacao_ids = Contratacao.objects.values_list('nome_funcionario_id', flat=True)
+        form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=contratacao_ids)
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pagamento_funcionarios'] = Pagamento.objects.all()
+        return context
 
 
 class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -155,6 +175,14 @@ class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filtra os funcionários que não foram contratados
+        # rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        contratacao_ids = Contratacao.objects.values_list('nome_funcionario_id', flat=True)
+        form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=contratacao_ids)
+        return form
 
 
 class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -212,9 +240,9 @@ class PagamentoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVie
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Filtra os funcionários que não têm contrato rescindido
+        # Filtra os funcionários com base nas contratações que não foram rescindidas
         rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=rescisao_ids)
+        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
         return form
 
 
@@ -229,7 +257,14 @@ class PagamentoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVie
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-    
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filtra os funcionários com base nas contratações que não foram rescindidas
+        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
+        return form
+
 
 class PagamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Pagamento
@@ -297,6 +332,13 @@ class RescisaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filtra os funcionários com base nas contratações que não foram rescindidas
+        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
+        return form
+
 
 class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Rescisao
@@ -311,3 +353,10 @@ class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filtra os funcionários com base nas contratações que não foram rescindidas
+        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
+        return form

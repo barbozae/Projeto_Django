@@ -3,7 +3,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
-# TODO falta garantir que não haja pagamentos de funcionarios que foram desligado
 class Cadastro(models.Model):
     LIST_BANK = [('Banco do Brasil', 'Banco do Brasil'),
                    ('Banco Original', 'Banco Original'),
@@ -73,7 +72,6 @@ class Contratacao(models.Model):
     class Meta:
         unique_together = ('nome_funcionario', 'data_contratacao')  # Um funcionário só pode ter uma contratação por data de pagamento
 
-
     @property
     def status_rescisao(self):
         """
@@ -81,7 +79,6 @@ class Contratacao(models.Model):
         Estou usando status_rescisao em contratacao_list.html para ver se o funcionario esta ativo
         """
         return Rescisao.objects.filter(nome_funcionario_id=self.nome_funcionario_id).exists()
-
 
     def save(self, *args, **kwargs):
         # Lógica para determinar o status_admissional
@@ -94,6 +91,10 @@ class Contratacao(models.Model):
             self.status_admissional = False
 
         super(Contratacao, self).save(*args, **kwargs)  # Chama o método save origina
+
+    def __str__(self):
+        # Retorna uma string representando o funcionário devido a ForeignKey em PG_Funcionarios
+        return f"{self.nome_funcionario}"
 
 
 class Rescisao(models.Model):
@@ -170,3 +171,15 @@ class Pagamento(models.Model):
     forma_pagamento = models.CharField(verbose_name="Forma de Pagamento", max_length=15, choices=lista_forma_pagamento, null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
+
+    # as duas funções abaixo é para EVITAR que funcionarios desligado recebam pagamentos e edições
+    def clean(self):
+        # Verifica se o funcionário tem uma rescisão
+        if Rescisao.objects.filter(nome_funcionario=self.nome_funcionario).exists():
+            raise ValidationError(f'O funcionário {self.nome_funcionario} foi desligado e não pode receber pagamentos.')
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        # Chama o método clean para garantir que a validação seja executada
+        self.clean()
+        super(Pagamento, self).save(*args, **kwargs)
