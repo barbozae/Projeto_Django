@@ -2,15 +2,9 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.db.models import Q, Exists, OuterRef
 
 from .models import Cadastro, Contratacao, Pagamento, Rescisao
-
-
-
-
-#TODO não permitir realizar rescisão do mesmo ID mais de uma vez
-
-
 
 
 class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -112,16 +106,15 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         if cargo_contratacao:
             queryset = queryset.filter(id=cargo_contratacao)
 
-        # Verifica se há rescisão para cada contratação
-        # for contratacao in queryset:
-        #     rescisao = Rescisao.objects.filter(nome_funcionario_id=contratacao.nome_funcionario_id).first()
-        #     contratacao.status_rescisao = rescisao.status_rescisao if rescisao else False
+        # Usando Exists para verificar o status_rescisao (verifica se há uma rescisão associada)
+        status_rescisao_subquery = Rescisao.objects.filter(nome_funcionario_id=OuterRef('nome_funcionario_id'))
+        queryset = queryset.annotate(status_rescisao_exists=Exists(status_rescisao_subquery))
 
-        # Adiciona o campo status_rescisao a cada objeto contratacao
-        # rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        # for contratacao in queryset:
-        #     contratacao.status_rescisao = contratacao.pk in rescisao_ids
-            
+        # Filtrando quando o switch de status_rescisao for ativado
+        filtrar_status_contrato = self.request.GET.get('filtrar_status_contrato')
+        if filtrar_status_contrato == 'on':  # Quando o switch está ativado
+            queryset = queryset.filter(status_rescisao_exists=False)  # Apenas contratações sem rescisão
+
         return queryset
 
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
@@ -130,6 +123,7 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         context['contratacao_funcionarios'] = Contratacao.objects.all()
         context['contratacao_setor'] = Contratacao.objects.all()
         context['contratacao_cargo'] = Contratacao.objects.all()
+        context['filtrar_status_contrato'] = 'filtrar_status_contrato' in self.request.GET  # Passa o estado do switch para o template
         return context
 
 

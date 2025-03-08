@@ -326,8 +326,6 @@ class DashboardComprasView(DashboardBaseView):
         # Aplique os filtros na queryset
         compras_filtradas = filtros.aplicar_filtros(compras)
 
-#TODO CORRIGIR O WIDGET RADIO
-        #TODO Filtrar compras vencidas se o switch estiver marcado
         if filtrar_vencidas:
             compras_filtradas = compras_filtradas.filter(
                 Q(data_vencimento__lt=today) & Q(data_pagamento__isnull=True)

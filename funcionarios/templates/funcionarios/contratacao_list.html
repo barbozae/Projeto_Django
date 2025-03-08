@@ -8,7 +8,7 @@
     <h5 class="mb-4 mt-3">Contratação de Funcionário</h5>
 
     <div class="container-fluid">
-        <form action="" method="GET" class="d-flex align-items-center">
+        <form id="filtro-form" action="" method="GET" class="d-flex align-items-center">
 
             <div class="mb-2">
                 <small for="data_inicio" class="form-text">Contratação Início:</small>
@@ -64,7 +64,7 @@
 
             <!-- switch para filtrar contas vencidas -->
             <div class="form-check form-switch mb-2 me-2">
-                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="filtrar_status_contrato" {% if status_rescisao %}checked{% endif %} onchange="document.getElementById('filtro-form').submit();">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="filtrar_status_contrato" {% if filtrar_status_contrato %}checked{% endif %} onchange="document.getElementById('filtro-form').submit();">
                 <label class="form-check-label" for="flexSwitchCheckDefault">Filtrar status contrato</label>
             </div>
 
