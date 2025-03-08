@@ -1,69 +1,67 @@
-<div class="card text-bg-warning shadow mb-3" style="max-width: 12rem;">
-    <div class="card-header">CMV</div>
-    <div class="card-body">
-        <h5 class="card-title">R$ {{ cmv|floatformat:2}}</h5>
-        <p class="card-text">
-            <strong>
-                <em>{{ taxa_cmv }}%</em>
-            </strong>
-            <br>
-            <em> Sobre a compra</em>
-        </p>
+<div class="row">
+    <div class="col-md-2">
+        <div class="card text-bg-warning shadow mb-3" style="max-width: 10rem;">
+            <div class="card-header">CMV</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ cmv|floatformat:2 }}</h5>
+                <p class="card-text">
+                    <strong><em>{{ taxa_cmv }}%</em></strong>
+                    <br><em>Sobre a compra</em>
+                </p>
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="card text-bg-secondary shadow mb-3" style="max-width: 12rem;">
-    <div class="card-header">Gasto Fixo</div>
-    <div class="card-body">
-        <h5 class="card-title">R$ {{ gasto_fixo|floatformat:2}}</h5>
-        <p class="card-text">
-            <strong>
-                <em>{{ taxa_gasto_fixo }}%</em>
-            </strong>
-            <br>
-            <em> Sobre a compra</em>
-        </p>
+    <div class="col-md-2">
+        <div class="card text-bg-secondary shadow mb-3" style="max-width: 10rem;">
+            <div class="card-header">Gasto Fixo</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ gasto_fixo|floatformat:2 }}</h5>
+                <p class="card-text">
+                    <strong><em>{{ taxa_gasto_fixo }}%</em></strong>
+                    <br><em>Sobre a compra</em>
+                </p>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="card text-bg-info shadow mb-3" style="max-width: 12rem;">
-    <div class="card-header">Gasto Variável</div>
-    <div class="card-body">
-        <h5 class="card-title">R$ {{ gasto_variavel|floatformat:2}}</h5>
-        <p class="card-text">
-            <strong>
-                <em>{{ taxa_gasto_variavel }}%</em>
-            </strong>
-            <br>
-                <em> Sobre a compra</em>
-        </p>
+    <div class="col-md-2">
+        <div class="card text-bg-info shadow mb-3" style="max-width: 10rem;">
+            <div class="card-header">Gasto Variável</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ gasto_variavel|floatformat:2 }}</h5>
+                <p class="card-text">
+                    <strong><em>{{ taxa_gasto_variavel }}%</em></strong>
+                    <br><em>Sobre a compra</em>
+                </p>
+            </div>
+        </div>
     </div>
-</div>
+<!-- </div> -->
 
-<div class="card shadow mb-3" style="max-width: 12rem; background-color: #de8439; color: white; border-color: #fd7e14;">
-    <div class="card-header">Funcionários</div>
-    <div class="card-body">
-        <h5 class="card-title">R$ {{ total_pagamentos_funcionarios|floatformat:2}}</h5>
-        <p class="card-text">
-            <strong>
-                <em>{{ taxa_pagamentos_funcionarios }}%</em>
-            </strong>
-            <br>
-                <em> Sobre a venda</em>
-        </p>
+<!-- Linha de cards abaixo -->
+<!-- <div class="row"> -->
+    <div class="col-md-2">
+        <div class="card shadow mb-3" style="background-color: #de8439; color: white; border-color: #de8439; max-width:10rem;">
+            <div class="card-header">Funcionários</div>
+            <div class="card-body">
+                <h5 class="card-title">R$ {{ total_pagamentos_funcionarios|floatformat:2 }}</h5>
+                <p class="card-text">
+                    <strong><em>{{ taxa_pagamentos_funcionarios }}%</em></strong>
+                    <br><em>Sobre a venda</em>
+                </p>
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="card shadow mb-3" style="max-width: 12rem; background-color: #de8439; color: white; border: #de8439;">
-    <div class="card-header">Rescisão</div>
-    <div class="card-body">
-        <h5 class="card-title text-center">R$ {{ total_rescisao|floatformat:2 }}</h5>
-        <p class="card-text">
-            <strong>
-                <em>{{ taxa_rescisao }}%</em>
-            </strong>
-            <br>
-                <em> Sobre a venda</em>
-        </p>
+    <div class="col-md-2" style="max-width: 10rem;">
+        <div class="card shadow mb-3" style="background-color: #de8439; color: white; border: #de8439; max-width: 10rem;">
+            <div class="card-header">Rescisão</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ total_rescisao|floatformat:2 }}</h5>
+                <p class="card-text">
+                    <strong><em>{{ taxa_rescisao }}%</em></strong>
+                    <br><em>Sobre a venda</em>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
