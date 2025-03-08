@@ -104,7 +104,15 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         cargo_contratacao = self.request.GET.get('cargo')
         if cargo_contratacao:
             queryset = queryset.filter(id=cargo_contratacao)
+
+        # Adiciona o campo status_rescisao a cada objeto contratacao
+        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        for contratacao in queryset:
+            contratacao.status_rescisao = contratacao.pk in rescisao_ids
+            
         return queryset
+
+
 
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
@@ -112,6 +120,7 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         context['contratacao_funcionarios'] = Contratacao.objects.all()
         context['contratacao_setor'] = Contratacao.objects.all()
         context['contratacao_cargo'] = Contratacao.objects.all()
+        # context['rescisao_funcionarios'] = Rescisao.objects.all()
         return context
 
 
