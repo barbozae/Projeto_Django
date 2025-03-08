@@ -105,14 +105,17 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         if cargo_contratacao:
             queryset = queryset.filter(id=cargo_contratacao)
 
+        # Verifica se há rescisão para cada contratação
+        # for contratacao in queryset:
+        #     rescisao = Rescisao.objects.filter(nome_funcionario_id=contratacao.nome_funcionario_id).first()
+        #     contratacao.status_rescisao = rescisao.status_rescisao if rescisao else False
+
         # Adiciona o campo status_rescisao a cada objeto contratacao
-        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        for contratacao in queryset:
-            contratacao.status_rescisao = contratacao.pk in rescisao_ids
+        # rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        # for contratacao in queryset:
+        #     contratacao.status_rescisao = contratacao.pk in rescisao_ids
             
         return queryset
-
-
 
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
@@ -120,7 +123,6 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         context['contratacao_funcionarios'] = Contratacao.objects.all()
         context['contratacao_setor'] = Contratacao.objects.all()
         context['contratacao_cargo'] = Contratacao.objects.all()
-        # context['rescisao_funcionarios'] = Rescisao.objects.all()
         return context
 
 
@@ -140,7 +142,8 @@ class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 
 class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Contratacao
-    fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
+    # fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
+    fields = ["setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
               "contabilidade_admissional", "observacao_admissional"]
     
     # form_class = ContratacaoCreateView
@@ -207,6 +210,13 @@ class PagamentoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVie
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filtra os funcionários que não têm contrato rescindido
+        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+        form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=rescisao_ids)
+        return form
+
 
 class PagamentoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Pagamento
@@ -219,7 +229,7 @@ class PagamentoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVie
         if not self.request.user.is_authenticated:
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-
+    
 
 class PagamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Pagamento

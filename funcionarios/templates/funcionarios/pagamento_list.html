@@ -12,31 +12,31 @@
 
         <div class="mb-2 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
-            <input type="date" class="form-control" id="data_inicio_pagamento_funcionario" name="data_inicio_pagamento_funcionario" value="{{ request.GET.data_pagamento }}">
+            <input type="date" class="form-control" id="data_inicio_pagamento_funcionario" name="data_inicio_pagamento_funcionario" value="{{ request.GET.data_inicio_pagamento_funcionario }}">
         </div>
 
         <div class="mb-2 ms-2 me-2">
             <small for="data_fim" class="form-text">Data Fim:</small>
-            <input type="date" class="form-control" id="data_fim_pagamento_funcionario" name="data_fim_pagamento_funcionario" value="{{ request.GET.data_pagamento }}">
+            <input type="date" class="form-control" id="data_fim_pagamento_funcionario" name="data_fim_pagamento_funcionario" value="{{ request.GET.data_fim_pagamento_funcionario }}">
         </div>
 
         <div class="form-floating mb-2 ms-2 me-2 mt-2">
             <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
                 <option value="">Selecione todos funcionário</option>
                 {% for funcionario in pagamento_funcionarios %}
-                    <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                    <option value="{{ funcionario.nome_funcionario.id }}" {% if funcionario.nome_funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
                         {{ funcionario.nome_funcionario }}
                     </option>
                 {% endfor %}
             </select>
-            <label for="floatingSelect">Funcionáro</label>
+            <label for="floatingSelect">Funcionário</label>
         </div>
         
         <div class="form-floating mb-2 ms-2 me-2 mt-2">
             <select class="form-select" id="floatingSelect" name="tipo_pagamento" aria-label="Floating label select example">
                 <option value="">Selecione todos pagamentos</option>
                 {% for funcionario in pagamento_funcionarios %}
-                    <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                    <option value="{{ funcionario.tipo_pagamento }}" {% if funcionario.tipo_pagamento|stringformat:"s" == request.GET.tipo_pagamento %} selected {% endif %}>
                         {{ funcionario.tipo_pagamento }}
                     </option>
                 {% endfor %}
@@ -71,10 +71,10 @@
             <tr>
                 <th scope="row" >{{ pagamento.pk }}</th>
                 <td>{{ pagamento.nome_funcionario }}</td>
-                <td>{{ pagamento.data_pagamento| date:"d/m/y"| default:"-" }}</td>
-                <td>{{ pagamento.valor_pago| default:"-" }}</td>
-                <td>{{ pagamento.tipo_pagamento| default:"-" }}</td>
-                <td>{{ pagamento.forma_pagamento| default:"-" }}</td>
+                <td>{{ pagamento.data_pagamento|date:"d/m/y"|default:"-" }}</td>
+                <td>{{ pagamento.valor_pago|default:"-" }}</td>
+                <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
+                <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
                 <td>
                     <a href="{% url 'update_payment' pk=pagamento.pk %}" class="btn btn-secondary btn-sm">Editar</a>
                     <a href="{% url 'delete_payment' pk=pagamento.pk %}" class="btn btn-danger btn-sm">Excluir</a>

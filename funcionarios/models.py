@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.core.exceptions import ValidationError
 
+
 # TODO falta garantir que não haja pagamentos de funcionarios que foram desligado
 class Cadastro(models.Model):
     LIST_BANK = [('Banco do Brasil', 'Banco do Brasil'),
@@ -73,10 +74,16 @@ class Contratacao(models.Model):
         unique_together = ('nome_funcionario', 'data_contratacao')  # Um funcionário só pode ter uma contratação por data de pagamento
 
 
+    @property
+    def status_rescisao(self):
+        """
+        Verifica se há uma rescisão associada a esta contratação. 
+        Estou usando status_rescisao em contratacao_list.html para ver se o funcionario esta ativo
+        """
+        return Rescisao.objects.filter(nome_funcionario_id=self.nome_funcionario_id).exists()
+
+
     def save(self, *args, **kwargs):
-        # Verifica se o funcionário já está ativo
-        # if Contratacao.objects.filter(nome_funcionario=self.nome_funcionario, status_admissional=True).exists():
-        #     raise ValidationError(f"O funcionário {self.nome_funcionario} já está ativo e não pode ser contratado novamente.")
         # Lógica para determinar o status_admissional
         if (
             self.contabilidade_admissional == 'Enviado' and  # A coluna contabilidade_admissional deve ter o valor 'True'
