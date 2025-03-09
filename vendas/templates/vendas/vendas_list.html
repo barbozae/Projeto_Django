@@ -73,7 +73,7 @@
                     <td class="text-dark fw-bold">{{ venda.total}}</td>
                     <td>{{ venda.socio| default:"-" }}</td>
                     <td>
-                        <a href="{% url 'update_vendas' pk=venda.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                        <a href="{% url 'update_vendas' pk=venda.pk %}" class="btn btn-outline-secondary btn-sm" >Editar</a>
                         <a href="{% url 'delete_vendas' pk=venda.pk %}" class="btn btn-danger btn-sm">Excluir</a>
                 </td>
                     <tr class="detail-row" style="display: none;">

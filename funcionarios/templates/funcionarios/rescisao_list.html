@@ -24,7 +24,8 @@
                 <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
                     <option value="">Selecione funcionário</option>
                     {% for funcionario in rescisao_funcionarios %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                        <option value="{{ funcionario.id }}"
+                            {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
                             {{ funcionario.nome_funcionario }}
                         </option>
                     {% endfor %}
@@ -35,9 +36,10 @@
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="tipo_desligamento" aria-label="Floating label select example">
                     <option value="">Selecione Tipo Desligamento</option>
-                    {% for funcionario in rescisao_funcionarios %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
-                            {{ funcionario.tipo_desligamento }}
+                    {% for desligamento in tipo_desligamento %}
+                        <option value="{{ desligamento }}"
+                            {% if desligamento|stringformat:"s" == request.GET.desligamento %} selected {% endif %}>
+                            {{ desligamento }}
                         </option>
                     {% endfor %}
                 </select>
@@ -94,7 +96,7 @@
                                 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                             </td>
                             <td>
-                                <a href="{% url 'update_rescisao' pk=rescisao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                                <a href="{% url 'update_rescisao' pk=rescisao.pk %}" class="btn btn-outline-secondary btn-sm">Editar</a>
                             </td>
                         </tr>
                     {% endfor %}

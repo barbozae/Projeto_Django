@@ -24,8 +24,9 @@
             <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
                 <option value="">Selecione todos funcionário</option>
                 {% for funcionario in pagamento_funcionarios %}
-                    <option value="{{ funcionario.nome_funcionario.id }}" {% if funcionario.nome_funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
-                        {{ funcionario.nome_funcionario }}
+                    <option value="{{ funcionario.nome_funcionario_id}}" 
+                        {% if funcionario.nome_funcionario_id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                        {{ funcionario.nome_funcionario__nome_funcionario }}
                     </option>
                 {% endfor %}
             </select>
@@ -33,15 +34,16 @@
         </div>
         
         <div class="form-floating mb-2 ms-2 me-2 mt-2">
-            <select class="form-select" id="floatingSelect" name="tipo_pagamento" aria-label="Floating label select example">
-                <option value="">Selecione todos pagamentos</option>
-                {% for funcionario in pagamento_funcionarios %}
-                    <option value="{{ funcionario.tipo_pagamento }}" {% if funcionario.tipo_pagamento|stringformat:"s" == request.GET.tipo_pagamento %} selected {% endif %}>
-                        {{ funcionario.tipo_pagamento }}
+            <select class="form-select" id="floatingSelectTipoPagamento" name="tipo_pagamento" aria-label="Floating label select example">
+                <option value="">Selecione tipo de pagamento</option>
+                {% for tipo in tipos_pagamento %}
+                    <option value="{{ tipo }}" 
+                        {% if tipo|stringformat:"s" == request.GET.tipo_pagamento %} selected {% endif %}>
+                        {{ tipo }}
                     </option>
                 {% endfor %}
             </select>
-            <label for="floatingSelect">Tipo Pagamento</label>
+            <label for="floatingSelectTipoPagamento">Tipo de Pagamento</label>
         </div>
 
         <div class="mb-2 ms-2 mt-3">

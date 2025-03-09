@@ -24,7 +24,8 @@
                 <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
                     <option value="">Selecione funcionário</option>
                     {% for funcionario in contratacao_funcionarios %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                        <option value="{{ funcionario.id }}" 
+                            {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
                             {{ funcionario.nome_funcionario }}
                         </option>
                     {% endfor %}
@@ -35,9 +36,10 @@
             <div class="form-floating mb-1 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="setor" aria-label="Floating label select example">
                     <option value="">Selecione setor</option>
-                    {% for funcionario in contratacao_setor %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
-                            {{ funcionario.setor }}
+                    {% for setor in contratacao_setor %}
+                        <option value="{{ setor }}" 
+                            {% if setor|stringformat:"s" == request.GET.setor %} selected {% endif %}>
+                            {{ setor }}
                         </option>
                     {% endfor %}
                 </select>
@@ -47,9 +49,10 @@
             <div class="form-floating mb-1 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="cargo" aria-label="Floating label select example">
                     <option value="">Selecione cargo</option>
-                    {% for funcionario in contratacao_cargo %}
-                        <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
-                            {{ funcionario.cargo }}
+                    {% for cargo in contratacao_cargo %}
+                        <option value="{{ cargo }}"
+                            {% if cargo|stringformat:"s" == request.GET.cargo %} selected {% endif %}>
+                            {{ cargo }}
                         </option>
                     {% endfor %}
                 </select>
@@ -120,7 +123,7 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'update_contratacao' pk=contratacao.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                            <a href="{% url 'update_contratacao' pk=contratacao.pk %}" class="btn btn-outline-secondary btn-sm">Editar</a>
                         </td>
                     </tr>
                 {% endfor %}

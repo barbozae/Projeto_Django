@@ -24,7 +24,8 @@
                 <select class="form-select" id="floatingSelect" name="fornecedor[]" aria-label="Floating label select example">
                     <option value="">Selecione fornecedor</option>
                     {% for fornecedor in fornecedores %}
-                        <option value="{{ fornecedor.id }}" {% if fornecedor.id|stringformat:"s" in request.GET.fornecedor %}selected{% endif %}>
+                        <option value="{{ fornecedor.id }}" 
+                            {% if fornecedor.id|stringformat:"s" in request.GET.fornecedor %}selected{% endif %}>
                             {{ fornecedor.nome_empresa }}
                         </option>
                     {% endfor %}
@@ -36,7 +37,8 @@
                 <select class="form-select" id="floatingSelect" name="numero_boleto[]" aria-label="Floating label select example">
                     <option value="">Selecione boleto</option>
                     {% for boleto in numero_boleto %}
-                        <option value="{{ boleto }}" {% if boleto in request.GET.boleto %}selected{% endif %}>
+                        <option value="{{ boleto }}" 
+                            {% if boleto in request.GET.boleto %}selected{% endif %}>
                             {{ boleto }}
                         </option>
                     {% endfor %}
@@ -88,7 +90,7 @@
                         <td>{{ compras.classificacao| default:"-" }}</td>
                         <td>{{ compras.forma_pagamento| default:"-" }}</td>
                         <td>
-                            <a href="{% url 'update_compras' pk=compras.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                            <a href="{% url 'update_compras' pk=compras.pk %}" class="btn btn-outline-secondary btn-sm" >Editar</a>
                             <a href="{% url 'delete_compras' pk=compras.pk %}" class="btn btn-danger btn-sm" >Excluir</a>
                         </td>
                     </tr>

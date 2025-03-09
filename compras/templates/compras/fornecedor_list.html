@@ -15,7 +15,8 @@
             <select class="form-select" id="floatingSelect" name="nome_empresa[]" aria-label="Floating label select example">
                 <option value="">Selecione um fornecedor</option>
                 {% for fornecedor in fornecedores %}
-                    <option value="{{ fornecedor.nome_empresa }}" {% if fornecedor.nome_empresa in request.GET.nome_empresa %}selected{% endif %}>
+                    <option value="{{ fornecedor.nome_empresa }}"
+                        {% if fornecedor.nome_empresa in request.GET.nome_empresa %}selected{% endif %}>
                         {{ fornecedor.nome_empresa }}
                     </option>
                 {% endfor %}
@@ -64,7 +65,7 @@
                     <td>{{ fornecedor.bairro| default:"-" }}</td>
                     <td>{{ fornecedor.cidade| default:"-" }}</td>
                     <td>
-                        <a href="{% url 'update_fornecedor' pk=fornecedor.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                        <a href="{% url 'update_fornecedor' pk=fornecedor.pk %}" class="btn btn-outline-secondary btn-sm" >Editar</a>
                     </td>
                 </tr>
             {% endfor %}

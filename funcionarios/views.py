@@ -2,7 +2,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.db.models import Q, Exists, OuterRef
+from django.db.models import Exists, OuterRef
 
 from .models import Cadastro, Contratacao, Pagamento, Rescisao
 
@@ -100,11 +100,11 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
 
         setor_contratacao = self.request.GET.get('setor')
         if setor_contratacao:
-            queryset = queryset.filter(id=setor_contratacao)
+            queryset = queryset.filter(setor=setor_contratacao)
 
         cargo_contratacao = self.request.GET.get('cargo')
         if cargo_contratacao:
-            queryset = queryset.filter(id=cargo_contratacao)
+            queryset = queryset.filter(cargo=cargo_contratacao)
 
         # Usando Exists para verificar o status_rescisao (verifica se há uma rescisão associada)
         status_rescisao_subquery = Rescisao.objects.filter(nome_funcionario_id=OuterRef('nome_funcionario_id'))
@@ -121,8 +121,9 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['contratacao_funcionarios'] = Contratacao.objects.all()
-        context['contratacao_setor'] = Contratacao.objects.all()
-        context['contratacao_cargo'] = Contratacao.objects.all()
+        context['contratacao_setor'] = Contratacao.objects.values_list('setor', flat=True).distinct()
+        # context['contratacao_cargo'] = Contratacao.objects.all().distinct()
+        context['contratacao_cargo'] = Contratacao.objects.values_list('cargo', flat=True).distinct()
         context['filtrar_status_contrato'] = 'filtrar_status_contrato' in self.request.GET  # Passa o estado do switch para o template
         return context
     
@@ -156,7 +157,8 @@ class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 
 class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Contratacao
-    fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
+    # fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
+    fields = ["setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
               "contabilidade_admissional", "observacao_admissional"]
     
     # form_class = ContratacaoCreateView
@@ -169,13 +171,13 @@ class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateV
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
     
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Filtra os funcionários que não foram contratados
-        # rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        contratacao_ids = Contratacao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=contratacao_ids)
-        return form
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #     # Filtra os funcionários que não foram contratados
+    #     # rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+    #     contratacao_ids = Contratacao.objects.values_list('nome_funcionario_id', flat=True)
+    #     form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=contratacao_ids)
+    #     return form
 
 
 class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -204,18 +206,19 @@ class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         nome_funcionario_pagamento = self.request.GET.get('nome_funcionario')
         if nome_funcionario_pagamento:
-            queryset = queryset.filter(id=nome_funcionario_pagamento)
+            queryset = queryset.filter(nome_funcionario_id=nome_funcionario_pagamento)
 
         tipo_pagamento = self.request.GET.get('tipo_pagamento')
         if tipo_pagamento:
-            queryset = queryset.filter(id=tipo_pagamento)
+            queryset = queryset.filter(tipo_pagamento=tipo_pagamento)
 
         return queryset
 
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pagamento_funcionarios'] = Pagamento.objects.all()
+        context['pagamento_funcionarios'] = Pagamento.objects.select_related('nome_funcionario').values('nome_funcionario_id', 'nome_funcionario__nome_funcionario').distinct()
+        context['tipos_pagamento'] = Pagamento.objects.values_list('tipo_pagamento', flat=True).distinct()
         return context
     
 
@@ -297,7 +300,7 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         tipo_desligamento = self.request.GET.get('tipo_desligamento')
         if tipo_desligamento:
-            queryset = queryset.filter(id=tipo_desligamento)
+            queryset = queryset.filter(tipo_desligamento=tipo_desligamento)
 
         nome_funcionario_rescisao = self.request.GET.get('nome_funcionario')
         if nome_funcionario_rescisao:
@@ -308,6 +311,7 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['rescisao_funcionarios'] = Rescisao.objects.all()
+        context['tipo_desligamento'] = Rescisao.objects.values_list('tipo_desligamento', flat=True).distinct()
         return context
 
 
@@ -335,7 +339,8 @@ class RescisaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
 
 class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Rescisao
-    fields = ["nome_funcionario", "data_desligamento", "devolucao_uniforme", "data_exame_demissional",
+    # fields = ["nome_funcionario", "data_desligamento", "devolucao_uniforme", "data_exame_demissional",
+    fields = ["data_desligamento", "devolucao_uniforme", "data_exame_demissional",
               "data_homologacao", "tipo_desligamento", "contabilidade_rescisao", "observacao_demissional",
               ]
     success_url = reverse_lazy("rescisao_list")
@@ -347,9 +352,9 @@ class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
             return redirect('login')  # Redireciona para a página de login
         return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Filtra os funcionários com base nas contratações que não foram rescindidas
-        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
-        return form
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #     # Filtra os funcionários com base nas contratações que não foram rescindidas
+    #     rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
+    #     form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
+    #     return form

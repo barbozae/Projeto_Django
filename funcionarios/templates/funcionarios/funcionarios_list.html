@@ -14,7 +14,8 @@
             <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
                 <option value="">Selecione funcionário</option>
                 {% for funcionario in cadastros_funcionarios %}
-                    <option value="{{ funcionario.id }}" {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                    <option value="{{ funcionario.id }}"
+                        {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
                         {{ funcionario.nome_funcionario }}
                     </option>
                 {% endfor %}
@@ -67,7 +68,7 @@
                     <td>{{ funcionario.agencia| default:"-" }}</td>
                     <td>{{ funcionario.conta| default:"-" }}</td>
                     <td>
-                        <a href="{% url 'update_funcionarios' pk=funcionario.pk %}" class="btn btn-secondary btn-sm" >Editar</a>
+                        <a href="{% url 'update_funcionarios' pk=funcionario.pk %}" class="btn btn-outline-secondary btn-sm" >Editar</a>
                     </td>
                 </tr>
             {% endfor %}
