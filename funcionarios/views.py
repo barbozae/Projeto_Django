@@ -125,7 +125,7 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         context['contratacao_cargo'] = Contratacao.objects.all()
         context['filtrar_status_contrato'] = 'filtrar_status_contrato' in self.request.GET  # Passa o estado do switch para o template
         return context
-
+    
 
 class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Contratacao
@@ -156,8 +156,7 @@ class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 
 class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Contratacao
-    # fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
-    fields = ["setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
+    fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
               "contabilidade_admissional", "observacao_admissional"]
     
     # form_class = ContratacaoCreateView
