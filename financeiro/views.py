@@ -3,7 +3,8 @@ from django.views import View
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
-from django.db.models import Sum, F, DecimalField, Case, When, Q
+from django.db.models import Sum, F, DecimalField, Q
+from django.db.models.functions import Coalesce
 from decimal import Decimal
 from datetime import date
 from django.utils import timezone
@@ -87,24 +88,33 @@ class FiltrosFinanceiro:
 class DashboardBaseView(View):
     def calcular_totais_vendas(self, vendas_queryset):
         vendas_total = vendas_queryset.aggregate(
-            total_rodizio=Sum('rodizio'),
-            total_dinheiro=Sum('dinheiro'),
-            total_pix=Sum('pix'),
-            total_debito=Sum('debito_mastercard') + Sum('debito_visa') + Sum('debito_elo'),
-            total_credito=Sum('credito_mastercard') + Sum('credito_visa') + Sum('credito_elo'),
-            total_beneficio=Sum('alelo') + Sum('american_express') + Sum('hiper') + Sum('sodexo') + 
-                            Sum('ticket_rest') + Sum('vale_refeicao') + Sum('dinersclub'),
-            total_socio=Sum('socio')
-        )
+        total_rodizio=Coalesce(Sum('rodizio', output_field=DecimalField()), 0, output_field=DecimalField()),
+        total_dinheiro=Coalesce(Sum('dinheiro', output_field=DecimalField()), 0, output_field=DecimalField()),
+        total_pix=Coalesce(Sum('pix', output_field=DecimalField()), 0, output_field=DecimalField()),
+        total_debito=Coalesce(Sum('debito_mastercard', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                     Coalesce(Sum('debito_visa', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                     Coalesce(Sum('debito_elo', output_field=DecimalField()), 0, output_field=DecimalField()),
+        total_credito=Coalesce(Sum('credito_mastercard', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                      Coalesce(Sum('credito_visa', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                      Coalesce(Sum('credito_elo', output_field=DecimalField()), 0, output_field=DecimalField()),
+        total_beneficio=Coalesce(Sum('alelo', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                        Coalesce(Sum('american_express', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                        Coalesce(Sum('hiper', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                        Coalesce(Sum('sodexo', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                        Coalesce(Sum('ticket_rest', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                        Coalesce(Sum('vale_refeicao', output_field=DecimalField()), 0, output_field=DecimalField()) +
+                        Coalesce(Sum('dinersclub', output_field=DecimalField()), 0, output_field=DecimalField()),
+        total_socio=Coalesce(Sum('socio', output_field=DecimalField()), 0, output_field=DecimalField())
+    )
 
         # Use valores padrão (0) para None
-        total_dinheiro = vendas_total['total_dinheiro'] or 0
-        total_pix = vendas_total['total_pix'] or 0
-        total_debito = vendas_total['total_debito'] or 0
-        total_credito = vendas_total['total_credito'] or 0
-        total_beneficio = vendas_total['total_beneficio'] or 0
-        total_socio = vendas_total['total_socio'] or 0
-        total_rodizio = vendas_total['total_rodizio'] or 0
+        total_dinheiro = vendas_total['total_dinheiro']
+        total_pix = vendas_total['total_pix']
+        total_debito = vendas_total['total_debito']
+        total_credito = vendas_total['total_credito']
+        total_beneficio = vendas_total['total_beneficio']
+        total_socio = vendas_total['total_socio']
+        total_rodizio = vendas_total['total_rodizio']
 
         # Cálculo total de vendas
         total_vendas = total_dinheiro + total_pix + total_debito + total_credito + total_beneficio
@@ -137,84 +147,33 @@ class DashboardBaseView(View):
         }
 
     def calcular_taxas_vendas(self, vendas_queryset):
-        # Define as regras de taxas por período
-        taxas = [
-            {
-                "inicio": date(2022, 1, 1),
-                "fim": date(2022, 8, 1),
-                "taxas": {
-                    "debito_mastercard": 0.0095,
-                    "debito_visa": 0.0095,
-                    "debito_elo": 0.0098,
-                    "credito_mastercard": 0.0167,
-                    "credito_visa": 0.0167,
-                    "credito_elo": 0.0167,
-                    "hiper": 0.0167,
-                    "dinersclub": 0.0167,
-                    "american_express": 0.025,
-                    "alelo": 0.12,
-                    "sodexo": 0.12,
-                    "ticket_rest": 0.0714,
-                    "vale_refeicao": 0.1274,
-                },
-            },
-            {
-                "inicio": date(2022, 8, 2),
-                "fim": date(2024, 3, 31),
-                "taxas": {
-                    "debito_mastercard": 0.0095,
-                    "debito_visa": 0.0095,
-                    "debito_elo": 0.01,
-                    "credito_mastercard": 0.031,
-                    "credito_visa": 0.031,
-                    "credito_elo": 0.034,
-                    "hiper": 0.034,
-                    "dinersclub": 0.0167,
-                    "american_express": 0.025,
-                    "alelo": 0.07,
-                    "sodexo": 0.069,
-                    "vale_refeicao": 0.069,
-                    "ticket_rest": 0.07,
-                },
-            },
-            {
-                "inicio": date(2024, 4, 1),
-                "fim": date.today(),
-                "taxas": {
-                    "debito_mastercard": 0.0094,
-                    "debito_visa": 0.0094,
-                    "debito_elo": 0.0094,
-                    "credito_mastercard": 0.0299,
-                    "credito_visa": 0.0299,
-                    "credito_elo": 0.0299,
-                    "hiper": 0.0299,
-                    "dinersclub": 0.0299,
-                    "american_express": 0.025,
-                    "alelo": 0.07,
-                    "sodexo": 0.069,
-                    "vale_refeicao": 0.069,
-                    "ticket_rest": 0.07,
-                },
-            },
-        ]
+        # Define as taxas por bandeira de cartão
+        taxas_bandeiras = {
+            "debito_mastercard": 0.0095,
+            "debito_visa": 0.0095,
+            "debito_elo": 0.0098,
+            "credito_mastercard": 0.0299,
+            "credito_visa": 0.0299,
+            "credito_elo": 0.0299,
+            "hiper": 0.0299,
+            "dinersclub": 0.0299,
+            "american_express": 0.025,
+            "alelo": 0.07,
+            "sodexo": 0.069,
+            "vale_refeicao": 0.069,
+            "ticket_rest": 0.07,
+        }
 
-        # Adiciona condições para cada período
-        conditions = []
-        for taxa in taxas:
-            cond = When(
-                data_venda__range=(taxa["inicio"], taxa["fim"]),
-                then=sum(F(campo) * valor for campo, valor in taxa["taxas"].items())
-            )
-            conditions.append(cond)
+        # Inicializa o total de taxas
+        total_taxas = 0
 
-        # Calcula o total de taxas
-        total_taxa = vendas_queryset.aggregate(
-            total_taxa=Sum(
-                Case(*conditions, output_field=DecimalField(max_digits=10, decimal_places=2))
-            )
-        )["total_taxa"]
+        # Itera sobre as taxas e calcula o total
+        for bandeira, taxa in taxas_bandeiras.items():
+            total_taxas += vendas_queryset.aggregate(
+                total=Sum(F(bandeira) * taxa, output_field=DecimalField())
+            )["total"] or 0
 
-        return total_taxa
+        return total_taxas
 
     def calcular_totais_compras(self, compras_queryset):
         total_compras = compras_queryset.aggregate(total_despesas=Sum('valor_compra'))['total_despesas'] or 0
@@ -277,6 +236,11 @@ class DashboardVendasView(DashboardBaseView):
         data_fim = request.GET.get('data_fim')
         periodo = request.GET.get('periodo')
         tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
+
+        # Verificar e converter o período para lista
+        if periodo:
+            periodo = periodo.split(',')
+
         vendas = Vendas.objects.all()
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio, 
@@ -320,7 +284,7 @@ class DashboardComprasView(DashboardBaseView):
         fornecedores_selecionado = request.GET.getlist('fornecedor')
         tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
-        #TODO Widget RADIO 
+        #TODO Widget RADIO
         filtrar_vencidas = request.GET.get('filtrar_vencidas') == 'on'
 
         compras = Compras.objects.all()
@@ -341,8 +305,8 @@ class DashboardComprasView(DashboardBaseView):
             )
 
         totais_compras = self.calcular_totais_compras(compras_filtradas)
-        fornecedores = Compras.objects.values('fornecedor__id', 'fornecedor__nome_empresa').distinct() #nesse caso estamos pegando o id por ser chave estrangeira
-        classificacao = Compras.objects.values('classificacao').distinct()
+        fornecedores = Compras.objects.filter(tenant=tenant).values('fornecedor__id', 'fornecedor__nome_empresa').distinct()
+        classificacao = Compras.objects.filter(tenant=tenant).values('classificacao').distinct()
 
         context = {
             **totais_compras,
@@ -392,9 +356,10 @@ class DashboardFuncionariosView(DashboardBaseView):
         total_forma_pagamento = sum(item['total_valor_pago'] for item in forma_pagamentos_agrupados)
 
         # Dados para o filtro
-        nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
-        tipos_pagamento = Pagamento.objects.values('tipo_pagamento').distinct()
-        formas_pagamento = Pagamento.objects.values('forma_pagamento').distinct()
+        # nome_funcionario = Pagamento.objects.values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
+        nome_funcionario = Pagamento.objects.filter(tenant=tenant).values('nome_funcionario__id', 'nome_funcionario__nome_funcionario').distinct()
+        tipos_pagamento = Pagamento.objects.filter(tenant=tenant).values('tipo_pagamento').distinct()
+        formas_pagamento = Pagamento.objects.filter(tenant=tenant).values('forma_pagamento').distinct()
 
         # Agrupar pagamentos por tipo de pagamento e funcionário
         funcionarios_por_tipo = (
@@ -477,7 +442,7 @@ class DashboardResumoView(DashboardBaseView):
         data_fim = request.GET.get('data_fim')
         tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
-        vendas = Vendas.objects.all()
+        vendas = Vendas.objects.filter(tenant=tenant)
         filtros_vendas = FiltrosFinanceiro(
             data_inicio=data_inicio, 
             data_fim=data_fim
@@ -490,7 +455,7 @@ class DashboardResumoView(DashboardBaseView):
         classificacao_selecionada = request.GET.getlist('classificacao_compras')
         fornecedores_selecionados = request.GET.getlist('fornecedor_compras')
 
-        compras = Compras.objects.all()
+        compras = Compras.objects.filter(tenant=tenant)
         filtros_compras = FiltrosFinanceiro(
             data_inicio=data_inicio, 
             data_fim=data_fim, 
@@ -540,7 +505,7 @@ class DashboardResumoView(DashboardBaseView):
         tipo_pagamento_selecionado = request.GET.getlist('tipo_pagamento')
         forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
 
-        funcionarios = Pagamento.objects.all()
+        funcionarios = Pagamento.objects.filter(tenant=tenant)
         filtros_funcionarios = FiltrosFinanceiro(
             data_inicio=data_inicio,
             data_fim=data_fim,
