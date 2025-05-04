@@ -1,6 +1,6 @@
 from django.urls import path, reverse
 from django.contrib.auth import views as auth_views
-from .views import CustomLoginView, register
+from .views import CustomLoginView, CustomPasswordChangeView, register
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
@@ -18,7 +18,8 @@ urlpatterns = [
     path('logout/', simple_logout, name='logout'),
     path(
         'password_change/', 
-         auth_views.PasswordChangeView.as_view(
+        #  auth_views.PasswordChangeView.as_view(
+        CustomPasswordChangeView.as_view(
              template_name='users/password_change.html', 
              success_url='/password_change_done/'
              ),

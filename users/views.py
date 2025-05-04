@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from .models import Tenant
 from .forms import CustomUserCreationForm
 from django.contrib import messages
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 
 
 def register(request):
@@ -73,3 +73,14 @@ class CustomLogoutView(LogoutView):
             # Redireciona para o login sem tenant
             return reverse_lazy("login")
         
+
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'users/password_change.html'
+
+    def get_success_url(self):
+        # Captura o tenant da URL (GET ou POST)
+        tenant = self.request.GET.get('tenant') or self.request.POST.get('tenant')
+        if tenant:
+            # Adiciona o tenant à URL de redirecionamento
+            return f'{reverse_lazy("password_change_done")}?tenant={tenant}'
+        return super().get_success_url()
