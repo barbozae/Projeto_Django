@@ -1,5 +1,6 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
+from users.models import Tenant
 from django.core.exceptions import ValidationError
 
 
@@ -17,6 +18,7 @@ class Cadastro(models.Model):
                    ('Santander', 'Santander'),
                    ]
     
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     nome_funcionario = models.CharField(verbose_name="Funcionário", max_length=40 , blank=False, unique=True)
     rg = models.CharField(verbose_name="RG", max_length=14, null=True , blank=True)
@@ -30,7 +32,7 @@ class Cadastro(models.Model):
     banco = models.CharField(verbose_name="Banco", choices=LIST_BANK, max_length=15, null=True, blank=True)
     agencia = models.CharField(verbose_name="Agencia", max_length=7, null=True, blank=True)
     conta = models.CharField(verbose_name="Conta", max_length=10, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     def __str__(self):
@@ -55,6 +57,7 @@ class Contratacao(models.Model):
     DOC_CONTABILIDADE = [('Enviado', 'Enviado'),
                          ('Não Enviado', 'Não Enviado')]
 
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     nome_funcionario = models.ForeignKey(Cadastro, on_delete=models.PROTECT, verbose_name="Funcionário", null=False)
     setor = models.CharField(verbose_name="Setor", choices=SETOR_CHOICES, max_length=13, null=False, blank=False)
@@ -65,7 +68,7 @@ class Contratacao(models.Model):
     contabilidade_admissional = models.CharField(verbose_name="Doc Contabilidade", choices=DOC_CONTABILIDADE, max_length=11, null=True, blank=True)
     status_admissional = models.BooleanField(verbose_name="Status Rescisão", default=False)
     observacao_admissional = models.CharField(verbose_name="Obs Admissional", max_length=50, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     # Garantir que o funcionário não seja repetido para a mesma data de contratação
@@ -110,6 +113,8 @@ class Rescisao(models.Model):
                   ]
     DOC_CONTABILIDADE = [('Enviado', 'Enviado'),
                          ('Não Enviado', 'Não Enviado')]
+    
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     nome_funcionario = models.ForeignKey(Cadastro, on_delete=models.PROTECT, verbose_name="Funcionário", null=False)
     data_desligamento = models.DateField(verbose_name="Data Desligamento", null=False, blank=False)
@@ -120,7 +125,7 @@ class Rescisao(models.Model):
     contabilidade_rescisao = models.CharField(verbose_name="Contabilidade Documentação", choices=DOC_CONTABILIDADE, max_length=11, null=True, blank=True)
     observacao_demissional = models.CharField(verbose_name="Observação", max_length=40, null=True, blank=True)
     status_rescisao = models.BooleanField(verbose_name="Status Rescisão", default=False)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     # Garantir que o funcionário não seja repetido para a mesma data de contratação
@@ -162,6 +167,8 @@ class Pagamento(models.Model):
                              ('Cheque', 'Cheque'),
                              ('Multa Recisória', 'Multa Recisória')
                              ]
+    
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     # Chave estrangeira para Funcionario, associando a PK de nome
     nome_funcionario = models.ForeignKey(Cadastro, on_delete=models.PROTECT, verbose_name="Funcionário", null=False)
@@ -169,7 +176,7 @@ class Pagamento(models.Model):
     valor_pago = models.DecimalField(verbose_name="Valor Pago", max_digits=9, decimal_places=2, null=False, blank=False)
     tipo_pagamento = models.CharField(verbose_name="Tipo de Pagamento", max_length=15, choices=lista_tipo_pagamento, null=False, blank=False)
     forma_pagamento = models.CharField(verbose_name="Forma de Pagamento", max_length=15, choices=lista_forma_pagamento, null=False, blank=False)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     # as duas funções abaixo é para EVITAR que funcionarios desligado recebam pagamentos e edições

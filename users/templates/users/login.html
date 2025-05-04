@@ -5,16 +5,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-        rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
- 
+
 <body class="bg-light">
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-4">
         <h2 class="text-center mb-4">Login</h2>
-        <form method="post" action="{% url 'login' %}">
+        <form method="post" action="{% url 'login' %}?tenant={{ request.GET.tenant }}">
           {% csrf_token %}
           <div class="mb-3">
             <label for="username" class="form-label">Usuário</label>
@@ -24,9 +23,9 @@
             <label for="password" class="form-label">Senha</label>
             <input type="password" class="form-control" id="password" name="password" required>
           </div>
-          <button type="submit" class="btn btn-primary w-100">Entrar</button>          
+          <button type="submit" class="btn btn-primary w-100">Entrar</button>
           <div class="text-center mt-3">
-            <p>Não tem uma conta? <a href="{% url 'register' %}">Registre-se aqui</a></p>
+            <p>Não tem uma conta? <a href="{% url 'register' %}?tenant={{ request.GET.tenant }}">Registre-se aqui</a></p>
           </div>
         </form>
       </div>

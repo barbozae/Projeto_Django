@@ -23,6 +23,6 @@
       <!-- form faz aparecer o formulario já do Django -->
         {{ form|crispy }}
       <button type="submit" class="btn btn-primary">Salvar</button>
-      <a href="{% url 'compras_list' %}" class="btn btn-danger">Cancelar</a>
+      <a href="{% url 'compras_list' %}?tenant={{ tenant }}" class="btn btn-danger">Cancelar</a>
     </form>
 {% endblock content %}

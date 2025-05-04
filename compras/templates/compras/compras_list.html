@@ -9,7 +9,8 @@
 
     <div class="container">
         <form action="" method="GET" class="d-flex align-items-center">
-
+            <input type="hidden" name="tenant" value="{{ tenant }}">
+            
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Data Início:</small>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
@@ -48,8 +49,8 @@
 
             <div class="mb-1 ms-1 mt-2">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_compras">Buscar</button>
-                <a href="{% url 'compras_list' %}" class="btn btn-outline-secondary me-2">Limpar</a>
-                <a href="{% url 'create_compras' %}" class="btn btn-outline-success me-2">Nova Compra</a>
+                <a href="{% url 'compras_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+                <a href="{% url 'create_compras' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Compra</a>
             </div>
 
         </form>
@@ -90,8 +91,8 @@
                         <td>{{ compras.classificacao| default:"-" }}</td>
                         <td>{{ compras.forma_pagamento| default:"-" }}</td>
                         <td>
-                            <a href="{% url 'update_compras' pk=compras.pk %}" class="btn btn-outline-secondary btn-sm" >Editar</a>
-                            <a href="{% url 'delete_compras' pk=compras.pk %}" class="btn btn-danger btn-sm" >Excluir</a>
+                            <a href="{% url 'update_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm" >Editar</a>
+                            <a href="{% url 'delete_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm" >Excluir</a>
                         </td>
                     </tr>
                     <tr class="detail-row" style="display: none;">

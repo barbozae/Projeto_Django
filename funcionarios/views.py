@@ -1,26 +1,21 @@
+from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.shortcuts import redirect
-from django.urls import reverse_lazy
 from django.db.models import Exists, OuterRef
 
 from .models import Cadastro, Contratacao, Pagamento, Rescisao
+from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
+from project.utils import generate_success_url
 
 
-class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
     model = Cadastro
     template_name = 'funcionarios/funcionarios_list.html'  # Garante que o template correto será usado
     context_object_name = 'funcionarios_list'
     permission_required = 'funcionarios.view_cadastro'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-    
     def get_queryset(self):
-        queryset = Cadastro.objects.all()
+        queryset = Cadastro.objects.filter(tenant=self.request.user.tenant)
 
         nome_funcionario_cadastro = self.request.GET.get('nome_funcionario')
         if nome_funcionario_cadastro:
@@ -30,11 +25,17 @@ class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cadastros_funcionarios'] = Cadastro.objects.all()
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            tenant = str(tenant).lower().replace(' ', '_')
+        context['tenant'] = tenant
+
+        # Adiciona os funcionários ao contexto para o form-select
+        context['cadastros_funcionarios'] = self.get_queryset()
         return context
 
 
-class CadastroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class CadastroCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
     model = Cadastro
     template_name = 'funcionarios/funcionarios_form.html'  # Força o uso do template correto
     # campos que o usuario precisa preencher
@@ -43,14 +44,21 @@ class CadastroCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
     success_url = reverse_lazy("funcionarios_list")
     permission_required = 'funcionarios.add_cadastro'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente
+        tenant = getattr(self.request.user, 'tenant', None)  # Busca o tenant associado ao usuário
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('funcionarios_list', tenant)
+    
 
-
-class CadastroUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class CadastroUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, UpdateView):
     model = Cadastro
     template_name = 'funcionarios/funcionarios_form.html'  # Força o uso do template correto
     fields = ["rg", "cpf", "carteira_trabalho", "cidade",
@@ -58,31 +66,33 @@ class CadastroUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
     success_url = reverse_lazy("funcionarios_list")
     permission_required = 'funcionarios.change_cadastro'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente, se necessário
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['funcionario'] = self.object  # Passa o objeto como 'funcionario'
         return context
 
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('funcionarios_list', tenant)
 
-class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+
+class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin,ListView):
     model = Contratacao
     template_name = 'funcionarios/contratacao_list.html'  # Garante que o template correto será usado
     permission_required = 'funcionarios.view_contratacao'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-    
     def get_queryset(self):
-        queryset = Contratacao.objects.all()
+        # Filtra as contratações com base no tenant do usuário
+        tenant = getattr(self.request.user, 'tenant', None)
+        queryset = Contratacao.objects.filter(tenant=tenant)
 
         # Captura os parâmetros da requisição GET
         data_inicio_contratacao = self.request.GET.get('data_inicio_contratacao')
@@ -120,6 +130,12 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            tenant = str(tenant).lower().replace(' ', '_')  # Formata o tenant
+        context['tenant'] = tenant
+
         context['contratacao_funcionarios'] = Contratacao.objects.all()
         context['contratacao_setor'] = Contratacao.objects.values_list('setor', flat=True).distinct()
         # context['contratacao_cargo'] = Contratacao.objects.all().distinct()
@@ -128,71 +144,91 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         return context
     
 
-class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
     model = Contratacao
     fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
                 "contabilidade_admissional", "observacao_admissional"]
     success_url = reverse_lazy("contratacao_list")
     permission_required = 'funcionarios.add_contratacao'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-    
-    # com essas duas funções abaixo eu tenho apenas a lista de funcionarios que não foram cadastrados
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Filtra os funcionários cadastrados que não foram contratados ainda
-        contratacao_ids = Contratacao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=contratacao_ids)
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            # IDs de funcionários que já foram contratados
+            funcionarios_contratados_ids = Contratacao.objects.filter(tenant=tenant).values_list('nome_funcionario_id', flat=True)
+
+            # IDs de funcionários que possuem rescisão
+            funcionarios_com_rescisao_ids = Rescisao.objects.filter(tenant=tenant).values_list('nome_funcionario_id', flat=True)
+
+            # IDs de funcionários a serem excluídos (contratados e com rescisão)
+            ids_excluidos = set(funcionarios_contratados_ids) | set(funcionarios_com_rescisao_ids)
+
+            # Filtra os funcionários disponíveis
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.filter(
+                tenant=tenant
+            ).exclude(id__in=ids_excluidos)
+        else:
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.none()  # Retorna vazio se o tenant não for encontrado
         return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['pagamento_funcionarios'] = Pagamento.objects.all()
         return context
+    
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant  # Atribui o tenant ao objeto antes de salvar
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('contratacao_list', tenant)
 
 
-class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ContratacaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, UpdateView):
     model = Contratacao
     # fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
-    fields = ["setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
+    fields = ["nome_funcionario", "setor", "cargo", "data_exame_admissional", "data_contratacao", "salario",
               "contabilidade_admissional", "observacao_admissional"]
-    
+
     # form_class = ContratacaoCreateView
     success_url = reverse_lazy("contratacao_list")
     permission_required = 'funcionarios.change_contratacao'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-    
-    # def get_form(self, form_class=None):
-    #     form = super().get_form(form_class)
-    #     # Filtra os funcionários que não foram contratados
-    #     # rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-    #     contratacao_ids = Contratacao.objects.values_list('nome_funcionario_id', flat=True)
-    #     form.fields['nome_funcionario'].queryset = Cadastro.objects.exclude(id__in=contratacao_ids)
-    #     return form
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente, se necessário
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
+        return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            # Filtra os funcionários pelo tenant
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.filter(tenant=tenant)
+        return form
+
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('contratacao_list', tenant)
 
 
-class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
     model = Pagamento
     template_name = 'funcionarios/pagamento_list.html'
     permission_required = 'funcionarios.view_pagamento'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-
     def get_queryset(self):
-        queryset = Pagamento.objects.all()
+        tenant = getattr(self.request.user, 'tenant', None)
+        queryset = Pagamento.objects.filter(tenant=tenant)
 
         # Captura os parâmetros da requisição GET
         data_inicio_pagamento_funcionario = self.request.GET.get('data_inicio_pagamento_funcionario')
@@ -217,73 +253,80 @@ class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Adiciona dados adicionais ao contexto
         context['pagamento_funcionarios'] = Pagamento.objects.select_related('nome_funcionario').values('nome_funcionario_id', 'nome_funcionario__nome_funcionario').distinct()
         context['tipos_pagamento'] = Pagamento.objects.values_list('tipo_pagamento', flat=True).distinct()
         return context
     
 
-class PagamentoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class PagamentoCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
     model = Pagamento
     fields = ["nome_funcionario", "data_pagamento", "valor_pago", "tipo_pagamento", "forma_pagamento"]
     success_url = reverse_lazy("pagamento_list")
     permission_required = 'funcionarios.add_pagamento'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Filtra os funcionários com base nas contratações que não foram rescindidas
-        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            # IDs de funcionários com rescisão
+            funcionarios_com_rescisao_ids = Rescisao.objects.filter(tenant=tenant).values_list('nome_funcionario_id', flat=True)
+
+            # Filtra os funcionários contratados que não possuem rescisão
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.filter(
+                tenant=tenant,
+                contratacao__isnull=False  # Verifica se há uma contratação associada
+            ).exclude(id__in=funcionarios_com_rescisao_ids).distinct()
+        else:
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.none()  # Retorna vazio se o tenant não for encontrado
         return form
 
+    def form_valid(self, form):
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)
+        form.instance.tenant = tenant
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('pagamento_list', tenant)
 
-class PagamentoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+
+class PagamentoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, UpdateView):
     model = Pagamento
     fields = ["nome_funcionario", "data_pagamento", "valor_pago", "tipo_pagamento", "forma_pagamento"]
     success_url = reverse_lazy("pagamento_list")
     permission_required = 'funcionarios.change_pagamento'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente, se necessário
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
+        return super().form_valid(form)
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Filtra os funcionários com base nas contratações que não foram rescindidas
-        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
-        return form
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('pagamento_list', tenant)
 
 
-class PagamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class PagamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, DeleteView):
     model = Pagamento
     success_url = reverse_lazy("pagamento_list")
     permission_required = 'pagamento.delete_payment'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('pagamento_list', tenant)
 
 
-class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
     model = Rescisao
     template_name = 'funcionarios/rescisao_list.html'
     permission_required = 'funcionarios.view_rescisao'  # Permissão para visualizar objetos'
-
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
 
     def get_queryset(self):
         queryset = Rescisao.objects.all()
@@ -315,7 +358,7 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return context
 
 
-class RescisaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class RescisaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
     model = Rescisao
     fields = ["nome_funcionario", "data_desligamento", "devolucao_uniforme", "data_exame_demissional",
               "data_homologacao", "tipo_desligamento", "contabilidade_rescisao", "observacao_demissional",
@@ -323,21 +366,35 @@ class RescisaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
     success_url = reverse_lazy("rescisao_list")
     permission_required = 'funcionarios.add_rescisao'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Filtra os funcionários com base nas contratações que não foram rescindidas
-        rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-        form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            # IDs de funcionários que já possuem rescisão
+            funcionarios_com_rescisao_ids = Rescisao.objects.filter(tenant=tenant).values_list('nome_funcionario_id', flat=True)
+
+            # Filtra os funcionários contratados que ainda não possuem rescisão
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.filter(
+                tenant=tenant,
+                contratacao__isnull=False  # Verifica se há uma contratação associada
+            ).exclude(id__in=funcionarios_com_rescisao_ids).distinct()
+        else:
+            form.fields['nome_funcionario'].queryset = Cadastro.objects.none()  # Retorna vazio se o tenant não for encontrado
         return form
 
+    def form_valid(self, form):
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)
+        form.instance.tenant = tenant
+        return super().form_valid(form)
 
-class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('rescisao_list', tenant)
+    
+
+class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, UpdateView):
     model = Rescisao
     # fields = ["nome_funcionario", "data_desligamento", "devolucao_uniforme", "data_exame_demissional",
     fields = ["data_desligamento", "devolucao_uniforme", "data_exame_demissional",
@@ -346,15 +403,14 @@ class RescisaoUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
     success_url = reverse_lazy("rescisao_list")
     permission_required = 'funcionarios.change_rescisao'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente, se necessário
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
+        return super().form_valid(form)
 
-    # def get_form(self, form_class=None):
-    #     form = super().get_form(form_class)
-    #     # Filtra os funcionários com base nas contratações que não foram rescindidas
-    #     rescisao_ids = Rescisao.objects.values_list('nome_funcionario_id', flat=True)
-    #     form.fields['nome_funcionario'].queryset = Contratacao.objects.exclude(nome_funcionario_id__in=rescisao_ids)
-    #     return form
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('rescisao_list', tenant)

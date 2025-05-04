@@ -8,10 +8,11 @@
 
 <h5 class="mb-4 mt-3">Vendas</h5>
 
-<a href="{% url 'resume_vendas' %}" class="btn btn-primary mb-2">Resumo</a>
+<a href="{% url 'resume_vendas' %}?tenant={{ tenant }}" class="btn btn-primary mb-2">Resumo</a>
 
 <div class="container">
     <form action="" method="GET" class="d-flex align-items-center">
+        <input type="hidden" name="tenant" value="{{ tenant }}">
 
         <div class="mb-2 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
@@ -34,8 +35,8 @@
 
         <div class="ms-2 me-2 mt-4">
             <button type="submit" class="btn btn-outline-primary me-2" name="buscar_vendas">Buscar</button>
-            <a href="{% url 'venda_list' %}" class="btn btn-outline-secondary me-2">Limpar</a>
-            <a href="{% url 'create_vendas' %}" class="btn btn-outline-success me-2">Nova Venda</a>
+            <a href="{% url 'venda_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+            <a href="{% url 'create_vendas' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Venda</a>
         </div>
     </form>
 </div>
@@ -73,8 +74,8 @@
                     <td class="text-dark fw-bold">{{ venda.total}}</td>
                     <td>{{ venda.socio| default:"-" }}</td>
                     <td>
-                        <a href="{% url 'update_vendas' pk=venda.pk %}" class="btn btn-outline-secondary btn-sm" >Editar</a>
-                        <a href="{% url 'delete_vendas' pk=venda.pk %}" class="btn btn-danger btn-sm">Excluir</a>
+                        <a href="{% url 'update_vendas' pk=venda.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm" >Editar</a>
+                        <a href="{% url 'delete_vendas' pk=venda.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm">Excluir</a>
                 </td>
                     <tr class="detail-row" style="display: none;">
                         <td colspan="3">

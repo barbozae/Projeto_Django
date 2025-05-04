@@ -26,13 +26,9 @@ SECRET_KEY = 'django-insecure-p9a=99jkpfwt62n85v%yyeo&t^grj2_-e1c!pm9igp03%(owv_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'modelo_teste']
 
 INSTALLED_APPS = [
-    # App do AdminLTE
-    # 'adminlte3',
-    # 'adminlte3_theme',  # Tema padrão do AdminLTE 3
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,6 +55,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # meus middleware personalizado
+    'users.middleware.TenantMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -76,6 +75,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                'project.context_processors.tenant_context',
             ],
         },
     },
@@ -113,6 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'users.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

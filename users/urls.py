@@ -1,11 +1,21 @@
-from django.urls import path
+from django.urls import path, reverse
 from django.contrib.auth import views as auth_views
-from users.views import register
+from .views import CustomLoginView, register
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
+
+def simple_logout(request):
+    tenant = request.GET.get('tenant')  # Captura o parâmetro 'tenant' da URL
+    logout(request)  # Executa o logout do usuário
+    if tenant:
+        return redirect(f"{reverse('login')}?tenant={tenant}")  # Redireciona com o tenant
+    return redirect('login')  # Redireciona sem tenant, se não estiver presente
 
 urlpatterns = [
     path('register/', register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', simple_logout, name='logout'),
     path(
         'password_change/', 
          auth_views.PasswordChangeView.as_view(

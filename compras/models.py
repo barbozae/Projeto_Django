@@ -1,8 +1,10 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
+from users.models import Tenant
 
 
 class Fornecedor(models.Model):
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     nome_empresa = models.CharField(verbose_name="Fornecedor", max_length=50, blank=False, unique=True)
     cnpj = models.CharField(verbose_name="CNPJ", max_length=14, null=True, blank=True)
@@ -14,7 +16,8 @@ class Fornecedor(models.Model):
     numero = models.CharField(verbose_name="Número", max_length=10, null=True, blank=True)
     bairro = models.CharField(verbose_name="Bairro", max_length=20, null=True, blank=True)
     cidade = models.CharField(verbose_name="Cidade", max_length=30, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    # author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
 
     def __str__(self):
@@ -40,6 +43,7 @@ class Compras(models.Model):
                     ('Débito Automático', 'Débito Automático')
     ]
 
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     data_compra = models.DateField(verbose_name="Data da Venda", null=False, blank=False)
     data_vencimento = models.DateField(verbose_name="Data do Vencimento", null=True, blank=False)
@@ -55,5 +59,6 @@ class Compras(models.Model):
     classificacao = models.CharField(verbose_name="Classificação", choices=classificacao_choices, max_length=20, null=True, blank=False)
     forma_pagamento = models.CharField(verbose_name="Forma de Pagamento", choices=tipo_pagamento, max_length=17, null=True, blank=False)
     observacao = models.CharField(verbose_name="Observação", max_length=35, null=True, blank=True)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    # author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)

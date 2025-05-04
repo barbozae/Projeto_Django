@@ -1,26 +1,25 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
 from .models import Vendas
+from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
+from project.utils import generate_success_url
 
 
 def vendas_resumo(request):
     return render(request, 'vendas/vendas_resume.html')
 
-class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+
+class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
     model = Vendas
     template_name = 'vendas_list.html'  # Garante que o template correto será usado
     permission_required = 'vendas.view_vendas'  # Permissão para visualizar objetos'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
-
     def get_queryset(self):
-        queryset = Vendas.objects.all()
+        # queryset = Vendas.objects.filter(tenant=self.request.user.tenant)
+        queryset = super().get_queryset()  # O TenantQuerysetMixin já filtra pelo tenant
 
         # Filtra pelo intervalo de datas, se os parâmetros de data foram passados
         data_inicio = self.request.GET.get('data_inicio')
@@ -39,6 +38,10 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         # Recupera o contexto padrão do Django
         context = super().get_context_data(**kwargs)
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            tenant = str(tenant).lower().replace(' ', '_')  # Substitui espaços por underscores
+        context['tenant'] = tenant
 
         # Inicializa os contadores
         venda_rodizio = 0
@@ -48,7 +51,6 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         venda_credito = 0
         venda_beneficio = 0
         venda_total = 0
-        venda_rodizio = 0
 
         # Calculando os totais usando os métodos do modelo
         vendas = context['object_list']
@@ -61,9 +63,9 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             # somando todas as linhas
             venda_rodizio += venda.rodizio or 0
             venda_dinheiro += venda.dinheiro or 0
-            venda_pix =+ venda.pix or 0
-            venda_debito =+ venda.debito or 0
-            venda_credito =+ venda.credito or 0
+            venda_pix += venda.pix or 0
+            venda_debito += venda.debito or 0
+            venda_credito += venda.credito or 0
             venda_beneficio += venda.beneficio
             venda_total += venda.total
         
@@ -78,7 +80,7 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return context
 
 
-class VendasCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class VendasCreateView(LoginRequiredMixin, PermissionRequiredMixin, HandleNoPermissionMixin, CreateView):
     model = Vendas
     # campos que o usuario precisa preencher
     fields = ["data_venda", "periodo", "rodizio", "dinheiro", "pix", "debito_mastercard", "debito_visa", 
@@ -89,18 +91,21 @@ class VendasCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = 'vendas.add_vendas'
 
     def form_valid(self, form):
-        # Adiciona o usuário logado como autor
+        # Certifique-se de que o tenant está sendo atribuído corretamente
+        tenant = getattr(self.request.user, 'tenant', None)  # Busca o tenant associado ao usuário
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
         form.instance.author = self.request.user
         return super().form_valid(form)
     
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    # get_success_url é um método que retorna a URL de sucesso após a operação
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('venda_list', tenant)
 
 
-class VendasUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class VendasUpDateView(LoginRequiredMixin, PermissionRequiredMixin, HandleNoPermissionMixin, UpdateView):
     model = Vendas
     fields = ["data_venda", "periodo", "rodizio", "dinheiro", "pix", "debito_mastercard", "debito_visa", 
               "debito_elo", "credito_mastercard", "credito_visa", "credito_elo", "alelo", "american_express",
@@ -113,20 +118,18 @@ class VendasUpDateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    # get_success_url é um método que retorna a URL de sucesso após a operação
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('venda_list', tenant)
 
 
-class VendasDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class VendasDeleteView(LoginRequiredMixin, PermissionRequiredMixin, HandleNoPermissionMixin, DeleteView):
     model = Vendas
     success_url = reverse_lazy("venda_list")
     permission_required = 'vendas.delete_vendas'
 
-    # caso usuário não tenha acesso conforme permissões consedidas seria direcionado para página Home
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return redirect('login')  # Redireciona para a página de login
-        return redirect('home')  # Redireciona para a home se o usuário não tiver permissão
+    # get_success_url é um método que retorna a URL de sucesso após a operação
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('venda_list', tenant)

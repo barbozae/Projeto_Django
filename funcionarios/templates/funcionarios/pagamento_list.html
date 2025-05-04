@@ -9,7 +9,8 @@
 
 <div class="container">
     <form action="" method="GET" class="d-flex align-items-center">
-
+        <input type="hidden" name="tenant" value="{{ tenant }}">
+        
         <div class="mb-2 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
             <input type="date" class="form-control" id="data_inicio_pagamento_funcionario" name="data_inicio_pagamento_funcionario" value="{{ request.GET.data_inicio_pagamento_funcionario }}">
@@ -48,8 +49,8 @@
 
         <div class="mb-2 ms-2 mt-3">
             <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
-            <a href="{% url 'pagamento_list' %}" class="btn btn-outline-secondary me-2">Limpar</a>
-            <a href="{% url 'create_payment' %}" class="btn btn-outline-success me-2">Pagar Funcionário</a>
+            <a href="{% url 'pagamento_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+            <a href="{% url 'create_payment' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Pagar Funcionário</a>
         </div>
 
     </form>
@@ -79,8 +80,8 @@
                     <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
                     <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
                     <td>
-                        <a href="{% url 'update_payment' pk=pagamento.pk %}" class="btn btn-outline-secondary btn-sm">Editar</a>
-                        <a href="{% url 'delete_payment' pk=pagamento.pk %}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                        <a href="{% url 'update_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                        <a href="{% url 'delete_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-danger btn-sm">Excluir</a>
                     </td>
                 </tr>
             {% endfor %}

@@ -5,7 +5,10 @@ from django.shortcuts import redirect
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import home_view
 
+# http://127.0.0.1:8000/admin/?tenant=modelo_1
+# http://127.0.0.1:8000/?tenant=modelo_1
 
 # Função personalizada para logout
 def custom_logout(request):
@@ -17,14 +20,11 @@ urlpatterns = [
 
                 path('', views.home_view, name='home'),
 
-                path('logout/', custom_logout, name='logout'),
-
                 path('', include('users.urls')),
                 path('', include('vendas.urls')),
                 path('', include('funcionarios.urls')),
                 path('', include('compras.urls')),
                 path('', include('menu.urls')),
-
                 path('', include('financeiro.urls')),
             ]
 

@@ -1,12 +1,14 @@
-from django.contrib.auth.models import User
 from django.db import models
-
+from users.models import Tenant
+from django.conf import settings
 
 class Vendas(models.Model):
     PERIODO_CHOICES = [
         ('Almoço', 'Almoço'),
         ('Jantar', 'Jantar'),
         ]
+    
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     data_venda = models.DateField(verbose_name="Data da Venda", null=False, blank=False)
     periodo = models.CharField(verbose_name="Período", max_length=6, choices=PERIODO_CHOICES, blank=False)
@@ -28,9 +30,11 @@ class Vendas(models.Model):
     dinersclub = models.DecimalField(verbose_name="DinersClub", max_digits=8, decimal_places=2, null=True, blank=True)
     socio = models.DecimalField(verbose_name="Sócio", max_digits=8, decimal_places=2, null=True, blank=True)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
-    author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False)
 
     def save(self, *args, **kwargs):
+        if not self.tenant_id:
+            self.tenant = kwargs.pop('tenant', None)
         if not self.author_id :  # Verifica se o autor não foi definido
             self.author = kwargs.pop('user', None)  # Pega o usuário da kwargs
         super().save(*args, **kwargs)

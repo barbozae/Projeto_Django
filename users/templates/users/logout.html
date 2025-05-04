@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+</head>
+<body>
+    <h1>Logout</h1>
+    <form method="post" action="{% url 'logout' %}?tenant={{ request.GET.tenant }}">
+        {% csrf_token %}
+        <input type="hidden" name="tenant" value="{{ request.GET.tenant }}">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

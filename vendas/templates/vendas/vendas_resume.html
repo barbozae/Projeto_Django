@@ -6,7 +6,7 @@
 
 {% block content %}
     <h2>Resumo Vendas</h2>
-    <a href="{% url 'venda_list' %}" class="btn btn-primary">Voltar</a>
+    <a href="{% url 'venda_list' %}?tenant={{ tenant }}" class="btn btn-primary">Voltar</a>
 
 
     <h6>Filtrar Datas</h6>
@@ -37,7 +37,7 @@
             </div>
             
             <div class="mb-2 ms-2 mt-4">
-                <a href="{% url 'venda_list' %}" class="btn btn-secondary">Limpar</a>
+                <a href="{% url 'venda_list' %}?tenant={{ tenant }}" class="btn btn-secondary">Limpar</a>
             </div>
         </form>
     </div>

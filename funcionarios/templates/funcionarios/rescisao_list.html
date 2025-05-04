@@ -9,7 +9,8 @@
 
     <div class="container">
         <form action="" method="GET" class="d-flex align-items-center">
-
+            <input type="hidden" name="tenant" value="{{ tenant }}">
+            
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Desligamento Início:</small>
                 <input type="date" class="form-control" id="data_inicio_rescisao" name="data_inicio_rescisao" value="{{ request.GET.data_desligamento }}">
@@ -48,8 +49,8 @@
             
             <div class="mb-3 ms-2 mt-3">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_cadastro">Buscar</button>
-                <a href="{% url 'rescisao_list' %}" class="btn btn-outline-secondary me-2">Limpar</a>
-                <a href="{% url 'create_rescisao' %}" class="btn btn-outline-success me-2">Rescisão Funcionário</a>
+                <a href="{% url 'rescisao_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+                <a href="{% url 'create_rescisao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Rescisão Funcionário</a>
             </div>
 
         </form>
@@ -96,7 +97,7 @@
                                 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                             </td>
                             <td>
-                                <a href="{% url 'update_rescisao' pk=rescisao.pk %}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                                <a href="{% url 'update_rescisao' pk=rescisao.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
                             </td>
                         </tr>
                     {% endfor %}

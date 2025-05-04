@@ -49,7 +49,7 @@
 
             <div class="mb-2 ms-2 me-2">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_compras">Buscar</button>
-                <a href="{% url 'dashboard_compras' %}" class="btn btn-outline-secondary me-2">Limpar</a>
+                <a href="{% url 'dashboard_compras' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
 
             <!-- switch para filtrar contas vencidas -->

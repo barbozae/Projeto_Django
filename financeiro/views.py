@@ -14,12 +14,13 @@ class FiltrosFinanceiro:
                  periodo=None, 
                  fornecedor=None, classificacao=None,
                  funcionario = None, tipo_pagamento = None, forma_pagamento = None,
-                   **kwargs):
+                 tenant=None,  **kwargs):
         # Geral
         self.data_inicio = data_inicio
         self.data_fim = data_fim
         self.campo_data = campo_data  # Define qual campo de data será filtrado (padrão é 'data_compra')
-        
+        self.tenant = tenant
+
         # Vendas
         self.periodo = periodo
         
@@ -35,8 +36,13 @@ class FiltrosFinanceiro:
         self.kwargs = kwargs  # Outros filtros adicionais passados como kwargs
 
     def aplicar_filtros(self, queryset):
+        # Filtrar pelo tenant
+        if self.tenant:
+            queryset = queryset.filter(tenant=self.tenant)
+
         if self.data_inicio:
             queryset = queryset.filter(**{f"{self.campo_data}__gte": self.data_inicio})
+        
         if self.data_fim:
             queryset = queryset.filter(**{f"{self.campo_data}__lte": self.data_fim})
 
@@ -91,39 +97,38 @@ class DashboardBaseView(View):
             total_socio=Sum('socio')
         )
 
-        total_vendas = (
-            (vendas_total['total_dinheiro'] or 0) +
-            (vendas_total['total_pix'] or 0) +
-            (vendas_total['total_debito'] or 0) +
-            (vendas_total['total_credito'] or 0) +
-            (vendas_total['total_beneficio'] or 0)
-        )
-
-        total_rodizio = vendas_total['total_rodizio'] or 0
+        # Use valores padrão (0) para None
+        total_dinheiro = vendas_total['total_dinheiro'] or 0
+        total_pix = vendas_total['total_pix'] or 0
+        total_debito = vendas_total['total_debito'] or 0
+        total_credito = vendas_total['total_credito'] or 0
+        total_beneficio = vendas_total['total_beneficio'] or 0
         total_socio = vendas_total['total_socio'] or 0
+        total_rodizio = vendas_total['total_rodizio'] or 0
 
-        taxa_dinheiro = vendas_total['total_dinheiro'] / total_vendas * 100 if total_vendas != 0 else 0
-        taxa_pix = vendas_total['total_pix'] / total_vendas * 100 if total_vendas != 0 else 0
-        taxa_debito = vendas_total['total_debito'] / total_vendas * 100 if total_vendas != 0 else 0
-        taxa_credito = vendas_total['total_credito'] / total_vendas * 100 if total_vendas != 0 else 0
-        taxa_beneficio = vendas_total['total_beneficio'] / total_vendas * 100 if total_vendas != 0 else 0
+        # Cálculo total de vendas
+        total_vendas = total_dinheiro + total_pix + total_debito + total_credito + total_beneficio
 
-        if total_vendas and total_rodizio != 0:
-            ticket_medio = total_vendas / total_rodizio
-        else:
-            ticket_medio = 0
+        # Calcule as taxas
+        taxa_dinheiro = (total_dinheiro / total_vendas * 100) if total_vendas != 0 else 0
+        taxa_pix = (total_pix / total_vendas * 100) if total_vendas != 0 else 0
+        taxa_debito = (total_debito / total_vendas * 100) if total_vendas != 0 else 0
+        taxa_credito = (total_credito / total_vendas * 100) if total_vendas != 0 else 0
+        taxa_beneficio = (total_beneficio / total_vendas * 100) if total_vendas != 0 else 0
+
+        # Ticket médio
+        ticket_medio = (total_vendas / total_rodizio) if total_rodizio != 0 else 0
 
         return {
-            'total_dinheiro': vendas_total['total_dinheiro'],
-            'total_pix': vendas_total['total_pix'],
-            'total_debito': vendas_total['total_debito'],
-            'total_credito': vendas_total['total_credito'],
-            'total_beneficio': vendas_total['total_beneficio'],
-            'total_socio': vendas_total['total_socio'],
+            'total_dinheiro': total_dinheiro,
+            'total_pix': total_pix,
+            'total_debito': total_debito,
+            'total_credito': total_credito,
+            'total_beneficio': total_beneficio,
+            'total_socio': total_socio,
             'total_vendas': total_vendas,
             'total_rodizio': total_rodizio,
             'ticket_medio': ticket_medio,
-            'vendas_total': vendas_total,
             'taxa_dinheiro': taxa_dinheiro,
             'taxa_pix': taxa_pix,
             'taxa_debito': taxa_debito,
@@ -266,17 +271,19 @@ class DashboardBaseView(View):
         return total_compras_dentro_do_prazo
 
 
-class DashboardVendasView(DashboardBaseView):    
+class DashboardVendasView(DashboardBaseView):
     def get(self, request):
         data_inicio = request.GET.get('data_inicio')
         data_fim = request.GET.get('data_fim')
         periodo = request.GET.get('periodo')
-
+        tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
         vendas = Vendas.objects.all()
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio, 
             data_fim=data_fim, 
-            periodo=periodo)
+            periodo=periodo,
+            tenant=tenant
+        )
         
         # Aplicar filtros no queryset de vendas
         vendas_filtradas = filtros.aplicar_filtros(vendas)
@@ -311,6 +318,7 @@ class DashboardComprasView(DashboardBaseView):
         data_fim = request.GET.get('data_fim')
         classificacao_selecionado = request.GET.getlist('classificacao')
         fornecedores_selecionado = request.GET.getlist('fornecedor')
+        tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
         #TODO Widget RADIO 
         filtrar_vencidas = request.GET.get('filtrar_vencidas') == 'on'
@@ -321,7 +329,8 @@ class DashboardComprasView(DashboardBaseView):
             data_fim=data_fim, 
             campo_data='data_compra',
             classificacao=classificacao_selecionado,
-            fornecedor=fornecedores_selecionado)
+            fornecedor=fornecedores_selecionado,
+            tenant=tenant)
         
         # Aplique os filtros na queryset
         compras_filtradas = filtros.aplicar_filtros(compras)
@@ -358,6 +367,7 @@ class DashboardFuncionariosView(DashboardBaseView):
         funcionario_selecionado = request.GET.getlist('nome_funcionario')
         tipo_pagamento_selecionado = request.GET.getlist('tipo_pagamento')
         forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
+        tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
         funcionarios = Pagamento.objects.all()
 
@@ -367,7 +377,8 @@ class DashboardFuncionariosView(DashboardBaseView):
             campo_data='data_pagamento',
             funcionario=funcionario_selecionado,
             tipo_pagamento=tipo_pagamento_selecionado,
-            forma_pagamento=forma_pagamento_selecionado
+            forma_pagamento=forma_pagamento_selecionado,
+            tenant=tenant
             )
         
         # Aplicar filtros no queryset de funcionários
@@ -464,11 +475,12 @@ class DashboardResumoView(DashboardBaseView):
         # Filtros e dados de vendas
         data_inicio = request.GET.get('data_inicio')
         data_fim = request.GET.get('data_fim')
+        tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
         vendas = Vendas.objects.all()
         filtros_vendas = FiltrosFinanceiro(
             data_inicio=data_inicio, 
-            data_fim=data_fim, 
+            data_fim=data_fim
         )
         vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
@@ -485,6 +497,7 @@ class DashboardResumoView(DashboardBaseView):
             campo_data='data_compra',
             classificacao=classificacao_selecionada,
             fornecedor=fornecedores_selecionados,
+            tenant=tenant,
         )
         compras_filtradas = filtros_compras.aplicar_filtros(compras)
         totais_compras = self.calcular_totais_compras(compras_filtradas)

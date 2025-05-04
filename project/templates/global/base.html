@@ -12,7 +12,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'menu' %}" style="color: green">SCV</a>
+        <a class="navbar-brand" href="{% url 'menu' %}?tenant={{ tenant }}" style="color: green">SCV</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -21,15 +21,15 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'venda_list' %}">Vendas</a>
+              <a class="nav-link" href="{% url 'venda_list' %}?tenant={{ tenant }}">Vendas</a>
             <!-- Dropdown Compras -->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Compras
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}">Fornecedor</a></li>
-                <li><a class="dropdown-item" href="{% url 'compras_list' %}">Compras</a></li>
+                <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}?tenant={{ tenant }}">Fornecedor</a></li>
+                <li><a class="dropdown-item" href="{% url 'compras_list' %}?tenant={{ tenant }}">Compras</a></li>
               </ul>
             </li>
             <!-- Dropdown Funcionários -->
@@ -38,11 +38,11 @@
                 Funcionários
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'funcionarios_list' %}">Cadastro</a></li>
-                <li><a class="dropdown-item" href="{% url 'contratacao_list' %}">Contratação</a></li>
-                <li><a class="dropdown-item" href="{% url 'rescisao_list' %}">Rescisão</a></li>
+                <li><a class="dropdown-item" href="{% url 'funcionarios_list' %}?tenant={{ tenant }}">Cadastro</a></li>
+                <li><a class="dropdown-item" href="{% url 'contratacao_list' %}?tenant={{ tenant }}">Contratação</a></li>
+                <li><a class="dropdown-item" href="{% url 'rescisao_list' %}?tenant={{ tenant }}">Rescisão</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'pagamento_list' %}">Pagamento</a></li>
+                <li><a class="dropdown-item" href="{% url 'pagamento_list' %}?tenant={{ tenant }}">Pagamento</a></li>
               </ul>
             </li>
             <!-- Dropdown Financeiro -->
@@ -51,11 +51,11 @@
               Financeiro
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'dashboard_vendas' %}">Vendas</a></li>
-                <li><a class="dropdown-item" href="{% url 'dashboard_compras' %}">Compras</a></li>
-                <li><a class="dropdown-item" href="{% url 'dashboard_funcionarios' %}">Funcionários</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}">Vendas</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard_compras' %}?tenant={{ tenant }}">Compras</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard_funcionarios' %}?tenant={{ tenant }}">Funcionários</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'dashboard_resumo' %}">Visão Geral</a></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard_resumo' %}?tenant={{ tenant }}">Visão Geral</a></li>
               </ul>
             </li>
           </ul>
@@ -65,10 +65,10 @@
               <span class="navbar-text text-dark me-3">
                 Bem-vindo, {{ user.first_name }}!
               </span>
-              <a href="{% url 'password_change' %}" class="btn btn-outline-secondary me-2">Alterar Senha</a>
-              <a href="{% url 'logout' %}" class="btn btn-danger">Sair</a>
+              <a href="{% url 'password_change' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Alterar Senha</a>
+              <a href="{% url 'logout' %}?tenant={{ tenant }}" class="btn btn-danger">Sair</a>
             {% else %}
-              <a href="{% url 'login' %}" class="btn btn-outline-light">Login</a>
+              <a href="{% url 'login' %}?tenant={{ tenant }}" class="btn btn-outline-light">Login</a>
             {% endif %}
           </div>
         </div>
