@@ -21,22 +21,37 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'venda_list' %}?tenant={{ tenant }}">Vendas</a>
+              <!-- Inativando botão Fornecedor se o usuário não tiver permissão -->
+              {% if perms.vendas.view_vendas %}
+                <a class="nav-link" href="{% url 'venda_list' %}?tenant={{ tenant }}">Vendas</a>
+              {% else %}
+                <a class="nav-link disabled" href="#" aria-disabled="true">Vendas</a>
+              {% endif %}
+
             <!-- Dropdown Compras -->
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Compras
-              </a>
+              <!-- Inativando botão Fornecedor se o usuário não tiver permissão -->
+              {% if perms.compras.view_compras %}
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Compras</a>
+              {% else %}
+                <a class="nav-link disabled" href="#" aria-disabled="true">Compras</a>
+              {% endif %}
+
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}?tenant={{ tenant }}">Fornecedor</a></li>
                 <li><a class="dropdown-item" href="{% url 'compras_list' %}?tenant={{ tenant }}">Compras</a></li>
               </ul>
+
             </li>
             <!-- Dropdown Funcionários -->
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Funcionários
-              </a>
+              <!-- Inativando botão Fornecedor se o usuário não tiver permissão -->
+              {% if perms.funcionarios.view_pagamento %}
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Funcionários</a>
+              {% else %}
+                <a class="nav-link disabled" href="#" aria-disabled="true">Funcionários</a>
+              {% endif %}
+
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{% url 'funcionarios_list' %}?tenant={{ tenant }}">Cadastro</a></li>
                 <li><a class="dropdown-item" href="{% url 'contratacao_list' %}?tenant={{ tenant }}">Contratação</a></li>
@@ -47,9 +62,13 @@
             </li>
             <!-- Dropdown Financeiro -->
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Financeiro
-              </a>
+              <!-- Inativando botão Financeiro se o usuário não tiver permissão -->
+              {% if perms.financeiro.view_financeiro %}
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Financeiro</a>
+              {% else %}
+                <a class="nav-link disabled" href="#" aria-disabled="true">Financeiro</a>
+              {% endif %}
+
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}">Vendas</a></li>
                 <li><a class="dropdown-item" href="{% url 'dashboard_compras' %}?tenant={{ tenant }}">Compras</a></li>

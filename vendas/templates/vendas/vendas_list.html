@@ -74,8 +74,22 @@
                     <td class="text-dark fw-bold">{{ venda.total}}</td>
                     <td>{{ venda.socio| default:"-" }}</td>
                     <td>
+                        {% if perms.vendas.change_vendas %}
                         <a href="{% url 'update_vendas' pk=venda.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm" >Editar</a>
-                        <a href="{% url 'delete_vendas' pk=venda.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm">Excluir</a>
+                        {% else %}
+                        <a href="#" class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">
+                            <i class="fas fa-lock"></i> Editar
+                        </a>
+                        {% endif %}
+                        
+
+                        {% if perms.vendas.delete_vendas %}
+                          <a href="{% url 'delete_vendas' pk=venda.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm">Excluir</a>
+                        {% else %}
+                          <a href="#" class="btn btn-danger btn-sm disabled" aria-disabled="true">
+                            <i class="fas fa-lock"></i> Excluir
+                        </a>
+                        {% endif %}
                 </td>
                     <tr class="detail-row" style="display: none;">
                         <td colspan="3">
@@ -135,6 +149,7 @@
             });
         });
     </script>
+
 {% else %}
     <div class="container">
         <div class="alert alert-warning mt-3" role="alert">
