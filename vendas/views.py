@@ -7,6 +7,9 @@ from .models import Vendas
 from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 from project.utils import generate_success_url
 
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 def vendas_resumo(request):
     return render(request, 'vendas/vendas_resume.html')
@@ -77,6 +80,15 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
         context['vendas_credito'] = venda_credito
         context['vendas_beneficio'] = venda_beneficio
         context['vendas_total'] = venda_total
+
+        # Labels (datas das vendas) e valores totais para o gráfico
+        labels = [venda.data_venda.strftime('%d/%m/%Y') for venda in vendas if venda.data_venda]
+        data = [float(venda.calcular_total()) for venda in vendas]
+
+        # Passar os dados de forma segura para o template
+        context['labels_json'] = json.dumps(labels, cls=DjangoJSONEncoder)
+        context['data_json'] = json.dumps(data, cls=DjangoJSONEncoder)
+
         return context
 
 

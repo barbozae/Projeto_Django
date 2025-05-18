@@ -107,12 +107,29 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
         data_fim = self.request.GET.get('data_fim')
         fornecedor_selecionado = self.request.GET.getlist('fornecedor[]')
         boleto_selecionado = self.request.GET.getlist('numero_boleto[]')
+        filtro_data = self.request.GET.get('filtro_data', 'compra')  # Padrão é 'compra'
 
         # Aplica os filtros se os parâmetros estiverem presentes
+        # if data_inicio:
+        #     queryset = queryset.filter(data_compra__gte=data_inicio)
+        # if data_fim:
+        #     queryset = queryset.filter(data_compra__lte=data_fim)
+
+        # Aplica o filtro de datas conforme o radio selecionado
         if data_inicio:
-            queryset = queryset.filter(data_compra__gte=data_inicio)
+            if filtro_data == 'vencimento':
+                queryset = queryset.filter(data_vencimento__gte=data_inicio)
+            elif filtro_data == 'pagamento':
+                queryset = queryset.filter(data_pagamento__gte=data_inicio)
+            else:
+                queryset = queryset.filter(data_compra__gte=data_inicio)
         if data_fim:
-            queryset = queryset.filter(data_compra__lte=data_fim)
+            if filtro_data == 'vencimento':
+                queryset = queryset.filter(data_vencimento__lte=data_fim)
+            elif filtro_data == 'pagamento':
+                queryset = queryset.filter(data_pagamento__lte=data_fim)
+            else:
+                queryset = queryset.filter(data_compra__lte=data_fim)
 
         # Aplica o filtro de fornecedor apenas se houver fornecedores selecionados e ignora valores vazios
         fornecedor_selecionado = [f for f in fornecedor_selecionado if f]  # Remove valores vazios

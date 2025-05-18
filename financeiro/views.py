@@ -284,7 +284,7 @@ class DashboardComprasView(DashboardBaseView):
         fornecedores_selecionado = request.GET.getlist('fornecedor')
         tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
-        #TODO Widget RADIO
+        # Widget RADIO
         filtrar_vencidas = request.GET.get('filtrar_vencidas') == 'on'
 
         compras = Compras.objects.all()

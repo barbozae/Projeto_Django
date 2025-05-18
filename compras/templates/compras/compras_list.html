@@ -7,7 +7,7 @@
 {% block content %}
     <h5 class="mb-4 mt-3">Compras</h5>
 
-    <div class="container">
+    <div class="container-fluid mb-3">
         <form action="" method="GET" class="d-flex align-items-center">
             <input type="hidden" name="tenant" value="{{ tenant }}">
             
@@ -53,6 +53,25 @@
                 <a href="{% url 'create_compras' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Compra</a>
             </div>
 
+            <!-- Radios para filtrar datas compras - vencimento - pagamento -->
+            <fieldset class="mb-2 ms-2 mt-3 p-2 border rounded" style="min-width: 200px;">
+                <legend class="float-none w-auto px-2" style="font-size: 1rem;">Filtrar datas</legend>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="filtro_data" id="filtro_data_compra" value="compra"
+                        {% if request.GET.filtro_data == "compra" or not request.GET.filtro_data %}checked{% endif %}>
+                    <label class="form-check-label" for="filtro_data_compra">Compra</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="filtro_data" id="filtro_data_pagamento" value="pagamento"
+                    {% if request.GET.filtro_data == "pagamento" %}checked{% endif %}>
+                    <label class="form-check-label" for="filtro_data_pagamento">Pagamento</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="filtro_data" id="filtro_data_vencimento" value="vencimento"
+                        {% if request.GET.filtro_data == "vencimento" %}checked{% endif %}>
+                    <label class="form-check-label" for="filtro_data_vencimento">Vencimento</label>
+                </div>
+            </fieldset>
         </form>
     </div>
 
