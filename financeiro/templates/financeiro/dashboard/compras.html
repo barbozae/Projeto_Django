@@ -1,0 +1,207 @@
+<div class="row align-items-stretch mt-4">
+  <!-- Gráfico de Teia: Compras por Classificação -->
+  <div class="col-md-3 d-flex flex-column gap-3">
+    <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
+      <div class="card-body p-1 d-flex flex-column" style="height: 260px;">
+        <h6 class="text-center mb-2" style="font-weight: 600;">Gastos por Classificação</h6>
+        <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+          <canvas id="comprasRadarChart" style="width:100%; height:100%; max-width:220px; max-height:220px;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de Linha: Compras por Data -->
+  <div class="col-md-7">
+      <div class="bg-white p-3 rounded-3 h-100">
+        <div class="card-body" style="height:260px;">
+          <h5 class="text-justify mb-3">Compras por Data</h5>
+          <canvas id="comprasLinhaChart" style="height:100%;"></canvas>
+        </div>
+      </div>
+  </div>
+
+  <!-- Coluna para Cards -->
+  <div class="col-md-2 d-flex flex-column gap-2" style="max-width: 220px;">
+
+    <div class="card" style="min-height: 70px;">
+      <div class="card-body py-2 px-3">
+        <h6 class="card-title d-flex justify-content-between align-items-center mb-1" style="font-size: 0.95rem;">
+          TOTAL COMPRA
+          <img src="https://img.icons8.com/ios/20/bdbdbd/shopping-cart.png" alt="Ícone" style="height: 20px; width: 20px;">
+        </h6>
+        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 1rem;">
+          <span>R$ {{ totais_compras|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="min-height: 70px;">
+      <div class="card-body py-2 px-3">
+        <h6 class="card-title d-flex justify-content-between align-items-center mb-1" style="font-size: 0.95rem;">
+          TOTAL PAGO
+          <img src="https://img.icons8.com/ios/20/bdbdbd/coins.png" alt="Ícone" style="height: 20px; width: 20px;">
+        </h6>
+        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 1rem;">
+          <span>R$ {{ total_pago_compras|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="min-height: 70px;">
+      <div class="card-body py-2 px-3">
+        <h6 class="card-title d-flex justify-content-between align-items-center mb-1" style="font-size: 0.95rem;">
+          EM VENCIMENTO
+          <img src="https://img.icons8.com/ios/20/bdbdbd/clock--v1.png" alt="Ícone" style="height: 20px; width: 20px;">
+        </h6>
+        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 1rem;">
+          <span>R$ {{ total_compras_dentro_do_prazo|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="min-height: 70px;">
+      <div class="card-body py-2 px-3">
+        <h6 class="card-title d-flex justify-content-between align-items-center mb-1" style="font-size: 0.95rem;">
+          CONTA VENCIDA
+          <img src="https://img.icons8.com/ios/20/bdbdbd/error--v1.png" alt="Ícone" style="height: 20px; width: 20px;">
+        </h6>
+        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 1rem;">
+          <span>R$ {{ total_compras_vencidas|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- Adicione mais cards aqui -->
+</div>
+
+<!-- testando caixa espansiva -->
+<details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+  <summary style="font-weight: bold; cursor: pointer;">Ver detalhes</summary>
+  <p>Conteúdo escondido que aparece ao clicar.</p>
+</details>
+
+<!-- Dados para os gráficos -->
+<script id="radar-labels" type="application/json">{{ radar_labels_json|safe }}</script>
+<script id="radar-data" type="application/json">{{ radar_data_json|safe }}</script>
+<script id="linha-labels" type="application/json">{{ linha_labels_json|safe }}</script>
+<script id="linha-data" type="application/json">{{ linha_data_json|safe }}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Gráfico de Teia (Radar): Compras por Classificação
+  const radarLabels = JSON.parse(document.getElementById('radar-labels').textContent);
+  const radarData = JSON.parse(document.getElementById('radar-data').textContent);
+  const radarCtx = document.getElementById('comprasRadarChart').getContext('2d');
+  
+  new Chart(radarCtx, {
+    type: 'radar',
+    data: {
+      labels: radarLabels,
+      datasets: [{
+        label: 'Compras',
+        data: radarData,
+        backgroundColor: 'rgba(6, 160, 96, 0.2)', // Verde claro com transparência
+        borderColor: '#06a060', // Verde escuro
+        pointBackgroundColor: '#06a060',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#06a060',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.label}: ${context.raw}`;
+            }
+          },
+          displayColors: false,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        r: {
+          angleLines: {
+            display: true,
+            color: 'rgba(0, 0, 0, 0.1)'
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          },
+          pointLabels: {
+            font: {
+              size: 10
+            },
+            color: '#666'
+          },
+          ticks: {
+            display: false,
+            beginAtZero: true
+          },
+          suggestedMin: 0
+        }
+      },
+    }
+  });
+
+  // Gráfico de Linha: Compras por Data
+  const linhaLabels = JSON.parse(document.getElementById('linha-labels').textContent);
+  const linhaData = JSON.parse(document.getElementById('linha-data').textContent);
+  const linhaCtx = document.getElementById('comprasLinhaChart').getContext('2d');
+
+  // Cria gradiente para o gráfico de linha
+  const gradient = linhaCtx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(6, 160, 96, 0.3)');
+  gradient.addColorStop(1, 'rgba(6, 160, 96, 0.05)');
+
+  new Chart(linhaCtx, {
+    type: 'line',
+    data: {
+      labels: linhaLabels,
+      datasets: [{
+        label: 'Compras',
+        data: linhaData,
+        borderColor: '#06a060',
+        // backgroundColor: 'rgba(6, 160, 96, 0.1)',
+        backgroundColor: gradient,
+        borderWidth: 3, // borda da linha
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6, // raio do ponto ao passar o mouse
+        pointBackgroundColor: '#06a060',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, grid: { display: true } }
+      }
+    }
+  });
+});
+</script>

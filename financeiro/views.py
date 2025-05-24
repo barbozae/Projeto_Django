@@ -3,12 +3,12 @@ from django.views import View
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
+
 from django.db.models import Sum, F, DecimalField, Q
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
 from decimal import Decimal
 from datetime import date
 from django.utils import timezone
-from django.db.models.functions import ExtractWeek, ExtractYear
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -453,6 +453,7 @@ class DashboardResumoView(DashboardBaseView):
         )
         vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
+
         total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
         fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
 
@@ -472,6 +473,13 @@ class DashboardResumoView(DashboardBaseView):
                 ticket_medio_por_data[v.data_venda]['total_venda'] += float(valor_venda)
                 ticket_medio_por_data[v.data_venda]['total_rodizio'] += float(v.rodizio or 0)
 
+        # Calcule a média de vendas por dia usando ticket_medio_por_data
+        if ticket_medio_por_data:
+            total_vendas_por_dia = [info['total_venda'] for info in ticket_medio_por_data.values()]
+            media_vendas = sum(total_vendas_por_dia) / len(total_vendas_por_dia)
+        else:
+            media_vendas = 0
+
         ticket_labels = []
         ticket_data = []
         for data_venda in sorted(ticket_medio_por_data.keys()):
@@ -479,6 +487,13 @@ class DashboardResumoView(DashboardBaseView):
             total_rodizio = ticket_medio_por_data[data_venda]['total_rodizio']
             ticket_labels.append(data_venda.strftime('%d/%m/%Y'))
             ticket_data.append(round(total_venda / total_rodizio, 2) if total_rodizio else 0)
+
+        # Média de rodízio por dia
+        if ticket_medio_por_data:
+            rodizio_por_dia = [info['total_rodizio'] for info in ticket_medio_por_data.values()]
+            media_rodizio = sum(rodizio_por_dia) / len(rodizio_por_dia)
+        else:
+            media_rodizio = 0
 
         # Gráfico de pizza para almoço e jantar
         total_almoco = sum(
@@ -631,19 +646,48 @@ class DashboardResumoView(DashboardBaseView):
         taxa_lucro = round(taxa_lucro, 2)
 
         # Dados para o gráfico de vendas
-        labels = [v.data_venda.strftime('%d/%m/%Y') for v in vendas_filtradas if v.data_venda]
-        data = [float(
-            (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
-            (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
-            (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
-            (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
-            (v.socio or 0)
-        ) for v in vendas_filtradas]
+        # labels = [v.data_venda.strftime('%d/%m/%Y') for v in vendas_filtradas if v.data_venda]
+        # data = [float(
+        #     (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
+        #     (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
+        #     (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
+        #     (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
+        #     (v.socio or 0)
+        # ) for v in vendas_filtradas]
 
-        # Se não houver vendas, evita erro no gráfico
-        if not labels:
-            labels = ['Sem dados']
-            data = [0]
+        # # Se não houver vendas, evita erro no gráfico
+        # if not labels:
+        #     labels = ['Sem dados']
+        #     data = [0]
+
+
+        datas_unicas = sorted({v.data_venda for v in vendas_filtradas if v.data_venda})
+        periodos = ['Almoço', 'Jantar']
+
+        # Inicializar estrutura: {data: {periodo: valor}}
+        vendas_por_data_periodo = {data: {p: 0 for p in periodos} for data in datas_unicas}
+
+        for v in vendas_filtradas:
+            if v.data_venda and v.periodo in periodos:
+                valor_venda = (
+                    (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
+                    (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
+                    (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
+                    (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
+                    (v.socio or 0)
+                )
+                vendas_por_data_periodo[v.data_venda][v.periodo] += float(valor_venda)
+
+        stacked_labels = [data.strftime('%d/%m/%Y') for data in datas_unicas]
+        almoco_data = [vendas_por_data_periodo[data]['Almoço'] for data in datas_unicas]
+        jantar_data = [vendas_por_data_periodo[data]['Jantar'] for data in datas_unicas]
+
+
+
+
+
+
+
 
         # Contexto para o template
         context = {
@@ -654,6 +698,7 @@ class DashboardResumoView(DashboardBaseView):
             'data_fim': data_fim,
             # Dados de vendas
             'totais_vendas': totais_vendas['total_vendas'],
+            'media_vendas': media_vendas,
             'total_taxas': total_taxas,
             'lucro_liquido': lucro_liquido,
             'taxa_lucro': taxa_lucro,
@@ -686,8 +731,11 @@ class DashboardResumoView(DashboardBaseView):
             'lucro_liquido': lucro_liquido,
 
             # Dados do gráfico
-            'labels_json': json.dumps(labels, cls=DjangoJSONEncoder),
-            'data_json': json.dumps(data, cls=DjangoJSONEncoder),
+            # 'labels_json': json.dumps(labels, cls=DjangoJSONEncoder),
+            # 'data_json': json.dumps(data, cls=DjangoJSONEncoder),
+            'stacked_labels_json': json.dumps(stacked_labels, cls=DjangoJSONEncoder),
+            'almoco_data_json': json.dumps(almoco_data, cls=DjangoJSONEncoder),
+            'jantar_data_json': json.dumps(jantar_data, cls=DjangoJSONEncoder),
 
             'donut_data': json.dumps([total_almoco, total_jantar], cls=DjangoJSONEncoder),
             
@@ -704,6 +752,8 @@ class DashboardResumoView(DashboardBaseView):
 
             'cmv_bar_labels_json': json.dumps(cmv_bar_labels, cls=DjangoJSONEncoder),
             'cmv_bar_data_json': json.dumps(cmv_bar_data, cls=DjangoJSONEncoder),
+
+            'media_rodizio': media_rodizio,
         }
 
         return render(request, 'financeiro/dashboard_resumo.html', context)

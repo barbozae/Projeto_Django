@@ -1,4 +1,4 @@
-<div class="row align-items-stretch">
+<div class="row align-items-stretch mt-4">
   <!-- Gráfico de Rosca: Almoço x Jantar (ocupa o mesmo espaço de um card) -->
   <div class="col-md-3 d-flex flex-column gap-3">
     <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
@@ -79,11 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
         data: ticketData,
         borderColor: '#06a060',
         backgroundColor: gradient,
-        borderWidth: 3,
+        borderWidth: 0, // Largura da linha
         fill: true,
         tension: 0.4,
         pointRadius: 4,
-        pointHoverRadius: 6,
+        pointHoverRadius: 6, // Raio do ponto ao passar o mouse,
         pointBackgroundColor: '#06a060',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2
