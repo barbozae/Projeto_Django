@@ -1,0 +1,92 @@
+<div class="row align-items-stretch mt-3">
+  <!-- Gráfico de Teia: Compras por Classificação -->
+  <div class="col-md-3 d-flex flex-column gap-3">
+    <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center align-items-center p-1" style="height: 260px;">
+        <h6 class="text-center mb-3">Gastos por Classificação</h6>
+        <canvas id="comprasRadarChart" width="220" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de Linha: Compras por Data -->
+  <div class="col-md-9">
+    <div class="bg-white p-3 rounded-3 h-100">
+      <div class="card-body" style="height:260px;">
+        <h5 class="text-justify mb-3">Compras por Data</h5>
+        <canvas id="comprasLinhaChart" style="height:100%;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dados para os gráficos -->
+<script id="radar-labels" type="application/json">{{ radar_labels_json|safe }}</script>
+<script id="radar-data" type="application/json">{{ radar_data_json|safe }}</script>
+<script id="linha-labels" type="application/json">{{ linha_labels_json|safe }}</script>
+<script id="linha-data" type="application/json">{{ linha_data_json|safe }}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Gráfico de Teia (Radar): Compras por Classificação
+  const radarLabels = JSON.parse(document.getElementById('radar-labels').textContent);
+  const radarData = JSON.parse(document.getElementById('radar-data').textContent);
+  const radarCtx = document.getElementById('comprasRadarChart').getContext('2d');
+  new Chart(radarCtx, {
+    type: 'radar',
+    data: {
+      labels: radarLabels,
+      datasets: [{
+        label: 'Compras',
+        data: radarData,
+        backgroundColor: 'rgba(6, 160, 96, 0.2)',
+        borderColor: '#06a060',
+        pointBackgroundColor: '#06a060',
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      layout: {
+        padding: 0 // Remove padding para ocupar todo o espaço do card
+      },
+    }
+  });
+
+  // Gráfico de Linha: Compras por Data
+  const linhaLabels = JSON.parse(document.getElementById('linha-labels').textContent);
+  const linhaData = JSON.parse(document.getElementById('linha-data').textContent);
+  const linhaCtx = document.getElementById('comprasLinhaChart').getContext('2d');
+  new Chart(linhaCtx, {
+    type: 'line',
+    data: {
+      labels: linhaLabels,
+      datasets: [{
+        label: 'Compras',
+        data: linhaData,
+        borderColor: '#06a060',
+        backgroundColor: 'rgba(6, 160, 96, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#06a060'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, grid: { display: true } }
+      }
+    }
+  });
+});
+</script>

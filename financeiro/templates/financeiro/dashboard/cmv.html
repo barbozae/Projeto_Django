@@ -1,0 +1,119 @@
+<div class="row align-items-stretch mt-3">
+    <!-- Gráfico de barra deitada - CMV Semanal -->
+    <div class="col-md-3 d-flex flex-column gap-3">
+        <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 260px;">
+                <h6 class="text-center mb-3">Gasto CMV Semanal</h6>
+                <canvas id="cmvBarChart" width="120" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Gráfico de barra de CMV Diário -->
+    <div class="col-md-9">
+        <div class="bg-white p-3 rounded-3 h-100">
+            <div class="card-body" style="height:260px;">
+                <h5 class="text-justify mb-3">CMV por Data</h5>
+                <canvas id="cmvBarPorDataChart" style="height:100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script id="cmv-labels" type="application/json">{{ cmv_labels_json|safe }}</script>
+<script id="cmv-data" type="application/json">{{ cmv_data_json|safe }}</script>
+<script id="cmv-bar-labels" type="application/json">{{ cmv_bar_labels_json|safe }}</script>
+<script id="cmv-bar-data" type="application/json">{{ cmv_bar_data_json|safe }}</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Gráfico de Barras Horizontal: Gasto CMV Semanal
+  const cmvLabels = JSON.parse(document.getElementById('cmv-labels').textContent);
+  const cmvData = JSON.parse(document.getElementById('cmv-data').textContent);
+  const cmvCtx = document.getElementById('cmvBarChart').getContext('2d');
+  new Chart(cmvCtx, {
+    type: 'bar',
+    data: {
+      labels: cmvLabels,
+      datasets: [{
+        label: 'CMV',
+        data: cmvData,
+        backgroundColor: 'rgba(6, 160, 96, 0.7)',
+        borderRadius: 8,
+        maxBarThickness: 24,
+      }]
+    },
+    options: {
+      indexAxis: 'y', // Faz as barras ficarem deitadas
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => `R$ ${context.parsed.x.toFixed(2)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { display: true },
+          ticks: {
+            callback: (value) => `R$ ${value}`
+          }
+        },
+        y: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Gráfico de Barras: CMV por Data
+  const cmvBarLabels = JSON.parse(document.getElementById('cmv-bar-labels').textContent);
+  const cmvBarData = JSON.parse(document.getElementById('cmv-bar-data').textContent);
+  const cmvBarCtx = document.getElementById('cmvBarPorDataChart').getContext('2d');
+  new Chart(cmvBarCtx, {
+    type: 'bar',
+    data: {
+      labels: cmvBarLabels,
+      datasets: [{
+        label: 'CMV',
+        data: cmvBarData,
+        backgroundColor: 'rgba(6, 160, 96, 0.7)',
+        borderRadius: 8,
+        maxBarThickness: 32,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // Permite que o gráfico se ajuste ao tamanho do contêiner
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => `R$ ${context.parsed.y.toFixed(2)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { display: true },
+          ticks: {
+            callback: (value) => `R$ ${value}`
+          }
+        }
+      }
+    }
+  });
+});
+</script>

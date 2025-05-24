@@ -6,7 +6,7 @@ from users.models import Tenant
 class Fornecedor(models.Model):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    nome_empresa = models.CharField(verbose_name="Fornecedor", max_length=50, blank=False, unique=True)
+    nome_empresa = models.CharField(verbose_name="Fornecedor", max_length=50, blank=False)
     cnpj = models.CharField(verbose_name="CNPJ", max_length=14, null=True, blank=True)
     nome_contato = models.CharField(verbose_name="Contato", max_length=35, null=True, blank=True)
     telefone = models.CharField(verbose_name="Telefone", max_length=15, null=True, blank=True)
@@ -19,6 +19,12 @@ class Fornecedor(models.Model):
     # author = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, default=1)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False, default=1)
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
+
+    # garantir que nome da empresa seja único para cada tenant
+    class Meta:
+        unique_together = ('tenant', 'nome_empresa')
+        verbose_name = "Fornecedor"
+        verbose_name_plural = "Fornecedores"
 
     def __str__(self):
         # Retorna uma string representando o fornecedor

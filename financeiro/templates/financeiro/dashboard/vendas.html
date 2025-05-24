@@ -1,0 +1,120 @@
+<!-- <h5 class="mb-4 mt-3" style="color: #06a060;">Vendas</h5> -->
+<!-- <h5 class="mb-4 mt-3" style="color: #686b6a;">Vendas</h5> -->
+
+<div class="row align-items-stretch">
+    <!-- Coluna dos cards (vertical) -->
+    <div class="col-md-3 d-flex flex-column gap-3">
+        <div class="card text-bg-light mb-2 flex-fill" style="max-width: 100%;">
+            <div class="card-header">Total Vendas</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ totais_vendas|floatformat:2}}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-light mb-2 flex-fill" style="max-width: 100%;">
+            <div class="card-header">Rodízio</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">{{ total_rodizio }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-light mb-2 flex-fill" style="max-width: 100%;">
+            <div class="card-header">Ticket Médio</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">{{ ticket_medio|floatformat:2 }}</h5>
+            </div>
+        </div>
+        <div class="card text-bg-light mb-2 flex-fill" style="max-width: 100%;">
+            <div class="card-header">Lucro</div>
+            <div class="card-body">
+                <h5 class="card-title text-center">R$ {{ lucro_liquido|floatformat:2}}</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna do gráfico (ocupa toda a altura dos cards) -->
+    <div class="col-md-9 d-flex flex-column justify-content-between">
+        <div class="h-100 d-flex flex-column">
+            <h5>Vendas</h5>
+            <!-- <p class="text-muted">Vendas.</p> -->
+            <div class="flex-grow-1" style="min-height:350px;">
+                <canvas id="vendasChart" style="height:100%; width:100%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dados para o gráfico -->
+<script id="labels-data" type="application/json">
+  {{ labels_json|safe }}
+</script>
+<script id="values-data" type="application/json">
+  {{ data_json|safe }}
+</script>
+
+<!-- Adicione Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const labels = JSON.parse(document.getElementById('labels-data').textContent);
+    const data = JSON.parse(document.getElementById('values-data').textContent);
+
+    // Encontre o maior valor
+    const maxValue = Math.max(...data);
+
+    // Gera um array de cores: verde escuro para o maior valor, verde claro para os outros
+    const pointColors = data.map(v =>
+      v === maxValue ? 'rgba(6, 160, 96, 1)' : 'rgba(75, 192, 192, 1)'
+    );
+
+    // Cria o gráfico
+    const ctx = document.getElementById('vendasChart').getContext('2d');
+
+    // Crie o degradê (de cima para baixo)
+    const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+    gradient.addColorStop(0, 'rgba(75, 192, 192, 1)');   // Cor no topo
+    gradient.addColorStop(1, 'rgba(230, 249, 240, 0.8)'); // Cor na base
+
+    const vendasChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Vendas Totais',
+            data: data,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            // backgroundColor: 'rgba(75, 192, 192, 0.4)',
+            backgroundColor: gradient, // Usando o degradê
+            borderWidth: 3, // Espessura da linha
+            fill: true, // Preenche a área abaixo da linha
+            tension: 0.3, // Suaviza a linha
+            pointRadius: 3, // Tamanho dos pontos
+            pointBackgroundColor: pointColors, // Cores dos pontos
+            pointBorderColor: 'rgba(75, 192, 192, 1)', // Cor da borda dos pontos
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 2000, // Duração da animação em milissegundos
+        },
+        plugins: {
+        //   legend: { position: 'top' },
+          legend: { display: false },
+        },
+        scales: {
+            x: {
+            title: { display: false },
+            grid: { display: false } // Remove linhas de grade verticais
+            },
+            y: {
+            title: { display: false },
+            beginAtZero: true,
+            grid: { display: true } // Mantém linhas de grade horizontais
+            },
+        },
+      },
+    });
+  });
+</script>

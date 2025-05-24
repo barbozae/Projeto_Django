@@ -1,0 +1,126 @@
+<div class="row align-items-stretch">
+  <!-- Gráfico de Rosca: Almoço x Jantar (ocupa o mesmo espaço de um card) -->
+  <div class="col-md-3 d-flex flex-column gap-3">
+    <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 260px;">
+        <h6 class="text-center mb-3">Almoço x Jantar</h6>
+        <canvas id="donutAlmocoJantar" width="120" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de Linha: Ticket Médio (ocupa o restante da linha) -->
+  <div class="col-md-9">       
+    <!-- <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height:320px;"> Borda aparente -->
+      <div class="bg-white p-3 rounded-3 h-100">  <!-- Borda sutil -->
+        <div class="card-body" style="height:260px;">
+          <h5 class="text-justify mb-3">Ticket Médio</h5>
+          <canvas id="ticketMedioChart" style="height:100%;"></canvas>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+<!-- Dados para os gráficos -->
+<script id="donut-data" type="application/json">{{ donut_data|safe }}</script>
+<script id="ticket-labels" type="application/json">{{ ticket_labels_json|safe }}</script>
+<script id="ticket-data" type="application/json">{{ ticket_data_json|safe }}</script>
+
+<!-- Script principal -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Gráfico de Rosca: Almoço x Jantar
+  const donutData = JSON.parse(document.getElementById('donut-data').textContent);
+  const donutCtx = document.getElementById('donutAlmocoJantar').getContext('2d');
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Almoço', 'Jantar'],
+      datasets: [{
+        data: donutData,
+        backgroundColor: ['#06a060', '#78ad97'],
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      cutout: '70%',
+      plugins: {
+        legend: { 
+          display: true, 
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            boxWidth: 12
+          }
+        }
+      }
+    }
+  });
+
+  // Gráfico de Linha: Ticket Médio
+  const ticketLabels = JSON.parse(document.getElementById('ticket-labels').textContent);
+  const ticketData = JSON.parse(document.getElementById('ticket-data').textContent);
+  const ticketCtx = document.getElementById('ticketMedioChart').getContext('2d');
+  
+  // Cria gradiente para o gráfico de linha
+  const gradient = ticketCtx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(6, 160, 96, 0.3)');
+  gradient.addColorStop(1, 'rgba(6, 160, 96, 0.05)');
+
+  new Chart(ticketCtx, {
+    type: 'line',
+    data: {
+      labels: ticketLabels,
+      datasets: [
+      {
+        label: 'Ticket Médio',
+        data: ticketData,
+        borderColor: '#06a060',
+        backgroundColor: gradient,
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#06a060',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              return `R$ ${context.parsed.y.toFixed(2)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { 
+          title: { display: false }, 
+          grid: { display: false },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45
+          }
+        },
+        y: { 
+          title: { display: false }, 
+          beginAtZero: false, 
+          grid: { display: true },
+          ticks: {
+            callback: (value) => `R$ ${value}`
+          }
+        }
+      }
+    }
+  });
+});
+</script>

@@ -8,6 +8,10 @@ from django.db.models.functions import Coalesce
 from decimal import Decimal
 from datetime import date
 from django.utils import timezone
+from django.db.models.functions import ExtractWeek, ExtractYear
+
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 class FiltrosFinanceiro:
@@ -449,7 +453,55 @@ class DashboardResumoView(DashboardBaseView):
         )
         vendas_filtradas = filtros_vendas.aplicar_filtros(vendas)
         totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
+        total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
         fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
+
+# --- Ticket médio diário para gráfico de linha ---
+        ticket_medio_por_data = {}
+        for v in vendas_filtradas:
+            if v.data_venda:
+                valor_venda = (
+                    (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
+                    (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
+                    (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
+                    (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
+                    (v.socio or 0)
+                )
+                if v.data_venda not in ticket_medio_por_data:
+                    ticket_medio_por_data[v.data_venda] = {'total_venda': 0, 'total_rodizio': 0}
+                ticket_medio_por_data[v.data_venda]['total_venda'] += float(valor_venda)
+                ticket_medio_por_data[v.data_venda]['total_rodizio'] += float(v.rodizio or 0)
+
+        ticket_labels = []
+        ticket_data = []
+        for data_venda in sorted(ticket_medio_por_data.keys()):
+            total_venda = ticket_medio_por_data[data_venda]['total_venda']
+            total_rodizio = ticket_medio_por_data[data_venda]['total_rodizio']
+            ticket_labels.append(data_venda.strftime('%d/%m/%Y'))
+            ticket_data.append(round(total_venda / total_rodizio, 2) if total_rodizio else 0)
+
+        # Gráfico de pizza para almoço e jantar
+        total_almoco = sum(
+            float(
+                (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
+                (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
+                (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
+                (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
+                (v.socio or 0)
+            )
+            for v in vendas_filtradas if hasattr(v, 'periodo') and v.periodo == 'Almoço'
+        )
+        total_jantar = sum(
+            float(
+                (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
+                (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
+                (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
+                (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
+                (v.socio or 0)
+            )
+            for v in vendas_filtradas if hasattr(v, 'periodo') and v.periodo == 'Jantar'
+        )
+        donut_data = [total_almoco, total_jantar]
 
         # Filtros e dados de compras
         classificacao_selecionada = request.GET.getlist('classificacao_compras')
@@ -498,6 +550,50 @@ class DashboardResumoView(DashboardBaseView):
                 if produto['classificacao'] == grupo_produto['classificacao'] and produto['grupo_produto'] == grupo_produto['grupo_produto']:
                     produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
 
+        # Dados para o gráfico de teia (Radar) - Compras por classificação
+        radar_labels = [item['classificacao'] for item in gastos_por_classificacao]
+        radar_data = [float(item['total_valor']) for item in gastos_por_classificacao]
+
+        # Dados para o gráfico de linha - Compras por data
+        compras_por_data = {}
+        for c in compras_filtradas:
+            if c.data_compra:
+                compras_por_data.setdefault(c.data_compra, 0)
+                compras_por_data[c.data_compra] += float(c.valor_compra or 0)
+
+        linha_labels = [data.strftime('%d/%m/%Y') for data in sorted(compras_por_data.keys())]
+        linha_data = [compras_por_data[data] for data in sorted(compras_por_data.keys())]
+
+        # Filtre apenas CMV
+        cmv_queryset = Compras.objects.filter(classificacao='CMV')
+
+        # Agrupe por semana e ano
+        cmv_semanal = (
+            cmv_queryset
+            .annotate(ano=ExtractYear('data_compra'), semana=ExtractWeek('data_compra'))
+            .values('ano', 'semana')
+            .annotate(total=Sum('valor_compra'))
+            .order_by('ano', 'semana')
+        )
+
+        # Prepare os labels e dados para o gráfico de barras
+        cmv_labels = [f"Sem {item['semana']}/{item['ano']}" for item in cmv_semanal]
+        cmv_data = [float(item['total']) for item in cmv_semanal]
+
+        cmv_por_data = {}
+        for c in compras_filtradas:
+            if c.classificacao == 'CMV' and c.data_compra:
+                cmv_por_data.setdefault(c.data_compra, 0)
+                cmv_por_data[c.data_compra] += float(c.valor_compra or 0)
+
+        cmv_bar_labels = [data.strftime('%d/%m/%Y') for data in sorted(cmv_por_data.keys())]
+        cmv_bar_data = [cmv_por_data[data] for data in sorted(cmv_por_data.keys())]
+
+
+
+
+
+
         # Filtros e dados de pagamentos de funcionários
         data_inicio_funcionarios = request.GET.get('data_inicio_funcionarios')
         data_fim_funcionarios = request.GET.get('data_fim_funcionarios')
@@ -534,14 +630,31 @@ class DashboardResumoView(DashboardBaseView):
         taxa_lucro = lucro_liquido / totais_vendas['total_vendas'] * 100 if totais_vendas['total_vendas'] != 0 else 0
         taxa_lucro = round(taxa_lucro, 2)
 
+        # Dados para o gráfico de vendas
+        labels = [v.data_venda.strftime('%d/%m/%Y') for v in vendas_filtradas if v.data_venda]
+        data = [float(
+            (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
+            (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
+            (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
+            (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
+            (v.socio or 0)
+        ) for v in vendas_filtradas]
+
+        # Se não houver vendas, evita erro no gráfico
+        if not labels:
+            labels = ['Sem dados']
+            data = [0]
+
         # Contexto para o template
         context = {
             **totais_compras,
+            **totais_vendas,
             # Dados de filtro
             'data_inicio': data_inicio,
             'data_fim': data_fim,
             # Dados de vendas
             'totais_vendas': totais_vendas['total_vendas'],
+            'total_taxas': total_taxas,
             'lucro_liquido': lucro_liquido,
             'taxa_lucro': taxa_lucro,
             'fundo_caixa': fundo_caixa,
@@ -571,6 +684,26 @@ class DashboardResumoView(DashboardBaseView):
 
             # Lucro líquido
             'lucro_liquido': lucro_liquido,
+
+            # Dados do gráfico
+            'labels_json': json.dumps(labels, cls=DjangoJSONEncoder),
+            'data_json': json.dumps(data, cls=DjangoJSONEncoder),
+
+            'donut_data': json.dumps([total_almoco, total_jantar], cls=DjangoJSONEncoder),
+            
+            'ticket_labels_json': json.dumps(ticket_labels, cls=DjangoJSONEncoder),
+            'ticket_data_json': json.dumps(ticket_data, cls=DjangoJSONEncoder),
+
+            'radar_labels_json': json.dumps(radar_labels, cls=DjangoJSONEncoder),
+            'radar_data_json': json.dumps(radar_data, cls=DjangoJSONEncoder),
+            'linha_labels_json': json.dumps(linha_labels, cls=DjangoJSONEncoder),
+            'linha_data_json': json.dumps(linha_data, cls=DjangoJSONEncoder),
+
+            'cmv_labels_json': json.dumps(cmv_labels, cls=DjangoJSONEncoder),
+            'cmv_data_json': json.dumps(cmv_data, cls=DjangoJSONEncoder),
+
+            'cmv_bar_labels_json': json.dumps(cmv_bar_labels, cls=DjangoJSONEncoder),
+            'cmv_bar_data_json': json.dumps(cmv_bar_data, cls=DjangoJSONEncoder),
         }
 
         return render(request, 'financeiro/dashboard_resumo.html', context)
