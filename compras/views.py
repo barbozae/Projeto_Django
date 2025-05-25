@@ -1,13 +1,93 @@
-# from urllib.parse import quote  # para codificar o tenant corretamente
+# Bibliotecas padrão
+import json
+from decimal import Decimal
+from datetime import datetime
 
+# Bibliotecas de terceiros (Django)
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+from django.core.serializers.json import DjangoJSONEncoder
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
+# Importações locais (do meu projeto)
 from .models import Fornecedor, Compras
-from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 from project.utils import generate_success_url
+from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
+
+
+@csrf_protect
+# Usado para atualizar os dados em massa da tabela de compras
+def compras_update_em_massa(request):
+    def parse_date(val):
+        if val:
+            try:
+                return datetime.strptime(val, "%Y-%m-%d").date()
+            except Exception:
+                return None
+        return None
+
+    def parse_decimal(val):
+        try:
+            return Decimal(str(val)) if val not in [None, ""] else None
+        except Exception:
+            return None
+
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Método não permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        updated_ids = []
+
+        for row in data:
+            if not row.get('id'):
+                continue
+
+            try:
+                compra = Compras.objects.get(pk=row['id'])
+
+                # Datas
+                compra.data_compra = parse_date(row.get('data_compra'))
+                compra.data_vencimento = parse_date(row.get('data_vencimento'))
+                compra.data_pagamento = parse_date(row.get('data_pagamento'))
+
+                # Valores decimais
+                compra.valor_compra = parse_decimal(row.get('valor_compra'))
+                compra.valor_pago = parse_decimal(row.get('valor_pago'))
+
+                # Campos textuais com default
+                text_fields = [
+                    'numero_boleto', 'classificacao', 'forma_pagamento',
+                    'qtd', 'observacao', 'grupo_produto', 'produto'
+                ]
+                for field in text_fields:
+                    setattr(compra, field, row.get(field, ""))
+
+                # Fornecedor
+                try:
+                    compra.fornecedor = Fornecedor.objects.get(pk=row['fornecedor']) if row.get('fornecedor') else None
+                except Fornecedor.DoesNotExist:
+                    compra.fornecedor = None
+
+                compra.save()
+                updated_ids.append(compra.id)
+
+            except Compras.DoesNotExist:
+                continue
+
+        return JsonResponse({
+            "status": "success",
+            "updated_count": len(updated_ids),
+            "updated_ids": updated_ids
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "message": "JSON inválido"}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 class FornecedorListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
@@ -33,7 +113,6 @@ class FornecedorListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuer
             queryset = queryset.filter(nome_empresa__in=nome_empresa)
         return queryset
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tenant = getattr(self.request.user, 'tenant', None)
@@ -45,6 +124,7 @@ class FornecedorListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuer
         context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
         # context['numero_boleto'] = Compras.objects.values_list('numero_boleto', flat=True).distinct()
         context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
+
         return context
     
 
@@ -109,12 +189,6 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
         boleto_selecionado = self.request.GET.getlist('numero_boleto[]')
         filtro_data = self.request.GET.get('filtro_data', 'compra')  # Padrão é 'compra'
 
-        # Aplica os filtros se os parâmetros estiverem presentes
-        # if data_inicio:
-        #     queryset = queryset.filter(data_compra__gte=data_inicio)
-        # if data_fim:
-        #     queryset = queryset.filter(data_compra__lte=data_fim)
-
         # Aplica o filtro de datas conforme o radio selecionado
         if data_inicio:
             if filtro_data == 'vencimento':
@@ -146,12 +220,36 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
         context = super().get_context_data(**kwargs)
         tenant = getattr(self.request.user, 'tenant', None)
         if tenant:
-            tenant = str(tenant).lower().replace(' ', '_')  # Converte para minúsculas e substitui espaços por underscores
+            tenant = str(tenant).lower().replace(' ', '_')
         context['tenant'] = tenant
 
         # Filtra os fornecedores e boletos pelo tenant
         context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
         context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
+
+        # Aqui você monta o JSON para a grid
+        # Usado para popular a grid com os dados em massa da tabela de compras
+        compras_queryset = self.get_queryset()
+        compras_grid_data = [
+            {
+                "id": c.pk,
+                "data_compra": c.data_compra.strftime('%Y-%m-%d') if c.data_compra else "",
+                "data_vencimento": c.data_vencimento.strftime('%Y-%m-%d') if c.data_vencimento else "",
+                "data_pagamento": c.data_pagamento.strftime('%Y-%m-%d') if c.data_pagamento else "",
+                "fornecedor": c.fornecedor_id,  # <-- ALTERE para enviar o ID!
+                "valor_compra": float(c.valor_compra or 0),
+                "valor_pago": float(c.valor_pago or 0),
+                "numero_boleto": c.numero_boleto or "",
+                "grupo_produto": c.grupo_produto,  # <-- ALTERE para enviar o ID se for FK
+                "produto": c.produto,              # <-- ALTERE para enviar o ID se for FK
+                "classificacao": str(c.classificacao or ""),
+                "forma_pagamento": str(c.forma_pagamento or ""),
+                "qtd": c.qtd or "",
+                "observacao": c.observacao or "",
+            }
+            for c in compras_queryset
+        ]
+        context['compras_grid_data_json'] = json.dumps(compras_grid_data, cls=DjangoJSONEncoder)
 
         return context
     

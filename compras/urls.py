@@ -1,4 +1,5 @@
 from django.urls import path
+from compras import views
 from compras.views import FornecedorListView, FornecedorCreateView, FornecedorUpDateView, ComprasListView, ComprasCreateView, ComprasUpDateView, ComprasDeleteView
 
 
@@ -13,4 +14,5 @@ urlpatterns = [
                 path('create_compras/', ComprasCreateView.as_view(), name="create_compras"),
                 path('update_compras/<int:pk>', ComprasUpDateView.as_view(), name="update_compras"),
                 path('delete_compras/<int:pk>', ComprasDeleteView.as_view(), name='delete_compras'),
+                path('compras/update-em-massa/', views.compras_update_em_massa, name='compras_update_em_massa'),
             ]

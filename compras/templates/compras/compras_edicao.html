@@ -1,0 +1,117 @@
+<!-- Tabela para edição em massa da tabela comrpas -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const columnDefs = [
+    { headerName: "ID", field: "id", editable: false },
+    { headerName: "Data Compra", field: "data_compra", editable: true },
+    { headerName: "Vencimento", field: "data_vencimento", editable: true },
+    { headerName: "Pagamento", field: "data_pagamento", editable: true },
+    { headerName: "Fornecedor", field: "fornecedor", editable: true },
+    { headerName: "Valor Compra", field: "valor_compra", editable: true, type: 'numericColumn' },
+    { headerName: "Valor Pago", field: "valor_pago", editable: true, type: 'numericColumn' },
+    { headerName: "N° Boleto", field: "numero_boleto", editable: true },
+    { headerName: "Grupo", field: "grupo_produto", editable: true },
+    { headerName: "Produto", field: "produto", editable: true },
+    { headerName: "Classificação", field: "classificacao", editable: true },
+    { headerName: "Forma Pagamento", field: "forma_pagamento", editable: true },
+    { headerName: "Qtd", field: "qtd", editable: true },
+    { headerName: "Observação", field: "observacao", editable: true }
+  ];
+
+  const rowData = JSON.parse(document.getElementById('compras-grid-data').textContent);
+
+  let gridApi = null;
+
+  const gridOptions = {
+    columnDefs: columnDefs,
+    rowData: rowData,
+    defaultColDef: { sortable: true, filter: true, resizable: true },
+    animateRows: true,
+    rowSelection: { type: 'sigleRow' },
+    editType: 'fullRow',
+    suppressClickEdit: false,
+    onCellValueChanged: function(event) {
+      event.data._edited = true;
+    },
+    onGridReady: function(params) {
+      gridApi = params.api;
+    }
+  };
+
+  const gridDiv = document.querySelector('#comprasGrid');
+  agGrid.createGrid(gridDiv, gridOptions);
+
+  function getEditedRows() {
+    const updatedRows = [];
+    if (!gridApi) {
+      alert('Grid ainda não está pronta!');
+      return updatedRows;
+    }
+    gridApi.forEachNode(node => {
+      if (node.data && node.data._edited) {
+        updatedRows.push(node.data);
+      }
+    });
+    return updatedRows;
+  }
+
+  document.getElementById('salvar-edicoes').onclick = function() {
+    console.log('Botão clicado!');
+    const editedRows = getEditedRows();
+    console.log('Linhas editadas:', editedRows);
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    const btn = document.getElementById('salvar-edicoes');
+    btn.disabled = true;
+    btn.innerText = 'Salvando...';
+
+    fetch("{% url 'compras_update_em_massa' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify(editedRows)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erro na resposta do servidor');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status === "success") {
+          alert(`Sucesso! ${data.updated_count} compras atualizadas.`);
+          if (gridApi) {
+            gridApi.refreshCells({ force: true });
+          }
+        } else {
+          alert('Erro ao salvar: ' + (data.error || 'Erro desconhecido'));
+        }
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao salvar alterações: ' + error.message);
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = 'Salvar alterações';
+      });
+  };
+});
+</script>
