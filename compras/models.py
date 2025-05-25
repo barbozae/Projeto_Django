@@ -46,7 +46,7 @@ class Compras(models.Model):
                     ('Cheque', 'Cheque'),
                     ('Transferência', 'Transferência'),
                     ('Boleto', 'Boleto'),
-                    ('Débito Automático', 'Débito Automático')
+                    ('Débito em Conta', 'Débito em Conta')
     ]
 
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)

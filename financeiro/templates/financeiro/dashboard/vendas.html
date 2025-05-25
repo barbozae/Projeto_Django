@@ -1,6 +1,13 @@
-<!-- <h5 class="mb-4 mt-3" style="color: #06a060;">Vendas</h5>
-<h5 class="mb-4 mt-3" style="color: #686b6a;">Vendas</h5> -->
-
+<!-- <h5 class="mb-4 mt-3" style="color: #06a060;">Vendas</h5> -->
+<h5 class="mb-4 mt-3" style="color: #686b6a;">
+  <strong>Vendas</strong>
+</h5>
+<!-- <h5 class="mb-4 mt-3" style="color: #8245bc;">Vendas</h5> -->
+<!-- <style>
+#vendasChart:hover {
+  cursor: pointer;
+}
+</style> -->
 <div class="row align-items-stretch mt-3">
     <!-- Coluna dos cards (vertical) -->
     <div class="col-md-3 d-flex flex-column gap-3">
@@ -63,15 +70,18 @@
               <span>
                 R$ {{ lucro_liquido|floatformat:2 }}
               </span>
+              <span style="font-size: 0.95em; color: #8a8a8a;">
+                {{ taxa_lucro|floatformat:2 }} %
+              </span>
             </div>
           </div>
         </div>
     </div>
 
     <!-- Coluna do gráfico (ocupa toda a altura dos cards) -->
-    <div class="col-md-9 d-flex flex-column justify-content-between">
+    <div class="col-md-9">
         <div class="h-100 d-flex flex-column">
-            <h5>Vendas</h5>
+            <h5>Vendas por Dia</h5>
             <!-- <p class="text-muted">Vendas.</p> -->
             <div class="flex-grow-1" style="min-height:350px;">
                 <canvas id="vendasChart" style="height:100%; width:100%;"></canvas>
@@ -85,6 +95,7 @@
 <script id="stacked-labels-data" type="application/json">{{ stacked_labels_json|safe }}</script>
 <script id="almoco-data" type="application/json">{{ almoco_data_json|safe }}</script>
 <script id="jantar-data" type="application/json">{{ jantar_data_json|safe }}</script>
+<script id="total-rodizio" type="application/json">{{ total_rodizio|floatformat:2 }}</script>
 
 <!-- Adicione Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -93,6 +104,7 @@
     const labels = JSON.parse(document.getElementById('stacked-labels-data').textContent);
     const almocoData = JSON.parse(document.getElementById('almoco-data').textContent);
     const jantarData = JSON.parse(document.getElementById('jantar-data').textContent);
+    // const totalRodizio = JSON.parse(document.getElementById('total-rodizio').textContent);
 
     const ctx = document.getElementById('vendasChart').getContext('2d');
     new Chart(ctx, {
@@ -104,12 +116,16 @@
             label: 'Almoço',
             data: almocoData,
             backgroundColor: 'rgba(6, 122, 140, 0.7)',
+            hoverBackgroundColor: 'rgba(6, 122, 140, 1)', // cor mais forte ao passar o mouse
+            hoverBorderWidth: 3, // borda mais grossa ao passar o mouse
             stack: 'Stack 0',
           },
           {
             label: 'Jantar',
             data: jantarData,
             backgroundColor: 'rgba(6, 160, 96, 0.8)',
+            hoverBackgroundColor: 'rgba(6, 160, 96, 1)',
+            hoverBorderWidth: 3,
             stack: 'Stack 0',
           }
         ]
@@ -119,6 +135,14 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' },
+          tooltip: {
+          displayColors: false, // inibe a cor do segmento
+          callbacks: {
+            label: function(context) {
+              return `R$ ${Number(context.raw).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+          }
+        },
         },
         scales: {
           x: {

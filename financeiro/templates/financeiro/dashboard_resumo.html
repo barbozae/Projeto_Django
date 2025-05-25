@@ -32,12 +32,12 @@
 
     <h5 class="mb-4 mt-3" style="color: #06a060;">Dashboard Visão Geral</h5>
 
-    <!-- Menu lateral -->
-    <div class="container-fluid">
-        <div class="row">
+    <!-- MENU LATERAL -->
+    <!-- <div class="container-fluid"> -->
+        <!-- <div class="row"> -->
             <!-- Menu lateral esquerdo estilizado -->
-            <nav class="position-fixed start-0 menu-lateral p-3" style="top: 100px; width: 190px;">
-                <form action="" method="GET" class="row g-2 align-items-end mb-3">
+            <!-- <nav class="position-fixed start-0 menu-lateral p-3" style="top: 100px; width: 190px;">
+                <form action="" method="GET" class="row g-2 align-items-end mb-3"> -->
                     <!-- <div class="col-12 mb-2">
                         <div class="row g-2">
                             <div class="col">
@@ -50,7 +50,7 @@
                             </div>
                         </div>
                     </div> -->
-                </form>
+                <!-- </form>
                 <div class="col-auto d-flex align-items-end">
                     <ul class="nav flex-column">
                         <li class="nav-item mb-2">
@@ -72,12 +72,13 @@
                 </div>
             </nav>
         </div>
-    </div>
+    </div> -->
 
 
 
     <!-- Conteúdo principal -->
-    <div class="col-10 offset-2">
+    <!-- <div class="col-10 offset-2"> -->
+    <div class="container-fluid px-0">
         <!-- Filtro -->
         <form action="" method="GET" class="d-flex align-items-center">
             <div class="mb-2 me-2">
@@ -94,7 +95,6 @@
             </div>
         </form>
 
-
         {% include 'financeiro/dashboard/vendas.html'%}
 
         {% include 'financeiro/dashboard/ticket_medio.html'%}
@@ -103,23 +103,31 @@
 
         {% include 'financeiro/dashboard/cmv.html'%}
 
-        <!-- Linha 1 dos cards -->
-        <div class="d-flex justify-content-around flex-wrap mt-3">
-            {% include 'financeiro/cards/cards_resumo_1.html' %}
-        </div>
+        <hr class="my-3 mt-5" style="border-color: #06a060; border-width: 3px;">
 
-        <hr class="my-3" style="border-color: #06a060; border-width: 3px;">
+        <!-- Caixa expansiva tabela -->
+        <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+            <summary style="font-weight: bold; cursor: pointer;">Tabela Dinâmica</summary>
+                <p>Tabela expansiva para visualização agrupada.</p>
 
-        <div class="row">
-            <div class="col-12 mt-3">
-                {% include 'financeiro/cards/cards_resumo_2.html' %}
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-12">
-                {% include 'financeiro/table/tabela_resumo.html' %}
-            </div>
-        </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            {% include 'financeiro/table/tabela_resumo.html' %}
+                        </div>
+                    </div>
+        </details>
+
+        <!-- Caixa expansiva Resumo final -->
+        <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+            <summary style="font-weight: bold; cursor: pointer;">Cards</summary>
+                <p>Resumo Geral.</p>
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            {% include 'financeiro/cards/cards_resumo.html' %}
+                        </div>
+                    </div>
+        </details>
+
     </div>
 
     <!-- IDs para navegação rápida -->

@@ -11,8 +11,7 @@
 
   <!-- Gráfico de Linha: Ticket Médio (ocupa o restante da linha) -->
   <div class="col-md-9">       
-    <!-- <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height:320px;"> Borda aparente -->
-      <div class="bg-white p-3 rounded-3 h-100">  <!-- Borda sutil -->
+      <div class="bg-white p-1 rounded-3 h-100">  <!-- Borda sutil -->
         <div class="card-body" style="height:260px;">
           <h5 class="text-justify mb-3">Ticket Médio</h5>
           <canvas id="ticketMedioChart" style="height:100%;"></canvas>
@@ -42,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data: donutData,
         backgroundColor: ['#06a060', '#78ad97'],
         borderWidth: 2,
+        hoverOffset: 16, // Aumenta o tamanho do segmento ao passar o mouse
       }]
     },
     options: {
@@ -53,6 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
           labels: {
             padding: 20,
             boxWidth: 12
+          }
+        },
+        tooltip: {
+        displayColors: false,
+        callbacks: {
+            label: function(context) {
+              return `R$ ${Number(context.raw).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
           }
         }
       }
@@ -83,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fill: true,
         tension: 0.4,
         pointRadius: 4,
-        pointHoverRadius: 6, // Raio do ponto ao passar o mouse,
+        pointHoverRadius: 8, // Raio do ponto ao passar o mouse,
         pointBackgroundColor: '#06a060',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2
@@ -95,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       plugins: { 
         legend: { display: false },
         tooltip: {
+        displayColors: false,
           callbacks: {
             label: (context) => {
               return `R$ ${context.parsed.y.toFixed(2)}`;

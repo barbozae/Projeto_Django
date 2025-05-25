@@ -537,6 +537,21 @@ class DashboardResumoView(DashboardBaseView):
         # Calcular o total das contas não pagas dentro do prazo
         total_compras_dentro_do_prazo = self.calcular_contas_dentro_do_prazo(compras_filtradas)
 
+        # Filtra apenas compras do grupo_produto='Peixe'
+        compras_peixe = compras_filtradas.filter(grupo_produto='Peixe')
+
+        # Agrupa por produto e soma o valor_compra
+        segmentos_peixe = (
+            compras_peixe
+            .values('produto')
+            .annotate(valor=Sum('valor_compra'))
+            .order_by('-valor')
+        )
+
+        # Prepara listas para o gráfico
+        segmento_labels = [item['produto'] for item in segmentos_peixe]
+        segmento_data = [float(item['valor'] or 0) for item in segmentos_peixe]
+
         # Agregar dados por classificação, tipo de produto e produto
         gastos_por_classificacao = compras_filtradas.values(
                                                             'classificacao').annotate(
@@ -603,11 +618,6 @@ class DashboardResumoView(DashboardBaseView):
 
         cmv_bar_labels = [data.strftime('%d/%m/%Y') for data in sorted(cmv_por_data.keys())]
         cmv_bar_data = [cmv_por_data[data] for data in sorted(cmv_por_data.keys())]
-
-
-
-
-
 
         # Filtros e dados de pagamentos de funcionários
         data_inicio_funcionarios = request.GET.get('data_inicio_funcionarios')
@@ -682,13 +692,6 @@ class DashboardResumoView(DashboardBaseView):
         almoco_data = [vendas_por_data_periodo[data]['Almoço'] for data in datas_unicas]
         jantar_data = [vendas_por_data_periodo[data]['Jantar'] for data in datas_unicas]
 
-
-
-
-
-
-
-
         # Contexto para o template
         context = {
             **totais_compras,
@@ -715,6 +718,8 @@ class DashboardResumoView(DashboardBaseView):
             'gastos_por_classificacao': gastos_por_classificacao,
             'gastos_por_grupo_produto': gastos_por_grupo_produto,
             'gastos_por_produto': gastos_por_produto,
+            'segmento_labels_json': json.dumps(segmento_labels, cls=DjangoJSONEncoder),
+            'segmento_data_json': json.dumps(segmento_data, cls=DjangoJSONEncoder),
 
             # Dados de pagamentos de funcionários
             'total_pagamentos_funcionarios': total_pagamentos_funcionarios,

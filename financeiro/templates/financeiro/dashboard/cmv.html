@@ -1,34 +1,44 @@
 <div class="row align-items-stretch mt-4">
-    <!-- Gráfico de barra deitada - CMV Semanal -->
-    <div class="col-md-3 d-flex flex-column gap-3">
-        <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
-            <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 260px;">
-                <h6 class="text-center mb-3">Gasto CMV Semanal</h6>
-                <canvas id="cmvBarChart" width="120" height="120"></canvas>
-            </div>
-        </div>
+  <!-- Gráfico de Rosca Segmentado -->
+  <div class="col-md-3 mb-3">
+    <div class="card bg-white shadow-sm rounded-4 h-100">
+      <div class="card-body" style="height:300px;">
+        <h6 class="text-center mb-3">Pescados</h6>
+        <!-- <canvas id="segmentoChart" style="height:100%; width:100%;"></canvas> -->
+         <canvas id="segmentoChart" width="220" height="220" style="display:block; margin:0 auto;"></canvas>
+      </div>
     </div>
-    <!-- Gráfico de barra de CMV Diário -->
-    <div class="col-md-9">
-        <div class="bg-white p-3 rounded-3 h-100">
-            <div class="card-body" style="height:260px;">
-                <h5 class="text-justify mb-3">CMV por Data</h5>
-                <canvas id="cmvBarPorDataChart" style="height:100%;"></canvas>
-            </div>
-        </div>
+  </div>  
+  <!-- Gráfico de barra de CMV Diário -->
+  <div class="col-md-6 mb-3">
+    <div class="h-100 d-flex flex-column">
+      <div class="card-body" style="height:300px;">
+        <h6 class="text-center mb-3">CMV por Data</h6>
+        <canvas id="cmvBarPorDataChart" style="height:100%;"></canvas>
+      </div>
     </div>
-
+  </div>
+  <!-- Gráfico de barra deitada - CMV Semanal -->
+  <div class="col-md-3 mb-3 p-0">
+    <div class="h-100 d-flex flex-column">
+      <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 300px;">
+        <h6 class="text-center mb-3">Gasto CMV Semanal</h6>
+        <canvas id="cmvBarChart" width="120" height="120"></canvas>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script id="cmv-labels" type="application/json">{{ cmv_labels_json|safe }}</script>
 <script id="cmv-data" type="application/json">{{ cmv_data_json|safe }}</script>
 <script id="cmv-bar-labels" type="application/json">{{ cmv_bar_labels_json|safe }}</script>
 <script id="cmv-bar-data" type="application/json">{{ cmv_bar_data_json|safe }}</script>
+<script id="segmento-labels-data" type="application/json">{{ segmento_labels_json|safe }}</script>
+<script id="segmento-data-data" type="application/json">{{ segmento_data_json|safe }}</script>
 
-
+<!-- Gráfico de Barras Horizontal: Gasto CMV Semanal -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Gráfico de Barras Horizontal: Gasto CMV Semanal
   const cmvLabels = JSON.parse(document.getElementById('cmv-labels').textContent);
   const cmvData = JSON.parse(document.getElementById('cmv-data').textContent);
   const cmvCtx = document.getElementById('cmvBarChart').getContext('2d');
@@ -40,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label: 'CMV',
         data: cmvData,
         backgroundColor: 'rgba(6, 160, 96, 0.7)',
+        hoverBackgroundColor: 'rgba(6, 122, 140, 0.9)', // Cor ao passar o mouse
         borderRadius: 8,
         maxBarThickness: 24,
       }]
@@ -49,11 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
       responsive: true,
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (context) => `R$ ${context.parsed.x.toFixed(2)}`
-          }
+      tooltip: {
+        displayColors: false, // exibe a cor do segmento
+        callbacks: {
+          label: (context) => `R$ ${context.parsed.x.toFixed(2)}`
         }
+      }
       },
       scales: {
         x: {
@@ -72,9 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- Gráfico de Barras: CMV por Data -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Gráfico de Barras: CMV por Data
   const cmvBarLabels = JSON.parse(document.getElementById('cmv-bar-labels').textContent);
   const cmvBarData = JSON.parse(document.getElementById('cmv-bar-data').textContent);
   const cmvBarCtx = document.getElementById('cmvBarPorDataChart').getContext('2d');
@@ -86,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label: 'CMV',
         data: cmvBarData,
         backgroundColor: 'rgba(6, 160, 96, 0.7)',
+        hoverBackgroundColor: 'rgba(6, 122, 140, 0.9)', // Cor ao passar o mouse
         borderRadius: 8,
         maxBarThickness: 32,
       }]
@@ -96,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       plugins: {
         legend: { display: false },
         tooltip: {
+          displayColors: false, // exibe a cor do segmento
           callbacks: {
             label: (context) => `R$ ${context.parsed.y.toFixed(2)}`
           }
@@ -116,4 +130,124 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+</script>
+
+<!-- Gráfico de Rosca Segmentado -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('segmentoChart');
+    if (!ctx) {
+      console.error("Elemento #segmentoChart não encontrado!");
+      return;
+    }
+
+    // Carrega os dados do backend
+    const segmentoLabels = JSON.parse(document.getElementById('segmento-labels-data').textContent);
+    const segmentoData = JSON.parse(document.getElementById('segmento-data-data').textContent);
+
+    // Ordena do menor para o maior valor (para roscas de dentro para fora)
+    const segmentos = segmentoLabels.map((label, idx) => ({
+      label: label,
+      valor: segmentoData[idx]
+    })).sort((a, b) => a.valor - b.valor);
+
+    // O total é o maior valor (o último após sort)
+    const total = segmentos.length > 0 ? segmentos[segmentos.length - 1].valor : 1;
+
+    // Paleta de cores (adicione mais se necessário)
+    const cores = [
+      'rgba(6, 122, 140, 0.7)',
+      'rgba(6, 160, 96, 0.8)',
+      'rgba(255, 193, 7, 0.7)',
+      'rgba(255, 87, 34, 0.7)',
+      'rgba(103, 58, 183, 0.7)',
+      'rgba(33, 150, 243, 0.7)',
+      'rgba(244, 67, 54, 0.7)',
+      'rgba(0, 188, 212, 0.7)'
+    ];
+
+    // Monta os datasets para roscas segmentadas
+    const datasets = segmentos.map((seg, idx) => ({
+      label: seg.label,
+      data: [seg.valor, total - seg.valor],
+      backgroundColor: [cores[idx % cores.length], '#eaeaea'],
+      borderWidth: 8,
+      circumference: 360,
+      rotation: -90
+    }));
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: segmentos.map(seg => seg.label),
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '35%',
+        // inativando a tooltip padrão quando o valor for zero
+        onHover: function(event, elements, chart) {
+          // se nenhum elemento for encontrado, remove o cursor de pointer
+          if (elements.length && elements[0].index !== 0) {
+            event.native.target.style.cursor = 'default';
+            elements.length = 0; // Remove o efeito de hover se o valor for zero
+          } else if (elements.length) {
+            event.native.target.style.cursor = 'pointer';
+          }
+        },
+        plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: {
+              size: 10
+            },
+            boxWidth: 5,   // largura do quadrado de cor
+            boxHeight: 5,  // altura do quadrado de cor
+            generateLabels: function(chart) {
+              // Gera uma legenda para cada dataset (rosca)
+              return chart.data.datasets.map((dataset, i) => ({
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor[0],
+                strokeStyle: dataset.backgroundColor[0],
+                lineWidth: 1,
+                hidden: !chart.isDatasetVisible(i),
+                index: i
+              }));
+            }
+          }
+        },
+          tooltip: {
+            displayColors: false, // exibe a cor do segmento
+            padding: 16, // aumenta o espaço interno da tooltip
+            bodySpacing: 8, // espaço entre linhas do corpo
+            titleSpacing: 8, // espaço entre título e corpo
+            titleFont: { size: 15, weight: 'bold' }, // aumenta fonte do título
+            bodyFont: { size: 13 }, // aumenta fonte do corpo
+            filter: function(context) {
+              // Só mostra tooltip para a parte colorida (dataIndex === 0)
+              return context.dataIndex === 0;
+            },
+            callbacks: {
+              title: function(context) {
+                // Só mostra tooltip se for a parte colorida (dataIndex === 0)
+                if (context[0].dataIndex === 0) {
+                  return context[0].dataset.label;
+              }
+              return null;
+              },
+              label: function(context) {
+                if (context.dataIndex === 0) {
+                  // Formata como R$ 1.234,56
+                  return `R$ ${Number(context.raw).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                }
+                return null;
+              }
+            }
+          }
+        }
+      }
+    });
+  });
 </script>
