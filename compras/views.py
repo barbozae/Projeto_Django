@@ -19,7 +19,7 @@ from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 
 
 @csrf_protect
-# Usado para atualizar os dados em massa da tabela de compras
+# Usado para atualizar (POST) os dados em massa da tabela de compras
 def compras_update_em_massa(request):
     def parse_date(val):
         if val:
@@ -178,9 +178,8 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
         if not tenant:
             return Compras.objects.none()  # Retorna vazio se o tenant não for encontrado
     
-        # queryset = Compras.objects.all()
         # Filtra as compras pelo tenant
-        queryset = Compras.objects.filter(tenant=tenant)
+        queryset = Compras.objects.filter(tenant=tenant).order_by('data_compra')
 
         # Captura os parâmetros da requisição GET
         data_inicio = self.request.GET.get('data_inicio')
@@ -236,7 +235,8 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
                 "data_compra": c.data_compra.strftime('%Y-%m-%d') if c.data_compra else "",
                 "data_vencimento": c.data_vencimento.strftime('%Y-%m-%d') if c.data_vencimento else "",
                 "data_pagamento": c.data_pagamento.strftime('%Y-%m-%d') if c.data_pagamento else "",
-                "fornecedor": c.fornecedor_id,  # <-- ALTERE para enviar o ID!
+                "fornecedor": c.fornecedor_id, # ID para salvar
+                "nome_empresa": c.fornecedor.nome_empresa if c.fornecedor else "",  # <-- ALTERE para enviar o ID!
                 "valor_compra": float(c.valor_compra or 0),
                 "valor_pago": float(c.valor_pago or 0),
                 "numero_boleto": c.numero_boleto or "",
