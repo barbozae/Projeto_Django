@@ -8,9 +8,7 @@
 
 <h5 class="mb-4 mt-3">Vendas</h5>
 
-<a href="{% url 'resume_vendas' %}?tenant={{ tenant }}" class="btn btn-primary mb-2">Resumo</a>
-
-<div class="container">
+<div class="container-fluid">
     <form action="" method="GET" class="d-flex align-items-center">
         <input type="hidden" name="tenant" value="{{ tenant }}">
 
@@ -151,78 +149,6 @@
         });
     </script>
 
-
-
-
-
-    <!-- <h5 class="mt-4">Gráfico de Vendas</h5>
-    <p class="text-muted">Gráfico de vendas por data.</p> -->
-
-<!-- Deixando os dados seguros -->
-<!-- <script id="labels-data" type="application/json">
-  {{ labels_json|safe }}
-</script>
-<script id="values-data" type="application/json">
-  {{ data_json|safe }}
-</script> -->
-
-
-<!-- Adicione Chart.js -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<canvas id="vendasChart" width="150" height="50"></canvas>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Carregando dados de forma segura
-    const labels = JSON.parse(document.getElementById('labels-data').textContent);
-    const data = JSON.parse(document.getElementById('values-data').textContent);
-
-    // Inicializando o gráfico
-    const ctx = document.getElementById('vendasChart').getContext('2d');
-    const vendasChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels, // Labels carregados de forma segura
-        datasets: [
-          {
-            label: 'Vendas Totais', // Rótulo do dataset
-            data: data,            // Dados carregados de forma segura
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderWidth: 2,
-            fill: true,
-          },
-        ], // Fim do array datasets
-      }, // Fim dos dados do gráfico
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top', // Posição da legenda
-          },
-        },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Datas', // Título do eixo X
-            },
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Valor Total', // Título do eixo Y
-            },
-            beginAtZero: true, // Início em zero no eixo Y
-          },
-        }, // Fim das escalas
-      }, // Fim das opções
-    }); // Fim do gráfico Chart
-  }); // Fim do evento DOMContentLoaded
-</script> -->
-
-
 {% else %}
     <div class="container">
         <div class="alert alert-warning mt-3" role="alert">
@@ -230,5 +156,42 @@
         </div>
     </div>
 {% endif %}
+
+<!-- Paginação -->
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-end">
+        {% if vendas_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ vendas_list.previous_page_number }}">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for num in vendas_list.paginator.page_range %}
+            {% if vendas_list.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > vendas_list.number|add:-2 and num < vendas_list.number|add:2 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if vendas_list.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ vendas_list.next_page_number }}">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
 
 {% endblock content %}

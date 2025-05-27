@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.paginator import Paginator
 
 from .models import Vendas
 from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
@@ -38,15 +39,68 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
 
         return queryset
 
+    # def get_context_data(self, **kwargs):
+    #     # Recupera o contexto padrão do Django
+    #     context = super().get_context_data(**kwargs)
+    #     tenant = getattr(self.request.user, 'tenant', None)
+    #     if tenant:
+    #         tenant = str(tenant).lower().replace(' ', '_')  # Substitui espaços por underscores
+    #     context['tenant'] = tenant
+
+    #     # Inicializa os contadores
+    #     venda_rodizio = 0
+    #     venda_dinheiro = 0
+    #     venda_pix = 0
+    #     venda_debito = 0
+    #     venda_credito = 0
+    #     venda_beneficio = 0
+    #     venda_total = 0
+
+    #     # Calculando os totais usando os métodos do modelo
+    #     vendas = context['object_list']
+    #     for venda in vendas:
+    #         venda.debito = venda.calcular_debito()
+    #         venda.credito = venda.calcular_credito()
+    #         venda.beneficio = venda.calcular_beneficio()
+    #         venda.total = venda.calcular_total()
+
+    #         # somando todas as linhas
+    #         venda_rodizio += venda.rodizio or 0
+    #         venda_dinheiro += venda.dinheiro or 0
+    #         venda_pix += venda.pix or 0
+    #         venda_debito += venda.debito or 0
+    #         venda_credito += venda.credito or 0
+    #         venda_beneficio += venda.beneficio
+    #         venda_total += venda.total
+        
+    #     # Adiciona o total geral ao contexto
+    #     context['vendas_rodizio'] = venda_rodizio
+    #     context['vendas_dinheiro'] = venda_dinheiro
+    #     context['vendas_pix'] = venda_pix
+    #     context['vendas_debito'] = venda_debito
+    #     context['vendas_credito'] = venda_credito
+    #     context['vendas_beneficio'] = venda_beneficio
+    #     context['vendas_total'] = venda_total
+        # return context
+
+
+
     def get_context_data(self, **kwargs):
-        # Recupera o contexto padrão do Django
         context = super().get_context_data(**kwargs)
         tenant = getattr(self.request.user, 'tenant', None)
         if tenant:
-            tenant = str(tenant).lower().replace(' ', '_')  # Substitui espaços por underscores
+            tenant = str(tenant).lower().replace(' ', '_')
         context['tenant'] = tenant
 
-        # Inicializa os contadores
+        # Paginação
+        vendas = context['object_list']  # Lista de vendas do queryset
+        paginator = Paginator(vendas, 10)  # 10 itens por página
+        page_number = self.request.GET.get('page')  # Número da página atual
+        vendas_page = paginator.get_page(page_number)
+
+        context['vendas_list'] = vendas_page  # Lista paginada para o template
+
+        # Cálculo de totais (baseado na lista paginada)
         venda_rodizio = 0
         venda_dinheiro = 0
         venda_pix = 0
@@ -55,24 +109,21 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
         venda_beneficio = 0
         venda_total = 0
 
-        # Calculando os totais usando os métodos do modelo
-        vendas = context['object_list']
-        for venda in vendas:
+        for venda in vendas_page:  # Use somente os itens da página atual
             venda.debito = venda.calcular_debito()
             venda.credito = venda.calcular_credito()
             venda.beneficio = venda.calcular_beneficio()
             venda.total = venda.calcular_total()
 
-            # somando todas as linhas
             venda_rodizio += venda.rodizio or 0
             venda_dinheiro += venda.dinheiro or 0
             venda_pix += venda.pix or 0
             venda_debito += venda.debito or 0
             venda_credito += venda.credito or 0
-            venda_beneficio += venda.beneficio
+            venda_beneficio += venda.beneficio or 0
             venda_total += venda.total
-        
-        # Adiciona o total geral ao contexto
+
+        # Adiciona os totais ao contexto
         context['vendas_rodizio'] = venda_rodizio
         context['vendas_dinheiro'] = venda_dinheiro
         context['vendas_pix'] = venda_pix
@@ -80,14 +131,6 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
         context['vendas_credito'] = venda_credito
         context['vendas_beneficio'] = venda_beneficio
         context['vendas_total'] = venda_total
-
-        # Labels (datas das vendas) e valores totais para o gráfico
-        # labels = [venda.data_venda.strftime('%d/%m/%Y') for venda in vendas if venda.data_venda]
-        # data = [float(venda.calcular_total()) for venda in vendas]
-
-        # # Passar os dados de forma segura para o template
-        # context['labels_json'] = json.dumps(labels, cls=DjangoJSONEncoder)
-        # context['data_json'] = json.dumps(data, cls=DjangoJSONEncoder)
 
         return context
 

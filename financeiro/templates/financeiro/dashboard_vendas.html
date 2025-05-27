@@ -9,10 +9,10 @@
 <h5 class="mb-4 mt-3" style="color: green;">Dashboard Vendas</h5>
 
 <!-- Filtros para buscar vendas -->
-<div class="container">
+<div class="container-fluid">
     <form action="" method="GET" class="d-flex align-items-center">
 
-        <div class="mb-2 me-2">
+        <div class="mb-3 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
             <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
         </div>
@@ -31,10 +31,11 @@
                 <option value="Jantar" {% if periodo == "Jantar" %}selected{% endif %}>Jantar</option>
             </select>
         </div>
-        <div class="mb-1 ms-1 mt-2">
+        <div class="mb-2 ms-1 mt-2">
             <button type="submit" class="btn btn-outline-primary me-2 mt-3" name="buscar_compras">Buscar</button>
-            <a href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2 mt-3">
-                <i class="bi bi-x-circle"></i> Limpar Filtro
+            <a href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}" 
+                class="btn btn-outline-secondary me-2 mt-3">
+                Limpar Filtro
             </a>
         </div>  
 
