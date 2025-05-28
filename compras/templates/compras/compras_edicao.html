@@ -1,5 +1,3 @@
-<!-- Tabela para edição em massa da tabela compras -->
-<!-- Caixa expansiva Resumo final -->
 <details id="compras-detalhes" class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
     <summary style="font-weight: bold; cursor: pointer;">Edição em Massa</summary>
     <div class="row">
@@ -33,13 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
         cellEditor: 'agDateCellEditor',
         cellEditorParams: {
             min: '1900-01-01',
-            max: '2100-12-31',
-            // Converter para string no formato ISO (YYYY-MM-DD) ao sair do editor
-            converter: (date) => date ? date.toISOString().split('T')[0] : null
+            max: '2100-12-31'
         },
         valueFormatter: (params) => {
             if (!params.value) return '';
-            // Tenta converter de ISO (YYYY-MM-DD) para DD/MM/YYYY
             const date = new Date(params.value);
             if (!isNaN(date.getTime())) {
                 const day = date.getDate().toString().padStart(2, '0');
@@ -47,30 +42,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const year = date.getFullYear();
                 return `${day}/${month}/${year}`;
             }
-            // Fallback para formatação direta se não for uma data válida
-            const parts = params.value.split('-');
-            if (parts.length === 3) {
-                return `${parts[2]}/${parts[1]}/${parts[0]}`;
-            }
             return params.value;
         },
         valueParser: (params) => {
             if (!params.newValue) return null;
-            
-            // Se veio do date picker (é um objeto Date)
             if (params.newValue instanceof Date) {
                 return params.newValue.toISOString().split('T')[0];
             }
-            
-            // Se foi digitado manualmente (DD/MM/YYYY)
             if (typeof params.newValue === 'string') {
                 const parts = params.newValue.split('/');
                 if (parts.length === 3) {
                     return `${parts[2]}-${parts[1]}-${parts[0]}`;
                 }
             }
-            
-            return params.newValue; // Mantém o valor original se não reconhecer o formato
+            return params.newValue;
         }
     });
 
@@ -94,18 +79,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const gridOptions = {
         columnDefs: columnDefs,
         rowData: rowData,
-        defaultColDef: { 
-            sortable: true, 
-            filter: true, 
+        defaultColDef: {
+            sortable: true,
+            filter: true,
             resizable: true,
-            // Atualiza o dado subjacente automaticamente
             onCellValueChanged: (params) => {
+                console.log('Célula alterada:', params);
                 params.data._edited = true;
             }
         },
         onGridReady: (params) => {
             gridApi = params.api;
-            // Ajusta o tamanho das colunas para preencher o espaço disponível
             params.api.sizeColumnsToFit();
         }
     };
@@ -114,7 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const gridDiv = document.querySelector('#comprasGrid');
     agGrid.createGrid(gridDiv, gridOptions);
 
-    // Função para obter linhas editadas (mantida igual)
     function getEditedRows() {
         const updatedRows = [];
         gridApi.forEachNode(node => {
@@ -125,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return updatedRows;
     }
 
-    // Configuração do botão de salvar (mantida igual)
     document.getElementById('salvar-edicoes').onclick = function() {
         const editedRows = getEditedRows();
         console.log('Linhas editadas:', editedRows);
@@ -134,23 +116,25 @@ document.addEventListener('DOMContentLoaded', function() {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
+                for (let i = 0; cookies.length > i; i++) {
                     const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.split('=')[1]);
                         break;
                     }
                 }
             }
             return cookieValue;
         }
+
         const csrftoken = getCookie('csrftoken');
+        console.log('CSRF Token:', csrftoken);
 
         const btn = document.getElementById('salvar-edicoes');
         btn.disabled = true;
         btn.innerText = 'Salvando...';
 
-        fetch("{% url 'compras_update_em_massa' %}", {
+        fetch("/compras/update-em-massa/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -162,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.status === "success") {
                 alert(`Sucesso! ${data.updated_count} compras atualizadas.`);
-                gridApi.refreshCells();
+                gridApi.applyTransaction({ update: data.updatedRows || [] });
             } else {
                 alert('Erro ao salvar: ' + (data.error || 'Erro desconhecido'));
             }
