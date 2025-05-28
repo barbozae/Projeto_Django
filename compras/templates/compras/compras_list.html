@@ -170,6 +170,43 @@
         </div>
     {% endif %}
 
+<!-- Paginação -->
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-end">
+        {% if compras_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ compras_list.previous_page_number }}">Previous</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for num in compras_list.paginator.page_range %}
+            {% if compras_list.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > compras_list.number|add:-2 and num < compras_list.number|add:2 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if compras_list.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ compras_list.next_page_number }}">Next</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
     {% include 'compras/compras_edicao.html' %}
 
 {% endblock content %}

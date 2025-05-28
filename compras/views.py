@@ -7,6 +7,7 @@ from datetime import datetime
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_protect
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -222,13 +223,22 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
             tenant = str(tenant).lower().replace(' ', '_')
         context['tenant'] = tenant
 
+
+        # Paginando os resultados
+        compras = context['object_list']  # Lista de vendas do queryset
+        paginator = Paginator(compras, 10)  # 10 itens por página
+        page_number = self.request.GET.get('page')  # Número da página atual
+        compras_page = paginator.get_page(page_number)
+
+        context['compras_list'] = compras_page  # Lista paginada para o template
+        
         # Filtra os fornecedores e boletos pelo tenant
         context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
         context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
 
         # Aqui você monta o JSON para a grid
         # Usado para popular a grid com os dados em massa da tabela de compras
-        compras_queryset = self.get_queryset()
+        # compras_queryset = self.get_queryset()
         compras_grid_data = [
             {
                 "id": c.pk,
@@ -247,63 +257,13 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
                 "qtd": c.qtd or "",
                 "observacao": c.observacao or "",
             }
-            for c in compras_queryset
+            # for c in compras_queryset
+            for c in compras_page  # Use apenas os itens da página atual
         ]
         context['compras_grid_data_json'] = json.dumps(compras_grid_data, cls=DjangoJSONEncoder)
 
         return context
 
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     tenant = getattr(self.request.user, 'tenant', None)
-    #     if tenant:
-    #         tenant = str(tenant).lower().replace(' ', '_')
-    #     context['tenant'] = tenant
-
-    #     # Filtra os fornecedores e boletos pelo tenant
-    #     context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
-    #     context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
-
-    #     # Queryset completo para o JSON da grid de edição em massa (sem paginação)
-    #     compras_queryset = self.get_queryset()
-
-    #     # Queryset paginado para a listagem com paginação
-    #     paginator = Paginator(compras_queryset, 10)  # 10 itens por página
-    #     page_number = self.request.GET.get('page')
-    #     compras_list = paginator.get_page(page_number)  # para paginação no template
-
-    #     # Monta o JSON para o grid de edição em massa usando todos os dados
-    #     compras_grid_data = [
-    #         {
-    #             "id": c.pk,
-    #             "data_compra": c.data_compra.strftime('%Y-%m-%d') if c.data_compra else "",
-    #             "data_vencimento": c.data_vencimento.strftime('%Y-%m-%d') if c.data_vencimento else "",
-    #             "data_pagamento": c.data_pagamento.strftime('%Y-%m-%d') if c.data_pagamento else "",
-    #             "fornecedor": c.fornecedor_id,
-    #             "nome_empresa": c.fornecedor.nome_empresa if c.fornecedor else "",
-    #             "valor_compra": float(c.valor_compra or 0),
-    #             "valor_pago": float(c.valor_pago or 0),
-    #             "numero_boleto": c.numero_boleto or "",
-    #             "grupo_produto": c.grupo_produto,
-    #             "produto": c.produto,
-    #             "classificacao": str(c.classificacao or ""),
-    #             "forma_pagamento": str(c.forma_pagamento or ""),
-    #             "qtd": c.qtd or "",
-    #             "observacao": c.observacao or "",
-    #         }
-    #         for c in compras_queryset  # <-- todos os registros, sem paginação
-    #     ]
-    #     context['compras_grid_data_json'] = json.dumps(compras_grid_data, cls=DjangoJSONEncoder)
-
-    #     # Para paginação no template
-    #     context['compras_list'] = compras_list
-
-    #     return context
-
-
-
-    
 
 class ComprasCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
     model = Compras
