@@ -73,6 +73,45 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Paginação -->
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-end">
+        {% if fornecedor_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ fornecedor_list.previous_page_number }}">Anterior</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Anterior</a>
+            </li>
+        {% endif %}
+        
+        {% for num in fornecedor_list.paginator.page_range %}
+            {% if fornecedor_list.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > fornecedor_list.number|add:-2 and num < fornecedor_list.number|add:2 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if fornecedor_list.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ fornecedor_list.next_page_number }}">Próxima</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Próxima</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+
 {% else %}
     <p>Não há registros</p>
 {% endif %}

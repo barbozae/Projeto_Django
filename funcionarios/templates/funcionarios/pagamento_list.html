@@ -57,43 +57,80 @@
 </div>
 
 {% if pagamento_list %}
-<div class="table-responsive mt-3">
-    <table class="table table-sm table-striped table-hover"> <!-- table-bordered -->
-        <thead class="table-light">
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Data Pagamento</th>
-                <th scope="col">Valor Pago</th>
-                <th scope="col">Tipo Pagamento</th>
-                <th scope="col">Forma Pagamento</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pagamento in pagamento_list %}
+    <div class="table-responsive mt-3">
+        <table class="table table-sm table-striped table-hover"> <!-- table-bordered -->
+            <thead class="table-light">
                 <tr>
-                    <th scope="row" >{{ pagamento.pk }}</th>
-                    <td>{{ pagamento.nome_funcionario }}</td>
-                    <td>{{ pagamento.data_pagamento|date:"d/m/y"|default:"-" }}</td>
-                    <td>{{ pagamento.valor_pago|default:"-" }}</td>
-                    <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
-                    <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
-                    <td>
-                        <a href="{% url 'update_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
-                        <a href="{% url 'delete_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-danger btn-sm">Excluir</a>
-                    </td>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Data Pagamento</th>
+                    <th scope="col">Valor Pago</th>
+                    <th scope="col">Tipo Pagamento</th>
+                    <th scope="col">Forma Pagamento</th>
+                    <th scope="col">Ações</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% else %}
-<div class="container">
-    <div class="alert alert-warning mt-3" role="alert">
-        Não há pagamentos para o filtro selecionado.
+            </thead>
+            <tbody>
+                {% for pagamento in pagamento_list %}
+                    <tr>
+                        <th scope="row" >{{ pagamento.pk }}</th>
+                        <td>{{ pagamento.nome_funcionario }}</td>
+                        <td>{{ pagamento.data_pagamento|date:"d/m/y"|default:"-" }}</td>
+                        <td>{{ pagamento.valor_pago|default:"-" }}</td>
+                        <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
+                        <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'update_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            <a href="{% url 'delete_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Paginação -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-end">
+                    {% if pagamento_funcionarios_paginados.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagamento_funcionarios_paginados.previous_page_number }}">Anterior</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">Anterior</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in pagamento_funcionarios_paginados.paginator.page_range %}
+                    {% if pagamento_funcionarios_paginados.number == num %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > pagamento_funcionarios_paginados.number|add:-2 and num < pagamento_funcionarios_paginados.number|add:2 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if pagamento_funcionarios_paginados.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pagamento_funcionarios_paginados.next_page_number }}">Próxima</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">Próxima</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
     </div>
-</div>
+{% else %}
+    <div class="container">
+        <div class="alert alert-warning mt-3" role="alert">
+            Não há pagamentos para o filtro selecionado.
+        </div>
+    </div>
 {% endif %}
 
 {% endblock content %}

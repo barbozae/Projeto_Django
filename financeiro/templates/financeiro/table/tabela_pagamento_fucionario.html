@@ -10,7 +10,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for funcionario in funcionarios %}
+        {% for funcionario in funcionarios_paginados %}
             <tr>
                 <th scope="row">{{ funcionario.pk }}</th>
                 <td>{{ funcionario.nome_funcionario }}</td>
@@ -28,3 +28,40 @@
         </tr>
     </tfoot>
 </table>
+
+<!-- Paginação -->
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-end">
+            {% if funcionarios_paginados.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ funcionarios_paginados.previous_page_number }}">Anterior</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link">Anterior</a>
+                </li>
+            {% endif %}
+
+            {% for num in funcionarios_paginados.paginator.page_range %}
+                {% if funcionarios_paginados.number == num %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > funcionarios_paginados.number|add:-2 and num < funcionarios_paginados.number|add:2 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if funcionarios_paginados.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ funcionarios_paginados.next_page_number }}">Próxima</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link">Próxima</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>

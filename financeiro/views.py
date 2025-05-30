@@ -4,11 +4,13 @@ from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
 
+from django.core.paginator import Paginator
 from django.db.models import Sum, F, DecimalField, Q
 from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
 from decimal import Decimal
-from datetime import date
 from django.utils import timezone
+from datetime import date, datetime, timedelta
+from django import forms
 
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -256,8 +258,13 @@ class DashboardVendasView(DashboardBaseView):
         # Aplicar filtros no queryset de vendas
         vendas_filtradas = filtros.aplicar_filtros(vendas)
 
-        totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
-        total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
+        # Paginação
+        paginator = Paginator(vendas_filtradas, 31)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        vendas_paginadas = paginator.get_page(page_number)
+
+        totais_vendas = self.calcular_totais_vendas(vendas_paginadas.object_list)
+        total_taxas = self.calcular_taxas_vendas(vendas_paginadas.object_list) or 0
         # Calcular a taxa percentual de total_taxa em relação ao total_vendas
         taxa_total_taxa = (total_taxas / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
 
@@ -275,6 +282,7 @@ class DashboardVendasView(DashboardBaseView):
             'total_despesas': total_compras,
             'pagamento_funcionario': total_pagamento_funcionarios,
             'vendas_por_forma': vendas_filtradas,
+            'vendas_paginadas': vendas_paginadas,
         }
         return render(request, 'financeiro/dashboard_vendas.html', context)
 
@@ -308,13 +316,18 @@ class DashboardComprasView(DashboardBaseView):
                 Q(data_vencimento__lt=today) & Q(data_pagamento__isnull=True)
             )
 
+        # Paginação
+        paginator = Paginator(compras_filtradas, 10)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        compras_paginadas = paginator.get_page(page_number)
+
+
         totais_compras = self.calcular_totais_compras(compras_filtradas)
         fornecedores = Compras.objects.filter(tenant=tenant).values('fornecedor__id', 'fornecedor__nome_empresa').distinct()
         classificacao = Compras.objects.filter(tenant=tenant).values('classificacao').distinct()
 
         context = {
             **totais_compras,
-            'today': today,
             'data_inicio': data_inicio,
             'data_fim': data_fim,
             'campo_data': 'data_compra',
@@ -324,6 +337,7 @@ class DashboardComprasView(DashboardBaseView):
             'classificacao_selecionado': classificacao_selecionado,
             'classificacao': classificacao,
             'filtrar_vencidas': filtrar_vencidas, #Filtro de radio
+            'compras_paginadas': compras_paginadas,
         }
         return render(request, 'financeiro/dashboard_compras.html', context)
 
@@ -353,9 +367,14 @@ class DashboardFuncionariosView(DashboardBaseView):
         funcionarios_filtrado = filtros.aplicar_filtros(funcionarios)
         tipo_pagamentos_agrupados = funcionarios_filtrado.values('tipo_pagamento').annotate(total_valor_pago=Sum('valor_pago'))
         forma_pagamentos_agrupados = funcionarios_filtrado.values('forma_pagamento').annotate(total_valor_pago=Sum('valor_pago'))
+
+        # Paginação
+        paginator = Paginator(funcionarios_filtrado, 10)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        funcionarios_paginados = paginator.get_page(page_number)
         
         # Totais de pagamentos
-        total_pagamentos = self.calcular_totais_pagamentos(funcionarios_filtrado)
+        total_pagamentos = self.calcular_totais_pagamentos(funcionarios_paginados.object_list)
         total_tipo_pagamento = sum(item['total_valor_pago'] for item in tipo_pagamentos_agrupados)
         total_forma_pagamento = sum(item['total_valor_pago'] for item in forma_pagamentos_agrupados)
 
@@ -435,6 +454,7 @@ class DashboardFuncionariosView(DashboardBaseView):
             'funcionarios_por_cargo': funcionarios_por_cargo,
             'pagamentos_por_setor': pagamentos_por_setor,
             'funcionario_por_setor': funcionario_por_setor,
+            'funcionarios_paginados': funcionarios_paginados,
         }
         return render(request, 'financeiro/dashboard_funcionarios.html', context)
 

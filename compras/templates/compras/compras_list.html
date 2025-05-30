@@ -179,7 +179,7 @@
             </li>
         {% else %}
             <li class="page-item disabled">
-                <a class="page-link">Previous</a>
+                <a class="page-link">Anterior</a>
             </li>
         {% endif %}
         
@@ -197,11 +197,11 @@
         
         {% if compras_list.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ compras_list.next_page_number }}">Next</a>
+                <a class="page-link" href="?page={{ compras_list.next_page_number }}">Próxima</a>
             </li>
         {% else %}
             <li class="page-item disabled">
-                <a class="page-link">Next</a>
+                <a class="page-link">Próxima</a>
             </li>
         {% endif %}
     </ul>

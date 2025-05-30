@@ -19,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for compra in compras %}
+                {% for compra in compras_paginadas %}
                     <tr>
                         <th scope="row">{{ compra.pk }}</th>
                         <td>{{ compra.data_compra|date:"d/m/y" }}</td>
@@ -67,6 +67,44 @@
                 </tr>
             </tfoot>
         </table>
+    </div>
+</div>
+    <!-- Paginação -->
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-end">
+            {% if compras_paginadas.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ compras_paginadas.previous_page_number }}">Anterior</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link">Anterior</a>
+                </li>
+            {% endif %}
+
+            {% for num in compras_paginadas.paginator.page_range %}
+                {% if compras_paginadas.number == num %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > compras_paginadas.number|add:-2 and num < compras_paginadas.number|add:2 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if compras_paginadas.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ compras_paginadas.next_page_number }}">Próxima</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link">Próxima</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
     </div>
 </div>
 

@@ -73,8 +73,31 @@
     {% else %}
         <div class="container">
             <div class="alert alert-warning mt-3" role="alert">
-                Não há compras para o filtro selecionadocadastradas.
+                Não há compras para o filtro selecionado cadastradas.
             </div>
         </div>
     {% endif %}
 {% endblock content %}
+
+
+            <!-- <div class="mb-2 me-2">
+                <small for="mes_ano" class="form-text">Selecione o mês/ano:</small>
+                <input type="month" class="form-control" id="mes_ano" name="mes_ano" 
+                    value="{% if data_inicio %}{{ data_inicio|date:'Y-m' }}{% endif %}">
+            </div> -->
+
+
+
+            <!-- <div class="col-md-4">
+                <label for="mes_ano" class="form-label small">Selecione o mês:</label>
+                <div class="input-group">
+                    <input type="month" class="form-control" id="mes_ano" name="mes_ano" 
+                        value="{{ mes_ano }}" 
+                        max="{{ current_month }}" -->
+                        <!-- onchange="this.form.submit()"> Submete o formulário -->
+                    <!-- <button class="btn btn-outline-secondary" type="button" 
+                            onclick="document.getElementById('mes_ano').value='{{ current_month }}'; this.form.submit();">
+                        <i class="bi bi-calendar-check"></i> Hoje
+                    </button>
+                </div>
+            </div> -->

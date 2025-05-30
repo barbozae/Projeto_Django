@@ -114,17 +114,50 @@ class FornecedorListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuer
             queryset = queryset.filter(nome_empresa__in=nome_empresa)
         return queryset
 
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     tenant = getattr(self.request.user, 'tenant', None)
+    #     if tenant:
+    #         tenant = str(tenant).lower().replace(' ', '_')  # Converte para minúsculas e substitui espaços por underscores
+    #     context['tenant'] = tenant
+
+    #     #Filtrar os fornecedores com base no tenant
+    #     context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
+    #     # context['numero_boleto'] = Compras.objects.values_list('numero_boleto', flat=True).distinct()
+    #     context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
+        
+    #     return context
+
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Obter o tenant e adicionar ao contexto
         tenant = getattr(self.request.user, 'tenant', None)
         if tenant:
-            tenant = str(tenant).lower().replace(' ', '_')  # Converte para minúsculas e substitui espaços por underscores
+            tenant = str(tenant).lower().replace(' ', '_')
         context['tenant'] = tenant
 
-        #Filtrar os fornecedores com base no tenant
-        context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
-        # context['numero_boleto'] = Compras.objects.values_list('numero_boleto', flat=True).distinct()
-        context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
+        # Filtrar fornecedores pelo tenant
+        fornecedores = Fornecedor.objects.filter(tenant=self.request.user.tenant)
+        nome_empresa = self.request.GET.getlist('nome_empresa[]')
+        nome_empresa = [nome.strip() for nome in nome_empresa if nome.strip()]
+        if nome_empresa:
+            fornecedores = fornecedores.filter(nome_empresa__in=nome_empresa)
+
+        # Adicionar paginação
+        paginator = Paginator(fornecedores, 10)  # Define 10 itens por página
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        # Adicionar informações paginadas ao contexto
+        context['fornecedor_list'] = page_obj
+
+        # Adicionar o restante dos dados ao contexto
+        context['fornecedores'] = fornecedores  # Lista completa para filtros
+        context['numero_boleto'] = Compras.objects.filter(
+            tenant=self.request.user.tenant
+        ).values_list('numero_boleto', flat=True).distinct()
 
         return context
     

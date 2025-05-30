@@ -1,7 +1,8 @@
 from django.urls import reverse_lazy
+from django.core.paginator import Paginator
+from django.db.models import Exists, OuterRef
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.db.models import Exists, OuterRef
 
 from .models import Cadastro, Contratacao, Pagamento, Rescisao
 from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
@@ -29,6 +30,17 @@ class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerys
         if tenant:
             tenant = str(tenant).lower().replace(' ', '_')
         context['tenant'] = tenant
+
+        # Paginação
+        funcionarios = self.get_queryset()
+        paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['funcionarios_list'] = page_obj
+        context['paginator'] = paginator
+        context['page_obj'] = page_obj
+        context['query_params'] = self.request.GET.urlencode()
 
         # Adiciona os funcionários ao contexto para o form-select
         context['cadastros_funcionarios'] = self.get_queryset()
@@ -135,6 +147,17 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQue
         if tenant:
             tenant = str(tenant).lower().replace(' ', '_')  # Formata o tenant
         context['tenant'] = tenant
+
+        # Paginação
+        funcionarios = self.get_queryset()
+        paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['contratacao_funcionarios_paginados'] = page_obj
+        # context['paginator'] = paginator
+        # context['page_obj'] = page_obj
+        # context['query_params'] = self.request.GET.urlencode()
 
         context['contratacao_funcionarios'] = Contratacao.objects.all()
         context['contratacao_setor'] = Contratacao.objects.values_list('setor', flat=True).distinct()
@@ -254,6 +277,18 @@ class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuery
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Paginação
+        funcionarios = self.get_queryset()
+        paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['pagamento_funcionarios_paginados'] = page_obj
+        context['paginator'] = paginator
+        context['page_obj'] = page_obj
+        context['query_params'] = self.request.GET.urlencode()
+
+
         # Adiciona dados adicionais ao contexto
         context['pagamento_funcionarios'] = Pagamento.objects.select_related('nome_funcionario').values('nome_funcionario_id', 'nome_funcionario__nome_funcionario').distinct()
         context['tipos_pagamento'] = Pagamento.objects.values_list('tipo_pagamento', flat=True).distinct()
@@ -353,6 +388,24 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerys
     # com essa função eu tenho a lista completa de funcionarios mesmo com filtro
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            tenant = str(tenant).lower().replace(' ', '_')  # Formata o tenant
+        context['tenant'] = tenant
+
+        # Paginação
+        funcionarios = self.get_queryset()
+        paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['rescisao_funcionarios_paginados'] = page_obj
+        context['paginator'] = paginator
+        context['page_obj'] = page_obj
+        context['query_params'] = self.request.GET.urlencode()
+
+
         context['rescisao_funcionarios'] = Rescisao.objects.all()
         context['tipo_desligamento'] = Rescisao.objects.values_list('tipo_desligamento', flat=True).distinct()
         return context
