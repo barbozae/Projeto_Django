@@ -257,6 +257,8 @@ class DashboardVendasView(DashboardBaseView):
         
         # Aplicar filtros no queryset de vendas
         vendas_filtradas = filtros.aplicar_filtros(vendas)
+        # Ordenar do maior para o menor (datas decrescentes)
+        vendas_filtradas = vendas_filtradas.order_by('-data_venda')
 
         # Paginação
         paginator = Paginator(vendas_filtradas, 31)  # Exibe 10 registros por página
@@ -299,7 +301,7 @@ class DashboardComprasView(DashboardBaseView):
         # Widget RADIO
         filtrar_vencidas = request.GET.get('filtrar_vencidas') == 'on'
 
-        compras = Compras.objects.all()
+        compras = Compras.objects.all().order_by('-data_compra')
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio, 
             data_fim=data_fim, 
@@ -311,6 +313,9 @@ class DashboardComprasView(DashboardBaseView):
         # Aplique os filtros na queryset
         compras_filtradas = filtros.aplicar_filtros(compras)
 
+        # Ordenar do maior para o menor (datas decrescentes)
+        # compras_filtradas = compras_filtradas.order_by('-data_compra')
+
         if filtrar_vencidas:
             compras_filtradas = compras_filtradas.filter(
                 Q(data_vencimento__lt=today) & Q(data_pagamento__isnull=True)
@@ -321,13 +326,13 @@ class DashboardComprasView(DashboardBaseView):
         page_number = self.request.GET.get('page')
         compras_paginadas = paginator.get_page(page_number)
 
-
         totais_compras = self.calcular_totais_compras(compras_filtradas)
         fornecedores = Compras.objects.filter(tenant=tenant).values('fornecedor__id', 'fornecedor__nome_empresa').distinct()
         classificacao = Compras.objects.filter(tenant=tenant).values('classificacao').distinct()
 
         context = {
             **totais_compras,
+            'today': today, # Data atual para comparação com vencimentos
             'data_inicio': data_inicio,
             'data_fim': data_fim,
             'campo_data': 'data_compra',
@@ -351,7 +356,7 @@ class DashboardFuncionariosView(DashboardBaseView):
         forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
         tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
-        funcionarios = Pagamento.objects.all()
+        funcionarios = Pagamento.objects.all().order_by('-data_pagamento')
 
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio,
@@ -365,6 +370,9 @@ class DashboardFuncionariosView(DashboardBaseView):
         
         # Aplicar filtros no queryset de funcionários
         funcionarios_filtrado = filtros.aplicar_filtros(funcionarios)
+        # Ordenar do maior para o menor (datas decrescentes)
+        # funcionarios_filtrado = funcionarios_filtrado.order_by('-data_pagamento')
+
         tipo_pagamentos_agrupados = funcionarios_filtrado.values('tipo_pagamento').annotate(total_valor_pago=Sum('valor_pago'))
         forma_pagamentos_agrupados = funcionarios_filtrado.values('forma_pagamento').annotate(total_valor_pago=Sum('valor_pago'))
 

@@ -47,7 +47,7 @@ class VendasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
         context['tenant'] = tenant
 
         # Paginação
-        vendas = context['object_list']  # Lista de vendas do queryset
+        vendas = context['object_list'].order_by('-data_venda')  # Lista de vendas do queryset
         paginator = Paginator(vendas, 10)  # 10 itens por página
         page_number = self.request.GET.get('page')  # Número da página atual
         vendas_page = paginator.get_page(page_number)

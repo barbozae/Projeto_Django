@@ -114,21 +114,6 @@ class FornecedorListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuer
             queryset = queryset.filter(nome_empresa__in=nome_empresa)
         return queryset
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     tenant = getattr(self.request.user, 'tenant', None)
-    #     if tenant:
-    #         tenant = str(tenant).lower().replace(' ', '_')  # Converte para minúsculas e substitui espaços por underscores
-    #     context['tenant'] = tenant
-
-    #     #Filtrar os fornecedores com base no tenant
-    #     context['fornecedores'] = Fornecedor.objects.filter(tenant=self.request.user.tenant)
-    #     # context['numero_boleto'] = Compras.objects.values_list('numero_boleto', flat=True).distinct()
-    #     context['numero_boleto'] = Compras.objects.filter(tenant=self.request.user.tenant).values_list('numero_boleto', flat=True).distinct()
-        
-    #     return context
-
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -139,7 +124,7 @@ class FornecedorListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuer
         context['tenant'] = tenant
 
         # Filtrar fornecedores pelo tenant
-        fornecedores = Fornecedor.objects.filter(tenant=self.request.user.tenant)
+        fornecedores = Fornecedor.objects.filter(tenant=self.request.user.tenant).order_by('nome_empresa')
         nome_empresa = self.request.GET.getlist('nome_empresa[]')
         nome_empresa = [nome.strip() for nome in nome_empresa if nome.strip()]
         if nome_empresa:
@@ -258,7 +243,7 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
 
 
         # Paginando os resultados
-        compras = context['object_list']  # Lista de vendas do queryset
+        compras = context['object_list'].order_by('-data_compra')  # Lista de vendas do queryset
         paginator = Paginator(compras, 10)  # 10 itens por página
         page_number = self.request.GET.get('page')  # Número da página atual
         compras_page = paginator.get_page(page_number)

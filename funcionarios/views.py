@@ -32,7 +32,7 @@ class CadastroListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerys
         context['tenant'] = tenant
 
         # Paginação
-        funcionarios = self.get_queryset()
+        funcionarios = self.get_queryset().order_by('nome_funcionario')  # Ordena a lista de funcionários pelo nome
         paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -149,7 +149,7 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQue
         context['tenant'] = tenant
 
         # Paginação
-        funcionarios = self.get_queryset()
+        funcionarios = self.get_queryset().order_by('nome_funcionario')  # Ordena a lista de funcionários pelo nome
         paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -251,7 +251,7 @@ class PagamentoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuery
 
     def get_queryset(self):
         tenant = getattr(self.request.user, 'tenant', None)
-        queryset = Pagamento.objects.filter(tenant=tenant)
+        queryset = Pagamento.objects.filter(tenant=tenant).order_by('-data_pagamento')
 
         # Captura os parâmetros da requisição GET
         data_inicio_pagamento_funcionario = self.request.GET.get('data_inicio_pagamento_funcionario')
@@ -395,7 +395,7 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerys
         context['tenant'] = tenant
 
         # Paginação
-        funcionarios = self.get_queryset()
+        funcionarios = self.get_queryset().order_by('-data_desligamento')  # Ordena a lista de funcionários pela data de desligamento
         paginator = Paginator(funcionarios, 10)  # Exibe 10 registros por página
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
