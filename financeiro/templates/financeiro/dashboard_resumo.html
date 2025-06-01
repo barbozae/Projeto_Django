@@ -102,21 +102,10 @@
         {% include 'financeiro/dashboard/compras.html'%}
 
         {% include 'financeiro/dashboard/cmv.html'%}
+
+        {% include 'financeiro/dashboard/compra_classificacao.html' %}
     
         <hr class="my-3 mt-5" style="border-color: #06a060; border-width: 3px;">
-
-        <!-- Caixa expansiva tabela -->
-        <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-            <summary style="font-weight: bold; cursor: pointer;">Tabela Dinâmica</summary>
-                <p>Tabela expansiva para visualização agrupada.</p>
-
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            {% include 'financeiro/table/tabela_resumo.html' %}
-                        </div>
-                    </div>
-        </details>
-
         <!-- Caixa expansiva tabela dinamica -->
         <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
             <summary style="font-weight: bold; cursor: pointer;">Tabela Dinâmica Ajustando</summary>

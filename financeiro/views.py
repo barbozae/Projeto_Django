@@ -9,10 +9,21 @@ from django.db.models import Sum, F, DecimalField, Q
 from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
 from decimal import Decimal
 from django.utils import timezone
-from datetime import date, datetime, timedelta
-from django import forms
+from datetime import date, timedelta, datetime
+
+from django.core.cache import cache
+
+from django.db.models import Sum, F, Value, CharField
 
 import json
+from django.core.serializers.json import DjangoJSONEncoder
+
+
+
+from django.core.cache import cache
+from datetime import datetime, timedelta
+import json
+from django.db.models import Sum, Value, CharField, F
 from django.core.serializers.json import DjangoJSONEncoder
 
 
@@ -485,7 +496,7 @@ class DashboardResumoView(DashboardBaseView):
         total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
         fundo_caixa = totais_vendas['total_vendas'] * Decimal('0.06') or Decimal('0')
 
-# --- Ticket médio diário para gráfico de linha ---
+        # Ticket médio diário para gráfico de linha
         ticket_medio_por_data = {}
         for v in vendas_filtradas:
             if v.data_venda:
@@ -544,6 +555,7 @@ class DashboardResumoView(DashboardBaseView):
             )
             for v in vendas_filtradas if hasattr(v, 'periodo') and v.periodo == 'Jantar'
         )
+
         donut_data = [total_almoco, total_jantar]
 
         # Filtros e dados de compras
@@ -580,73 +592,6 @@ class DashboardResumoView(DashboardBaseView):
         segmento_labels = [item['produto'] for item in segmentos_peixe]
         segmento_data = [float(item['valor'] or 0) for item in segmentos_peixe]
 
-        # Agregar dados por classificação, tipo de produto e produto
-        gastos_por_classificacao = compras_filtradas.values(
-                                                            'classificacao').annotate(
-                                                                total_valor=Sum('valor_compra')).order_by(
-                                                                    'classificacao')
-        gastos_por_grupo_produto = compras_filtradas.values(
-                                                            'classificacao', 'grupo_produto').annotate(
-                                                                total_valor=Sum('valor_compra')).order_by(
-                                                                    'classificacao', 'grupo_produto')
-        gastos_por_produto = compras_filtradas.values(
-                                                    'classificacao', 'grupo_produto', 'produto').annotate(
-                                                        total_valor=Sum('valor_compra')).order_by(
-                                                            'classificacao', 'grupo_produto', 'produto')
-
-        # Calcular taxas percentuais
-        for classificacao in gastos_por_classificacao:
-            classificacao['taxa_percentual'] = (classificacao['total_valor'] / totais_compras['total_compras'] * 100) if totais_compras['total_compras'] != 0 else 0
-
-        for grupo_produto in gastos_por_grupo_produto:
-            for classificacao in gastos_por_classificacao:
-                if grupo_produto['classificacao'] == classificacao['classificacao']:
-                    grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / classificacao['total_valor'] * 100) if classificacao['total_valor'] != 0 else 0
-
-        for produto in gastos_por_produto:
-            for grupo_produto in gastos_por_grupo_produto:
-                if produto['classificacao'] == grupo_produto['classificacao'] and produto['grupo_produto'] == grupo_produto['grupo_produto']:
-                    produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
-
-        # Dados para o gráfico de teia (Radar) - Compras por classificação
-        radar_labels = [item['classificacao'] for item in gastos_por_classificacao]
-        radar_data = [float(item['total_valor']) for item in gastos_por_classificacao]
-
-        # Dados para o gráfico de linha - Compras por data
-        compras_por_data = {}
-        for c in compras_filtradas:
-            if c.data_compra:
-                compras_por_data.setdefault(c.data_compra, 0)
-                compras_por_data[c.data_compra] += float(c.valor_compra or 0)
-
-        linha_labels = [data.strftime('%d/%m/%Y') for data in sorted(compras_por_data.keys())]
-        linha_data = [compras_por_data[data] for data in sorted(compras_por_data.keys())]
-
-        # Filtre apenas CMV
-        cmv_queryset = Compras.objects.filter(classificacao='CMV')
-
-        # Agrupe por semana e ano
-        cmv_semanal = (
-            cmv_queryset
-            .annotate(ano=ExtractYear('data_compra'), semana=ExtractWeek('data_compra'))
-            .values('ano', 'semana')
-            .annotate(total=Sum('valor_compra'))
-            .order_by('ano', 'semana')
-        )
-
-        # Prepare os labels e dados para o gráfico de barras
-        cmv_labels = [f"Sem {item['semana']}/{item['ano']}" for item in cmv_semanal]
-        cmv_data = [float(item['total']) for item in cmv_semanal]
-
-        cmv_por_data = {}
-        for c in compras_filtradas:
-            if c.classificacao == 'CMV' and c.data_compra:
-                cmv_por_data.setdefault(c.data_compra, 0)
-                cmv_por_data[c.data_compra] += float(c.valor_compra or 0)
-
-        cmv_bar_labels = [data.strftime('%d/%m/%Y') for data in sorted(cmv_por_data.keys())]
-        cmv_bar_data = [cmv_por_data[data] for data in sorted(cmv_por_data.keys())]
-
         # Filtros e dados de pagamentos de funcionários
         data_inicio_funcionarios = request.GET.get('data_inicio_funcionarios')
         data_fim_funcionarios = request.GET.get('data_fim_funcionarios')
@@ -677,6 +622,129 @@ class DashboardResumoView(DashboardBaseView):
 
         taxa_rescisao = total_rescisao / totais_vendas['total_vendas'] * 100 if totais_vendas['total_vendas'] != 0 else 0
         taxa_rescisao = round(taxa_rescisao, 2)
+
+        # Agregar dados de compras por classificação, tipo de produto e produto
+        gastos_por_classificacao = compras_filtradas.values(
+            'classificacao').annotate(
+            total_valor=Sum('valor_compra')).order_by(
+            'classificacao')
+
+        gastos_por_grupo_produto = compras_filtradas.values(
+            'classificacao', 'grupo_produto').annotate(
+            total_valor=Sum('valor_compra')).order_by(
+            'classificacao', 'grupo_produto')
+
+        gastos_por_produto = compras_filtradas.values(
+            'classificacao', 'grupo_produto', 'produto').annotate(
+            total_valor=Sum('valor_compra')).order_by(
+            'classificacao', 'grupo_produto', 'produto')
+
+        # Agregar dados de funcionários (considerando "Mão de Obra" como classificação)
+        gastos_funcionarios_por_classificacao = funcionarios_filtrados.annotate(
+            classificacao=Value("Mão de Obra", output_field=CharField())
+        ).values(
+            'classificacao').annotate(
+            total_valor=Sum('valor_pago')).order_by(
+            'classificacao')
+
+        gastos_funcionarios_por_grupo = funcionarios_filtrados.annotate(
+            classificacao=Value("Mão de Obra", output_field=CharField()),
+            grupo_produto=F('tipo_pagamento')
+        ).values(
+            'classificacao', 'grupo_produto').annotate(
+            total_valor=Sum('valor_pago')).order_by(
+            'classificacao', 'grupo_produto')
+
+        gastos_funcionarios_por_produto = funcionarios_filtrados.annotate(
+            classificacao=Value("Mão de Obra", output_field=CharField()),
+            grupo_produto=F('tipo_pagamento'),
+            produto=F('nome_funcionario')  # Alterado de funcionario_selecionado para nome_funcionario
+        ).values(
+            'classificacao', 'grupo_produto', 'produto').annotate(
+            total_valor=Sum('valor_pago')).order_by(
+            'classificacao', 'grupo_produto', 'produto')
+
+        # Combinar os resultados de compras e funcionários
+        gastos_por_classificacao = list(gastos_por_classificacao) + list(gastos_funcionarios_por_classificacao)
+        gastos_por_grupo_produto = list(gastos_por_grupo_produto) + list(gastos_funcionarios_por_grupo)
+        gastos_por_produto = list(gastos_por_produto) + list(gastos_funcionarios_por_produto)
+
+        # Calcular totais combinados (compras + funcionários)
+        total_compras = sum(item['total_valor'] for item in gastos_por_classificacao if item['classificacao'] != "Mão de Obra")
+        total_funcionarios = sum(item['total_valor'] for item in gastos_por_classificacao if item['classificacao'] == "Mão de Obra")
+        total_geral = total_compras + total_funcionarios
+
+        # Capturando o parâmetro da radio button
+        usar_totais_vendas = request.GET.get('usar_totais_vendas') == 'false'
+
+        # Calcular taxas percentuais para tabela gastos
+        for classificacao in gastos_por_classificacao:
+            if usar_totais_vendas:
+                classificacao['taxa_percentual'] = (classificacao['total_valor'] / total_geral * 100) if total_geral != 0 else 0
+            else:
+                classificacao['taxa_percentual'] = (classificacao['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+
+        for grupo_produto in gastos_por_grupo_produto:
+            for classificacao in gastos_por_classificacao:
+                if grupo_produto['classificacao'] == classificacao['classificacao']:
+                    if usar_totais_vendas:
+                        grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / classificacao['total_valor'] * 100) if classificacao['total_valor'] != 0 else 0
+                    else:
+                        grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+                    break
+
+        for produto in gastos_por_produto:
+            for grupo_produto in gastos_por_grupo_produto:
+                if (produto['classificacao'] == grupo_produto['classificacao'] and 
+                    produto['grupo_produto'] == grupo_produto['grupo_produto']):
+                    if usar_totais_vendas:
+                        produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
+                    else:
+                        produto['taxa_percentual'] = (produto['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+                    break
+
+        # Dados para o gráfico de barras - Compras por grupo de produto
+        bar_grupo_labels = [item['grupo_produto'] for item in gastos_por_grupo_produto]
+        bar_grupo_data = [float(item['total_valor']) for item in gastos_por_grupo_produto]
+
+        # Dados para o gráfico de teia (Radar) - Compras por classificação
+        radar_labels = [item['classificacao'] for item in gastos_por_classificacao]
+        radar_data = [float(item['total_valor']) for item in gastos_por_classificacao]
+
+        # Dados para o gráfico de linha - Compras por data
+        compras_por_data = {}
+        for c in compras_filtradas:
+            if c.data_compra:
+                compras_por_data.setdefault(c.data_compra, 0)
+                compras_por_data[c.data_compra] += float(c.valor_compra or 0)
+
+        linha_labels = [data.strftime('%d/%m/%Y') for data in sorted(compras_por_data.keys())]
+        linha_data = [compras_por_data[data] for data in sorted(compras_por_data.keys())]
+
+        # Filtre apenas CMV
+        cmv_queryset = compras_filtradas.filter(classificacao='CMV')
+
+        # Agrupe por semana e ano
+        cmv_semanal = (
+            cmv_queryset
+            .annotate(ano=ExtractYear('data_compra'), semana=ExtractWeek('data_compra'))
+            .values('ano', 'semana')
+            .annotate(total=Sum('valor_compra'))
+            .order_by('ano', 'semana')
+        )
+
+        # Prepare os labels e dados para o gráfico de barras
+        cmv_labels = [f"Sem {item['semana']}/{item['ano']}" for item in cmv_semanal]
+        cmv_data = [float(item['total']) for item in cmv_semanal]
+
+        cmv_por_data = {}
+        for c in compras_filtradas:
+            if c.classificacao == 'CMV' and c.data_compra:
+                cmv_por_data.setdefault(c.data_compra, 0)
+                cmv_por_data[c.data_compra] += float(c.valor_compra or 0)
+
+        cmv_bar_labels = [data.strftime('%d/%m/%Y') for data in sorted(cmv_por_data.keys())]
+        cmv_bar_data = [cmv_por_data[data] for data in sorted(cmv_por_data.keys())]
 
         # Cálculo do lucro líquido
         lucro_liquido = totais_vendas['total_vendas'] - totais_compras['total_compras'] - total_pagamentos_funcionarios
@@ -769,6 +837,9 @@ class DashboardResumoView(DashboardBaseView):
             'cmv_bar_data_json': json.dumps(cmv_bar_data, cls=DjangoJSONEncoder),
 
             'media_rodizio': media_rodizio,
+
+            'bar_grupo_labels_json': json.dumps(bar_grupo_labels, cls=DjangoJSONEncoder),
+            'bar_grupo_data_json': json.dumps(bar_grupo_data, cls=DjangoJSONEncoder),
         }
 
         return render(request, 'financeiro/dashboard_resumo.html', context)

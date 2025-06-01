@@ -1,10 +1,7 @@
 <!-- <h5 class="mb-4 mt-4" style="color: #686b6a;">
   <strong>Compras</strong>
 </h5>
-<hr class="my-0" style="border-color: #686b6a; border-width: 3px;">
-
- -->
-
+<hr class="my-0" style="border-color: #686b6a; border-width: 3px;"> -->
 
 <div style="position: relative;">
 <!-- <div class="mt-6;"> -->
@@ -15,16 +12,9 @@
   <hr style="border-color: #686b6a; border-width: 3px; margin-top: 0.5rem; margin-bottom: 1.5rem;">
 </div>
 
-<style>
-  .bg-custom {
-    background-color: #f0f8ff; /* Azul claro f0f8ff */
-  }
-</style>
-
-
 <div class="row align-items-stretch mt-4">
   <!-- Gráfico de Teia: Compras por Classificação -->
-  <!-- <div class="col-md-3 d-flex flex-column gap-3">
+  <div class="col-md-3 d-flex flex-column gap-3">
     <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
       <div class="card-body p-1 d-flex flex-column" style="height: 260px;">
         <h6 class="text-center mb-2" style="font-weight: 600;">Gastos por Classificação</h6>
@@ -33,20 +23,7 @@
         </div>
       </div>
     </div>
-  </div> -->
-
-  <div class="col-md-3 d-flex flex-column gap-3">
-  <div class="card bg-custom shadow-sm rounded-4 h-100" style="min-height: 320px; border: none;">
-    <div class="card-body p-1 d-flex flex-column" style="height: 260px;">
-      <h6 class="text-center mb-2" style="font-weight: 600;">Gastos por Classificação</h6>
-      <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-        <canvas id="comprasRadarChart" style="width:100%; height:100%;"></canvas>
-      </div>
-    </div>
   </div>
-</div>
-
-
 
   <!-- Gráfico de Linha: Compras por Data -->
   <div class="col-md-7">
@@ -89,7 +66,7 @@
       <div class="card-body py-2 px-3">
         <h6 class="card-title d-flex justify-content-between align-items-center mb-1" style="font-size: 0.95rem;">
           EM VENCIMENTO
-          <img src="https://img.icons8.com/ios/20/bdbdbd/clock--v1.png" alt="Ícone" style="height: 20px; width: 20px;">
+          <img src="https://img.icons8.com/ios/20/0505FB/clock--v1.png" alt="Ícone" style="height: 20px; width: 20px;">
         </h6>
         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 1rem;">
           <span>R$ {{ total_compras_dentro_do_prazo|floatformat:2 }}</span>
@@ -101,7 +78,7 @@
       <div class="card-body py-2 px-3">
         <h6 class="card-title d-flex justify-content-between align-items-center mb-1" style="font-size: 0.95rem;">
           CONTA VENCIDA
-          <img src="https://img.icons8.com/ios/20/bdbdbd/error--v1.png" alt="Ícone" style="height: 20px; width: 20px;">
+          <img src="https://img.icons8.com/ios/20/FF0000/error--v1.png" alt="Ícone" style="height: 20px; width: 20px;">
         </h6>
         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 1rem;">
           <span>R$ {{ total_compras_vencidas|floatformat:2 }}</span>
