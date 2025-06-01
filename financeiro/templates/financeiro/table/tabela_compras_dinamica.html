@@ -1,0 +1,273 @@
+<div class="container-fluid">
+    <h5 class="mb-4 mt-3">Relatório Consolidado de Compras e Mão de Obra</h5>
+    
+    <!-- Container da tabela manual -->
+    <div class="card bg-white shadow-sm rounded-4">
+        <div class="card-body p-3">
+            <div id="manualGridContainer">
+                <!-- A tabela será renderizada aqui via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos otimizados */
+#manualGridContainer {
+    overflow-x: auto;
+}
+
+.manual-grid {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.manual-grid th {
+    background-color: #f8f9fa;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.manual-grid td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.group-row {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.group-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subgroup-row {
+    background-color: #f0f0f0;
+    font-weight: 600;
+}
+
+.subgroup-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    color: #0a58ca;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 20px;
+}
+
+.item-row {
+    background-color: white;
+}
+
+.item-row:hover {
+    background-color: #f5f5f5;
+}
+
+.detail-row {
+    background-color: #f9f9f9;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.badge {
+    font-weight: normal;
+    font-size: 0.8em;
+}
+
+.float-end {
+    float: right;
+}
+
+.me-3 {
+    margin-right: 1rem;
+}
+</style>
+
+<script>
+// Estado dos grupos
+let currentGroupStates = {
+    classifications: {},
+    groups: {}
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Simulação de dados combinados
+    const combinedData = [
+        // Compras
+        { id: 1, tipo_pagamento: 'Matéria Prima', produto: 'Aço Inox', valor_compra: 2500.00, classificacao: 'Insumos' },
+        { id: 2, tipo_pagamento: 'Embalagem', produto: 'Caixas de Papelão', valor_compra: 800.00, classificacao: 'Insumos' },
+        { id: 3, tipo_pagamento: 'Serviços', produto: 'Manutenção Equipamentos', valor_compra: 1200.00, classificacao: 'Serviços' },
+        
+        // Pagamentos (convertidos)
+        { id: 101, tipo_pagamento: 'Mão de Obra', produto: 'João Silva (Soldador)', valor_compra: 1800.00, classificacao: 'Mão de Obra' },
+        { id: 102, tipo_pagamento: 'Mão de Obra', produto: 'Maria Souza (Supervisora)', valor_compra: 2200.00, classificacao: 'Mão de Obra' },
+        { id: 103, tipo_pagamento: 'Mão de Obra', produto: 'Carlos Oliveira (Auxiliar)', valor_compra: 1500.00, classificacao: 'Mão de Obra' }
+    ];
+
+    initializeGroupStates(combinedData);
+    renderManualGrid(combinedData);
+});
+
+function initializeGroupStates(data) {
+    // Inicializar estados para classificações
+    const uniqueClassifications = [...new Set(data.map(item => item.classificacao))];
+    uniqueClassifications.forEach(classification => {
+        currentGroupStates.classifications[classification] = true;
+    });
+    
+    // Inicializar estados para grupos
+    const uniqueGroups = [...new Set(data.map(item => item.tipo_pagamento))];
+    uniqueGroups.forEach(group => {
+        currentGroupStates.groups[group] = true;
+    });
+}
+
+function renderManualGrid(data) {
+    const container = document.getElementById('manualGridContainer');
+    container.innerHTML = '';
+    
+    const table = document.createElement('table');
+    table.className = 'manual-grid';
+    
+    // Cabeçalho simplificado
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th style="width: 30px;"></th>
+            <th>Classificação</th>
+            <th>Grupo</th>
+            <th>Produto/Colaborador</th>
+            <th class="text-right">Valor</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+    
+    const tbody = document.createElement('tbody');
+    
+    // Agrupar por classificação
+    const groupedByClassification = groupData(data, 'classificacao');
+    
+    groupedByClassification.forEach(classificationGroup => {
+        // Linha da classificação
+        const classificationRow = document.createElement('tr');
+        classificationRow.className = 'group-row';
+        classificationRow.innerHTML = `
+            <td colspan="5">
+                <button class="group-toggle classification-toggle" data-group="${classificationGroup.name}">
+                    <span class="toggle-icon">${currentGroupStates.classifications[classificationGroup.name] ? '▼' : '►'}</span>
+                    <span>${classificationGroup.name}</span>
+                    <span class="badge bg-secondary">${classificationGroup.items.length} itens</span>
+                </button>
+                <span class="float-end me-3">
+                    Total: <strong>R$ ${classificationGroup.totals.valor_compra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                </span>
+            </td>
+        `;
+        tbody.appendChild(classificationRow);
+        
+        if (currentGroupStates.classifications[classificationGroup.name]) {
+            // Agrupar por tipo_pagamento dentro da classificação
+            const groupedByTipoPagamento = groupData(classificationGroup.items, 'tipo_pagamento');
+            
+            groupedByTipoPagamento.forEach(group => {
+                // Linha do grupo
+                const groupRow = document.createElement('tr');
+                groupRow.className = 'subgroup-row';
+                groupRow.innerHTML = `
+                    <td></td>
+                    <td></td>
+                    <td colspan="3">
+                        <button class="subgroup-toggle group-toggle" data-classification="${classificationGroup.name}" data-group="${group.name}">
+                            <span class="toggle-icon">${currentGroupStates.groups[group.name] ? '▼' : '►'}</span>
+                            <span>${group.name}</span>
+                            <span class="badge bg-secondary">${group.items.length} itens</span>
+                        </button>
+                        <span class="float-end me-3">
+                            Subtotal: <strong>R$ ${group.totals.valor_compra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(groupRow);
+                
+                if (currentGroupStates.groups[group.name]) {
+                    group.items.forEach(item => {
+                        // Linha do item
+                        const itemRow = document.createElement('tr');
+                        itemRow.className = 'item-row';
+                        itemRow.innerHTML = `
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>${item.produto}</td>
+                            <td class="text-right">R$ ${item.valor_compra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        `;
+                        tbody.appendChild(itemRow);
+                    });
+                }
+            });
+        }
+    });
+    
+    table.appendChild(tbody);
+    container.appendChild(table);
+    
+    // Event listeners para toggle
+    document.querySelectorAll('.classification-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            const classificationName = this.getAttribute('data-group');
+            currentGroupStates.classifications[classificationName] = !currentGroupStates.classifications[classificationName];
+            renderManualGrid(data);
+        });
+    });
+    
+    document.querySelectorAll('.subgroup-toggle').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const groupName = this.getAttribute('data-group');
+            currentGroupStates.groups[groupName] = !currentGroupStates.groups[groupName];
+            renderManualGrid(data);
+        });
+    });
+}
+
+function groupData(data, groupField) {
+    const groups = {};
+    
+    data.forEach(item => {
+        const groupValue = item[groupField];
+        if (!groups[groupValue]) {
+            groups[groupValue] = {
+                name: groupValue,
+                items: [],
+                totals: { valor_compra: 0 }
+            };
+        }
+        
+        groups[groupValue].items.push(item);
+        groups[groupValue].totals.valor_compra += item.valor_compra;
+    });
+    
+    return Object.values(groups).sort((a, b) => a.name.localeCompare(b.name));
+}
+</script>

@@ -11,7 +11,8 @@
             <!-- Linha principal da classificação -->
             <tr class="clickable-row" data-target="#grupo-produto-{{ forloop.counter }}">
                 <td>
-                    <span class="expand-icon">+</span>
+                    <!-- <span class="expand-icon">+</span> -->
+                    <span class="expand-icon">▼</span>
                     {{ classificacao.classificacao|default:"-" }}
                 </td>
                 <td>R$ {{ classificacao.total_valor|floatformat:2 }}</td>
@@ -34,7 +35,7 @@
                                     <!-- Linha principal do grupo de produto -->
                                     <tr class="clickable-row" data-target="#produto-{{ forloop.counter }}">
                                         <td>
-                                            <span class="expand-icon">+</span>
+                                            <span class="expand-icon">▼</span>
                                             {{ grupo_produto.grupo_produto|default:"-" }}
                                         </td>
                                         <td>R$ {{ grupo_produto.total_valor|floatformat:2 }}</td>
@@ -84,10 +85,10 @@
                 var icon = row.querySelector('.expand-icon');
                 if (target.style.display === 'none') {
                     target.style.display = 'table-row';
-                    icon.textContent = '-';
+                    icon.textContent = '►';
                 } else {
                     target.style.display = 'none';
-                    icon.textContent = '+';
+                    icon.textContent = '▼';
                 }
             });
         });

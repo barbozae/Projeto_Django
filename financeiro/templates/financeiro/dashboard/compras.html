@@ -15,9 +15,16 @@
   <hr style="border-color: #686b6a; border-width: 3px; margin-top: 0.5rem; margin-bottom: 1.5rem;">
 </div>
 
+<style>
+  .bg-custom {
+    background-color: #f0f8ff; /* Azul claro f0f8ff */
+  }
+</style>
+
+
 <div class="row align-items-stretch mt-4">
   <!-- Gráfico de Teia: Compras por Classificação -->
-  <div class="col-md-3 d-flex flex-column gap-3">
+  <!-- <div class="col-md-3 d-flex flex-column gap-3">
     <div class="card bg-white shadow-sm rounded-4 h-100" style="min-height: 320px;">
       <div class="card-body p-1 d-flex flex-column" style="height: 260px;">
         <h6 class="text-center mb-2" style="font-weight: 600;">Gastos por Classificação</h6>
@@ -26,7 +33,20 @@
         </div>
       </div>
     </div>
+  </div> -->
+
+  <div class="col-md-3 d-flex flex-column gap-3">
+  <div class="card bg-custom shadow-sm rounded-4 h-100" style="min-height: 320px; border: none;">
+    <div class="card-body p-1 d-flex flex-column" style="height: 260px;">
+      <h6 class="text-center mb-2" style="font-weight: 600;">Gastos por Classificação</h6>
+      <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <canvas id="comprasRadarChart" style="width:100%; height:100%;"></canvas>
+      </div>
+    </div>
   </div>
+</div>
+
+
 
   <!-- Gráfico de Linha: Compras por Data -->
   <div class="col-md-7">

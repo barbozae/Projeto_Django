@@ -683,22 +683,6 @@ class DashboardResumoView(DashboardBaseView):
         taxa_lucro = lucro_liquido / totais_vendas['total_vendas'] * 100 if totais_vendas['total_vendas'] != 0 else 0
         taxa_lucro = round(taxa_lucro, 2)
 
-        # Dados para o gráfico de vendas
-        # labels = [v.data_venda.strftime('%d/%m/%Y') for v in vendas_filtradas if v.data_venda]
-        # data = [float(
-        #     (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
-        #     (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
-        #     (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
-        #     (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
-        #     (v.socio or 0)
-        # ) for v in vendas_filtradas]
-
-        # # Se não houver vendas, evita erro no gráfico
-        # if not labels:
-        #     labels = ['Sem dados']
-        #     data = [0]
-
-
         datas_unicas = sorted({v.data_venda for v in vendas_filtradas if v.data_venda})
         periodos = ['Almoço', 'Jantar']
 
@@ -764,8 +748,6 @@ class DashboardResumoView(DashboardBaseView):
             'lucro_liquido': lucro_liquido,
 
             # Dados do gráfico
-            # 'labels_json': json.dumps(labels, cls=DjangoJSONEncoder),
-            # 'data_json': json.dumps(data, cls=DjangoJSONEncoder),
             'stacked_labels_json': json.dumps(stacked_labels, cls=DjangoJSONEncoder),
             'almoco_data_json': json.dumps(almoco_data, cls=DjangoJSONEncoder),
             'jantar_data_json': json.dumps(jantar_data, cls=DjangoJSONEncoder),

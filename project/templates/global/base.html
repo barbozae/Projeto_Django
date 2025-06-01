@@ -10,7 +10,25 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary position-sticky top-0" style="z-index: 1050;">
+  <style>
+    .navbar.scrolled {
+    background-color: #e7ebef !important; /* Cor de fundo ao rolar */
+    transition: background-color 0.3s ease; /* Suavidade na transição */
+    } 
+  </style>
+
+  <script>
+    document.addEventListener("scroll", function() {
+      const navbar = document.getElementById("navbar");
+      if (window.scrollY > 50) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    });
+    </script>
+
+    <nav id="navbar" class="navbar navbar-expand-lg bg-body-tertiary position-sticky top-0" style="z-index: 1050;">
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'menu' %}?tenant={{ tenant }}" style="color: green">SCV</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
