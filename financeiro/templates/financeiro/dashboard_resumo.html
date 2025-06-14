@@ -84,6 +84,7 @@
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Data Início:</small>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+
             </div>
             <div class="mb-2 ms-2 me-2">
                 <small for="data_fim" class="form-text">Data Fim:</small>
@@ -93,6 +94,12 @@
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
                 <a href="{% url 'dashboard_resumo' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
+            
+            {% if pagamentos %}
+                <div class="alert alert-success">
+                    <strong>{{ pagamentos|length }}</strong> pagamento(s) encontrado(s) entre <strong>{{ data_inicio }}</strong> e <strong>{{ data_fim }}</strong>.
+                </div>
+            {% endif %}
         </form>
 
         {% include 'financeiro/dashboard/vendas.html'%}

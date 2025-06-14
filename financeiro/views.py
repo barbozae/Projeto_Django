@@ -1,30 +1,27 @@
-from django.shortcuts import render
-from django.views import View
+import json
+from datetime import date
+from decimal import Decimal
+
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
+from .models import TaxasVendas
 
-from django.core.paginator import Paginator
-from django.db.models import Sum, F, DecimalField, Q
-from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
-from decimal import Decimal
+from project.utils import generate_success_url
+
+from django.views import View
 from django.utils import timezone
-from datetime import date, timedelta, datetime
-
-from django.core.cache import cache
-
-from django.db.models import Sum, F, Value, CharField
-
-import json
+from django.urls import reverse_lazy
+from django.shortcuts import render
+from django.core.paginator import Paginator
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Sum, Value, CharField, DecimalField, Q, F
+from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
+from django.views.generic import ListView, CreateView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
+from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 
-
-from django.core.cache import cache
-from datetime import datetime, timedelta
-import json
-from django.db.models import Sum, Value, CharField, F
-from django.core.serializers.json import DjangoJSONEncoder
 
 
 class FiltrosFinanceiro:
@@ -103,6 +100,10 @@ class FiltrosFinanceiro:
 
 
 class DashboardBaseView(View):
+    def calcular_totais_pagamentos(self, pagamentos_queryset):
+        total_pagamentos = pagamentos_queryset.aggregate(total_despesas=Sum('valor_pago'))['total_despesas'] or 0
+        return total_pagamentos
+    
     def calcular_totais_vendas(self, vendas_queryset):
         vendas_total = vendas_queryset.aggregate(
         total_rodizio=Coalesce(Sum('rodizio', output_field=DecimalField()), 0, output_field=DecimalField()),
@@ -198,6 +199,7 @@ class DashboardBaseView(View):
         cmv = compras_queryset.filter(classificacao='CMV').aggregate(total_cmv=Sum('valor_compra'))['total_cmv'] or 0
         gasto_fixo = compras_queryset.filter(classificacao='Gasto Fixo').aggregate(total_gasto_fixo=Sum('valor_compra'))['total_gasto_fixo'] or 0
         gasto_variavel = compras_queryset.filter(classificacao='Gasto Variável').aggregate(total_gasto_variavel=Sum('valor_compra'))['total_gasto_variavel'] or 0
+        
         # Taxas
         taxa_cmv = round(cmv / total_compras * 100, 2) if total_compras != 0 else 0
         taxa_gasto_fixo = round(gasto_fixo / total_compras * 100, 2) if total_compras != 0 else 0
@@ -213,10 +215,6 @@ class DashboardBaseView(View):
             'taxa_gasto_fixo': taxa_gasto_fixo,
             'taxa_gasto_variavel': taxa_gasto_variavel,
         }
-
-    def calcular_totais_pagamentos(self, pagamentos_queryset):
-        total_pagamentos = pagamentos_queryset.aggregate(total_despesas=Sum('valor_pago'))['total_despesas'] or 0
-        return total_pagamentos
 
     def calcular_contas_vencidas(self, compras_queryset):
         # Filtra as compras com data de vencimento menor que a data atual e onde valor_pago é zero ou não existe
@@ -245,6 +243,71 @@ class DashboardBaseView(View):
         )['total_nao_pagas_dentro_do_prazo'] or 0
 
         return total_compras_dentro_do_prazo
+
+
+
+
+
+
+class TaxaListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
+# class TaxaListView(ListView):
+    model = TaxasVendas
+    template_name = 'financeiro/taxasvendas_list.html'  # Garante que o template correto será usado
+    context_object_name = 'taxas_list'  # Isso define o nome que será usado no template
+    permission_required = 'financeiro.view_taxasvendas'  # Permissão para visualizar objetos'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        print("QuerySet:", qs.query)  # Debug
+        print("Count:", qs.count())   # Debug
+        return qs
+
+
+class TaxaCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
+    model = TaxasVendas
+    fields = ["data_taxa_venda", "debito_mastercard", "debito_visa", "debito_elo", "credito_mastercard", 
+              "credito_visa", "credito_elo", "hiper", "dinersclub", "american_express", 
+              "alelo", "sodexo", "vale_refeicao", "ticket_rest"]
+    permission_required = 'financeiro.add_taxas_vendas'
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        tenant = getattr(self.request.user, 'tenant', None)
+        if tenant:
+            form.instance.tenant = tenant
+            form.instance.author = self.request.user
+        return form  # Adicionado o return
+
+    def form_valid(self, form):
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)
+        form.instance.tenant = tenant
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy("taxas_vendas")
+
+
+class TaxaUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, UpdateView):
+    model = TaxasVendas
+    fields = ["debito_mastercard", "debito_visa", "debito_elo", "credito_mastercard", "credito_visa", "credito_elo",
+              "hiper", "dinersclub", "american_express", "alelo", "sodexo", "vale_refeicao", "ticket_rest"]
+    success_url = reverse_lazy("taxas_vendas")
+    permission_required = 'financeiro.change_taxas_vendas'  # Permissão para visualizar objetos'
+
+    def form_valid(self, form):
+        # Certifique-se de que o tenant está sendo atribuído corretamente, se necessário
+        tenant = getattr(self.request.user, 'tenant', None)
+        if not tenant:
+            return self.form_invalid(form)  # Retorna erro se o tenant não for encontrado
+        form.instance.tenant = tenant
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        tenant = getattr(self.request.user, 'tenant', None)
+        return generate_success_url('taxas_vendas', tenant)
 
 
 class DashboardVendasView(DashboardBaseView):
@@ -658,7 +721,7 @@ class DashboardResumoView(DashboardBaseView):
         gastos_funcionarios_por_produto = funcionarios_filtrados.annotate(
             classificacao=Value("Mão de Obra", output_field=CharField()),
             grupo_produto=F('tipo_pagamento'),
-            produto=F('nome_funcionario')  # Alterado de funcionario_selecionado para nome_funcionario
+            produto=F('nome_funcionario__nome_funcionario')  # foi usado __ devido nome_funcionario ser um chave estrangeira 
         ).values(
             'classificacao', 'grupo_produto', 'produto').annotate(
             total_valor=Sum('valor_pago')).order_by(

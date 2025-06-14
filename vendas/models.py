@@ -2,11 +2,12 @@ from django.db import models
 from users.models import Tenant
 from django.conf import settings
 
+
 class Vendas(models.Model):
-    PERIODO_CHOICES = [
+    PERIODO_CHOICES = (
         ('Almoço', 'Almoço'),
         ('Jantar', 'Jantar'),
-        ]
+    )
     
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
