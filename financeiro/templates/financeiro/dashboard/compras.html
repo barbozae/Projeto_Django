@@ -178,8 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cria gradiente para o gráfico de linha
   const gradient = linhaCtx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(6, 160, 96, 0.3)');
-  gradient.addColorStop(1, 'rgba(6, 160, 96, 0.05)');
+  // gradient.addColorStop(0, 'rgba(6, 160, 96, 0.3)');
+  // gradient.addColorStop(1, 'rgba(6, 160, 96, 0.05)');
+  gradient.addColorStop(0, 'rgba(114, 124, 245, 0.3)');
+  gradient.addColorStop(1, 'rgba(114, 124, 245, 0.05)');
 
   new Chart(linhaCtx, {
     type: 'line',
@@ -188,7 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
       datasets: [{
         label: 'Compras',
         data: linhaData,
-        borderColor: '#06a060',
+        // borderColor: '#06a060',
+        borderColor: '#727CF5',
         // backgroundColor: 'rgba(6, 160, 96, 0.1)',
         backgroundColor: gradient,
         borderWidth: 3, // borda da linha
@@ -196,7 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         tension: 0.4,
         pointRadius: 4,
         pointHoverRadius: 8, // raio do ponto ao passar o mouse
-        pointBackgroundColor: '#06a060',
+        // pointBackgroundColor: '#06a060',
+        pointBackgroundColor: '#727CF5',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
       }]

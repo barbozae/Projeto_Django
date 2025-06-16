@@ -27,7 +27,12 @@
         <div class="mb-2 ms-2">
             <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_cadastro">Buscar</button>
             <a href="{% url 'funcionarios_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-            <a href="{% url 'create_funcionarios' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Novo Funcionário</a>
+            {% if perms.funcionarios.add_contratacao %}
+                <a href="{% url 'create_funcionarios' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Novo Funcionário</a>
+            {% else %}
+                <a class="btn btn-outline-success disabled" href="#" aria-disabled="true">Novo Funcionário</a>
+            {% endif %}
+
         </div>
 
     </form>

@@ -50,8 +50,15 @@
 
             <div class="mb-1 ms-1 mt-2">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_compras">Buscar</button>
-                <a href="{% url 'compras_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-                <a href="{% url 'create_compras' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Compra</a>
+                <a href="{% url 'compras_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>            
+            
+                {% if perms.comrpas.add_compras %}
+                    <a href="{% url 'create_compras' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Compra</a>
+                {% else %}
+                    <a href="#" class="btn btn-outline-success btn-sm disabled">
+                        <i class="fas fa-lock"></i>Nova Compra
+                    </a>
+                {% endif %}
             </div>
 
             <!-- Radios para filtrar datas compras - vencimento - pagamento -->
@@ -111,8 +118,21 @@
                         <td>{{ compras.classificacao| default:"-" }}</td>
                         <td>{{ compras.forma_pagamento| default:"-" }}</td>
                         <td>
-                            <a href="{% url 'update_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm" >Editar</a>
-                            <a href="{% url 'delete_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm" >Excluir</a>
+                            {% if perms.compras.change_compras %}
+                                <a href="{% url 'update_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            {% else %}
+                                <a href="#" class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">
+                                    <i class="fas fa-lock"></i> Editar
+                                </a>
+                            {% endif %}
+
+                            {% if perms.compras.delete_compras %}
+                                <a href="{% url 'delete_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm">Excluir</a>
+                            {% else %}
+                                <a href="#" class="btn btn-danger btn-sm disabled" aria-disabled="true">
+                                    <i class="fas fa-lock"></i>Excluir
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                     <tr class="detail-row" style="display: none;">
@@ -206,7 +226,8 @@
         {% endif %}
     </ul>
 </nav>
-
-    {% include 'compras/compras_edicao.html' %}
+    {% if perms.compras.add_compras %}
+        {% include 'compras/compras_edicao.html' %}
+    {% endif %}
     
 {% endblock content %}

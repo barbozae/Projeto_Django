@@ -50,7 +50,11 @@
         <div class="mb-2 ms-2 mt-3">
             <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
             <a href="{% url 'pagamento_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-            <a href="{% url 'create_payment' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Pagar Funcionário</a>
+            {% if perms.funcionarios.add_pagamento %}
+                <a href="{% url 'create_payment' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Pagar Funcionário</a>
+            {% else %}
+                <a class="btn btn-outline-success disabled me-2" href="#" aria-disabled="true">Pagar Funcionário</a>
+            {% endif %}
         </div>
 
     </form>
@@ -80,8 +84,17 @@
                         <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
                         <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
                         <td>
-                            <a href="{% url 'update_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
-                            <a href="{% url 'delete_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                            {% if perms.funcionarios.change_pagamento %}
+                                <a href="{% url 'update_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            {% else %}
+                                <a class="btn btn-outline-secondary disabled btn-sm" href="#" aria-disabled="true">Editar</a>
+                            {% endif %}
+
+                            {% if perms.funcionarios.delete_pagamento %}
+                                <a href="{% url 'delete_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                            {% else %}
+                                <a class="btn btn-outline-danger disabled btn-sm" href="#" aria-disabled="true">Excluir</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

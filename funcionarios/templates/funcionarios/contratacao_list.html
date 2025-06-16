@@ -62,7 +62,13 @@
             <div class="mb-1 ms-2 mt-2">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_cadastro">Buscar</button>
                 <a href="{% url 'contratacao_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-                <a href="{% url 'create_contratacao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Contratar</a>
+                
+                {% if perms.funcionarios.add_contratacao %}
+                    <li><a href="{% url 'create_contratacao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Contratar</a></li>
+                {% else %}
+                    <a class="btn btn-outline-success disabled" href="#" aria-disabled="true">Contratar</a>
+                {% endif %}
+
             </div>
 
             <!-- switch para filtrar contas vencidas -->
@@ -123,7 +129,12 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'update_contratacao' pk=contratacao.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            {% if perms.funcionarios.change_contratacao %}
+                                <a href="{% url 'update_contratacao' pk=contratacao.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            {% else %}
+                                <a class="btn btn-outline-secondary disabled"  href="#" aria-disabled="true">Editar</a>
+                            {% endif %}
+                            
                         </td>
                     </tr>
                 {% endfor %}

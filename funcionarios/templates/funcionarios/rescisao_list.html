@@ -50,7 +50,13 @@
             <div class="mb-3 ms-2 mt-3">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_cadastro">Buscar</button>
                 <a href="{% url 'rescisao_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-                <a href="{% url 'create_rescisao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Rescisão Funcionário</a>
+
+                {% if perms.funcionarios.add_rescisao %}
+                    <a href="{% url 'create_rescisao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Rescisão Funcionário</a>
+                {% else %}
+                    <a class="btn btn-outline-success disabled me-2" href="#" aria-disabled="true">Rescisão Funcionário</a>
+                {% endif %}
+
             </div>
 
         </form>
@@ -97,7 +103,12 @@
                                 ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                             </td>
                             <td>
-                                <a href="{% url 'update_rescisao' pk=rescisao.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                                {% if perms.funcionarios.change_rescisao %}
+                                    <a href="{% url 'update_rescisao' pk=rescisao.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                                {% else %}
+                                    <a class="btn btn-outline-secondary disabled btn-sm" href="#" aria-disabled="true">Editar</a>
+                                {% endif %}
+
                             </td>
                         </tr>
                     {% endfor %}

@@ -1,27 +1,25 @@
 import json
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, DivisionByZero
 
+from .models import TaxasVendas
 from vendas.models import Vendas
 from compras.models import Compras
 from funcionarios.models import Pagamento
-from .models import TaxasVendas
-
-from project.utils import generate_success_url
 
 from django.views import View
 from django.utils import timezone
-from django.urls import reverse_lazy
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.core.serializers.json import DjangoJSONEncoder
+from django.views.generic import ListView, CreateView, UpdateView
 from django.db.models import Sum, Value, CharField, DecimalField, Q, F
 from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
-from django.views.generic import ListView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
+from project.utils import generate_success_url
 from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
-
 
 
 class FiltrosFinanceiro:
@@ -166,30 +164,71 @@ class DashboardBaseView(View):
 
     def calcular_taxas_vendas(self, vendas_queryset):
         # Define as taxas por bandeira de cartão
-        taxas_bandeiras = {
-            "debito_mastercard": 0.0095,
-            "debito_visa": 0.0095,
-            "debito_elo": 0.0098,
-            "credito_mastercard": 0.0299,
-            "credito_visa": 0.0299,
-            "credito_elo": 0.0299,
-            "hiper": 0.0299,
-            "dinersclub": 0.0299,
-            "american_express": 0.025,
-            "alelo": 0.07,
-            "sodexo": 0.069,
-            "vale_refeicao": 0.069,
-            "ticket_rest": 0.07,
-        }
+        # taxas_bandeiras = {
+        #     "debito_mastercard": 0.0095,
+        #     "debito_visa": 0.0095,
+        #     "debito_elo": 0.0098,
+        #     "credito_mastercard": 0.0299,
+        #     "credito_visa": 0.0299,
+        #     "credito_elo": 0.0299,
+        #     "hiper": 0.0299,
+        #     "dinersclub": 0.0299,
+        #     "american_express": 0.025,
+        #     "alelo": 0.07,
+        #     "sodexo": 0.069,
+        #     "vale_refeicao": 0.069,
+        #     "ticket_rest": 0.07,
+        # }
 
-        # Inicializa o total de taxas
-        total_taxas = 0
 
-        # Itera sobre as taxas e calcula o total
-        for bandeira, taxa in taxas_bandeiras.items():
-            total_taxas += vendas_queryset.aggregate(
-                total=Sum(F(bandeira) * taxa, output_field=DecimalField())
-            )["total"] or 0
+        # Configura precisão decimal
+        # getcontext().prec = 8
+
+        # Verifica se existem vendas
+        if not vendas_queryset.exists():
+            return Decimal('0.00')
+
+        # Obtém todas as taxas em ordem cronológica (como lista)
+        taxas = list(TaxasVendas.objects.order_by('data_taxa_venda'))
+        
+        if not taxas:
+            return Decimal('0.00')
+
+        total_taxas = Decimal('0.00')
+        
+        # Processa cada taxa
+        for i in range(len(taxas)):
+            taxa = taxas[i]
+            data_inicio = taxa.data_taxa_venda
+            data_fim = taxas[i+1].data_taxa_venda if i+1 < len(taxas) else None
+            
+            # Cria nova queryset para o período
+            vendas_filtradas = vendas_queryset.model.objects.filter(
+                pk__in=vendas_queryset.values_list('pk', flat=True),
+                data_venda__gte=data_inicio
+            )
+            
+            if data_fim:
+                vendas_filtradas = vendas_filtradas.filter(data_venda__lt=data_fim)
+            
+            # Calcula para cada bandeira
+            for bandeira in [
+                'debito_mastercard', 'debito_visa', 'debito_elo',
+                'credito_mastercard', 'credito_visa', 'credito_elo',
+                'hiper', 'dinersclub', 'american_express',
+                'alelo', 'sodexo', 'vale_refeicao', 'ticket_rest'
+            ]:
+                valor_taxa = getattr(taxa, bandeira, Decimal('0.00'))
+                valor_taxa = valor_taxa if valor_taxa is not None else Decimal('0.00')
+                
+                if valor_taxa != Decimal('0.00'):
+                    resultado = vendas_filtradas.aggregate(
+                        total=Sum(F(bandeira) * valor_taxa / 100,
+                        output_field=DecimalField()
+                    ))
+
+                    total_bandeira = Decimal(resultado.get('total') or '0.00')
+                    total_taxas += total_bandeira
 
         return total_taxas
 
@@ -245,22 +284,11 @@ class DashboardBaseView(View):
         return total_compras_dentro_do_prazo
 
 
-
-
-
-
 class TaxaListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
-# class TaxaListView(ListView):
     model = TaxasVendas
     template_name = 'financeiro/taxasvendas_list.html'  # Garante que o template correto será usado
     context_object_name = 'taxas_list'  # Isso define o nome que será usado no template
     permission_required = 'financeiro.view_taxasvendas'  # Permissão para visualizar objetos'
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        print("QuerySet:", qs.query)  # Debug
-        print("Count:", qs.count())   # Debug
-        return qs
 
 
 class TaxaCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, CreateView):
@@ -268,7 +296,7 @@ class TaxaCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
     fields = ["data_taxa_venda", "debito_mastercard", "debito_visa", "debito_elo", "credito_mastercard", 
               "credito_visa", "credito_elo", "hiper", "dinersclub", "american_express", 
               "alelo", "sodexo", "vale_refeicao", "ticket_rest"]
-    permission_required = 'financeiro.add_taxas_vendas'
+    permission_required = 'financeiro.add_taxasvendas'
     
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -292,10 +320,10 @@ class TaxaCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryset
 
 class TaxaUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, UpdateView):
     model = TaxasVendas
-    fields = ["debito_mastercard", "debito_visa", "debito_elo", "credito_mastercard", "credito_visa", "credito_elo",
+    fields = ["data_taxa_venda", "debito_mastercard", "debito_visa", "debito_elo", "credito_mastercard", "credito_visa", "credito_elo",
               "hiper", "dinersclub", "american_express", "alelo", "sodexo", "vale_refeicao", "ticket_rest"]
     success_url = reverse_lazy("taxas_vendas")
-    permission_required = 'financeiro.change_taxas_vendas'  # Permissão para visualizar objetos'
+    permission_required = 'financeiro.change_taxasvendas'  # Permissão para visualizar objetos'
 
     def form_valid(self, form):
         # Certifique-se de que o tenant está sendo atribuído corretamente, se necessário
@@ -733,46 +761,125 @@ class DashboardResumoView(DashboardBaseView):
         gastos_por_produto = list(gastos_por_produto) + list(gastos_funcionarios_por_produto)
 
         # Calcular totais combinados (compras + funcionários)
-        total_compras = sum(item['total_valor'] for item in gastos_por_classificacao if item['classificacao'] != "Mão de Obra")
-        total_funcionarios = sum(item['total_valor'] for item in gastos_por_classificacao if item['classificacao'] == "Mão de Obra")
+        # total_compras = sum(item['total_valor'] for item in gastos_por_classificacao if item['classificacao'] != "Mão de Obra")
+        # total_funcionarios = sum(item['total_valor'] for item in gastos_por_classificacao if item['classificacao'] == "Mão de Obra") or 0
+
+
+        total_compras = sum(item['total_valor'] or 0 for item in gastos_por_classificacao if item['classificacao'] != "Mão de Obra")
+        total_funcionarios = sum(item['total_valor'] or 0 for item in gastos_por_classificacao if item['classificacao'] == "Mão de Obra")
+
+
+
         total_geral = total_compras + total_funcionarios
 
         # Capturando o parâmetro da radio button
         usar_totais_vendas = request.GET.get('usar_totais_vendas') == 'false'
 
         # Calcular taxas percentuais para tabela gastos
-        for classificacao in gastos_por_classificacao:
-            if usar_totais_vendas:
-                classificacao['taxa_percentual'] = (classificacao['total_valor'] / total_geral * 100) if total_geral != 0 else 0
-            else:
-                classificacao['taxa_percentual'] = (classificacao['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+        # for classificacao in gastos_por_classificacao:
+        #     if usar_totais_vendas:
+        #         classificacao['taxa_percentual'] = (classificacao['total_valor'] / total_geral * 100) if total_geral != 0 else 0
+        #     else:
+        #         classificacao['taxa_percentual'] = (classificacao['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
 
+        # for grupo_produto in gastos_por_grupo_produto:
+        #     for classificacao in gastos_por_classificacao:
+        #         if grupo_produto['classificacao'] == classificacao['classificacao']:
+        #             if usar_totais_vendas:
+        #                 grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / classificacao['total_valor'] * 100) if classificacao['total_valor'] != 0 else 0
+        #             else:
+        #                 grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+        #             break
+
+        # for produto in gastos_por_produto:
+        #     for grupo_produto in gastos_por_grupo_produto:
+        #         if (produto['classificacao'] == grupo_produto['classificacao'] and 
+        #             produto['grupo_produto'] == grupo_produto['grupo_produto']):
+        #             if usar_totais_vendas:
+        #                 produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
+        #             else:
+        #                 produto['taxa_percentual'] = (produto['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+        #             break
+
+        def calcular_percentual(numerador, denominador):
+            """Calcula percentual de forma segura pois quando o valor no banco era None a página dava erro"""
+            try:
+                # Converte para Decimal se não for None
+                num = Decimal(numerador) if numerador is not None else Decimal('0')
+                den = Decimal(denominador) if denominador is not None else Decimal('0')
+                
+                # Evita divisão por zero
+                if den == 0:
+                    return Decimal('0')
+                    
+                return (num / den) * 100
+            except (TypeError, InvalidOperation, DivisionByZero):
+                return Decimal('0')
+
+        # Processamento das classificações
+        for classificacao in gastos_por_classificacao:
+            denominador = total_geral if usar_totais_vendas else totais_vendas.get('total_vendas', 0)
+            classificacao['taxa_percentual'] = calcular_percentual(
+                classificacao.get('total_valor'), 
+                denominador
+            )
+
+        # Processamento dos grupos de produto
         for grupo_produto in gastos_por_grupo_produto:
             for classificacao in gastos_por_classificacao:
                 if grupo_produto['classificacao'] == classificacao['classificacao']:
-                    if usar_totais_vendas:
-                        grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / classificacao['total_valor'] * 100) if classificacao['total_valor'] != 0 else 0
-                    else:
-                        grupo_produto['taxa_percentual'] = (grupo_produto['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+                    denominador = (
+                        classificacao.get('total_valor') 
+                        if usar_totais_vendas 
+                        else totais_vendas.get('total_vendas', 0)
+                    )
+                    grupo_produto['taxa_percentual'] = calcular_percentual(
+                        grupo_produto.get('total_valor'),
+                        denominador
+                    )
                     break
 
+        # Processamento dos produtos
         for produto in gastos_por_produto:
             for grupo_produto in gastos_por_grupo_produto:
                 if (produto['classificacao'] == grupo_produto['classificacao'] and 
                     produto['grupo_produto'] == grupo_produto['grupo_produto']):
-                    if usar_totais_vendas:
-                        produto['taxa_percentual'] = (produto['total_valor'] / grupo_produto['total_valor'] * 100) if grupo_produto['total_valor'] != 0 else 0
-                    else:
-                        produto['taxa_percentual'] = (produto['total_valor'] / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
+                    denominador = (
+                        grupo_produto.get('total_valor') 
+                        if usar_totais_vendas 
+                        else totais_vendas.get('total_vendas', 0)
+                    )
+                    produto['taxa_percentual'] = calcular_percentual(
+                        produto.get('total_valor'),
+                        denominador
+                    )
                     break
+
+        # # Dados para o gráfico de barras - Compras por grupo de produto
+        # bar_grupo_labels = [item['grupo_produto'] for item in gastos_por_grupo_produto]
+        # bar_grupo_data = [float(item['total_valor']) for item in gastos_por_grupo_produto]
+
+        # # Dados para o gráfico de teia (Radar) - Compras por classificação
+        # radar_labels = [item['classificacao'] for item in gastos_por_classificacao]
+        # radar_data = [float(item['total_valor']) for item in gastos_por_classificacao]
+
+        # Função auxiliar para conversão segura desta forma não da erro nos gráficos quando o valor do banco for None
+        def safe_float(value, default=0.0):
+            """Converte para float de forma segura, tratando None e outros casos"""
+            try:
+                return float(value) if value is not None else default
+            except (TypeError, ValueError):
+                return default
 
         # Dados para o gráfico de barras - Compras por grupo de produto
         bar_grupo_labels = [item['grupo_produto'] for item in gastos_por_grupo_produto]
-        bar_grupo_data = [float(item['total_valor']) for item in gastos_por_grupo_produto]
+        bar_grupo_data = [safe_float(item.get('total_valor')) for item in gastos_por_grupo_produto]
 
         # Dados para o gráfico de teia (Radar) - Compras por classificação
         radar_labels = [item['classificacao'] for item in gastos_por_classificacao]
-        radar_data = [float(item['total_valor']) for item in gastos_por_classificacao]
+        radar_data = [safe_float(item.get('total_valor')) for item in gastos_por_classificacao]
+
+
 
         # Dados para o gráfico de linha - Compras por data
         compras_por_data = {}

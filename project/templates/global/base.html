@@ -56,32 +56,61 @@
               {% endif %}
 
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}?tenant={{ tenant }}">Fornecedor</a></li>
-                <li><a class="dropdown-item" href="{% url 'compras_list' %}?tenant={{ tenant }}">Compras</a></li>
+                {% if perms.fornecedor.view_fornecedor %}
+                  <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}?tenant={{ tenant }}">Fornecedor</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Fornecedor</a>
+                {% endif %}
+                
+                {% if perms.compras.view_compras %}
+                  <li><a class="dropdown-item" href="{% url 'compras_list' %}?tenant={{ tenant }}">Compras</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Compras</a>
+                {% endif %}
               </ul>
 
             </li>
             <!-- Dropdown Funcionários -->
             <li class="nav-item dropdown">
               <!-- Inativando botão Fornecedor se o usuário não tiver permissão -->
-              {% if perms.funcionarios.view_pagamento %}
+              {% if perms.funcionarios.view_contratacao %}
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Funcionários</a>
               {% else %}
                 <a class="nav-link disabled" href="#" aria-disabled="true">Funcionários</a>
               {% endif %}
 
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'funcionarios_list' %}?tenant={{ tenant }}">Cadastro</a></li>
-                <li><a class="dropdown-item" href="{% url 'contratacao_list' %}?tenant={{ tenant }}">Contratação</a></li>
-                <li><a class="dropdown-item" href="{% url 'rescisao_list' %}?tenant={{ tenant }}">Rescisão</a></li>
+                {% if perms.funcionarios.view_cadastro %}
+                  <li><a class="dropdown-item" href="{% url 'funcionarios_list' %}?tenant={{ tenant }}">Cadastro</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Cadastro</a>
+                {% endif %}
+
+                {% if perms.funcionarios.view_contratacao %}
+                  <li><a class="dropdown-item" href="{% url 'contratacao_list' %}?tenant={{ tenant }}">Contratação</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Contratação</a>
+                {% endif %}
+
+                {% if perms.funcionarios.view_rescisao %}
+                  <li><a class="dropdown-item" href="{% url 'rescisao_list' %}?tenant={{ tenant }}">Rescisão</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Rescisão</a>
+                {% endif %}
+
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'pagamento_list' %}?tenant={{ tenant }}">Pagamento</a></li>
+                {% if perms.funcionarios.view_pagamento %}
+                  <li><a class="dropdown-item" href="{% url 'pagamento_list' %}?tenant={{ tenant }}">Pagamento</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Pagamentos</a>
+                {% endif %}
+
               </ul>
             </li>
             <!-- Dropdown Financeiro -->
             <li class="nav-item dropdown">
               <!-- Inativando botão Financeiro se o usuário não tiver permissão -->
-              {% if perms.financeiro.view_financeiro %}
+              {% if perms.financeiro.view_dashboard_financeiro %}
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Financeiro</a>
               {% else %}
                 <a class="nav-link disabled" href="#" aria-disabled="true">Financeiro</a>
@@ -89,7 +118,12 @@
 
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}">Vendas</a></li>
-                <li><a class="dropdown-item" href="{% url 'taxas_vendas' %}?tenant={{ tenant }}">Taxas</a></li>
+                {% if perms.financeiro.add_taxasvendas %}
+                  <li><a class="dropdown-item" href="{% url 'taxas_vendas' %}?tenant={{ tenant }}">Taxas</a></li>
+                {% else %}
+                  <a class="nav-link disabled" href="#" aria-disabled="true">Taxas</a>
+                {% endif %}
+
                 <li><a class="dropdown-item" href="{% url 'dashboard_compras' %}?tenant={{ tenant }}">Compras</a></li>
                 <li><a class="dropdown-item" href="{% url 'dashboard_funcionarios' %}?tenant={{ tenant }}">Funcionários</a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -103,7 +137,6 @@
             <button id="fullscreen-btn" class="btn btn me-2" type="button" title="Tela Cheia" style="box-shadow:none;">
               <span id="fullscreen-icon" class="bi bi-arrows-fullscreen"></span>
             </button>
-
 
             {% if user.is_authenticated %}
               <span class="navbar-text text-dark me-3">
