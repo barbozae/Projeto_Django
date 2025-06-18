@@ -56,7 +56,7 @@
               {% endif %}
 
               <ul class="dropdown-menu">
-                {% if perms.fornecedor.view_fornecedor %}
+                {% if perms.compras.view_fornecedor %}
                   <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}?tenant={{ tenant }}">Fornecedor</a></li>
                 {% else %}
                   <a class="nav-link disabled" href="#" aria-disabled="true">Fornecedor</a>

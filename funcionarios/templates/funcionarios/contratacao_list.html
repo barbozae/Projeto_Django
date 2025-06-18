@@ -9,17 +9,16 @@
 
     <div class="container-fluid">
         <form id="filtro-form" action="" method="GET" class="d-flex align-items-center">
-
+            <!-- <input type="hidden" name="tenant" value="{{ tenant }}"> -->
+            <input type="hidden" name="tenant" value="{{ tenant }}">
             <div class="mb-2">
                 <small for="data_inicio" class="form-text">Contratação Início:</small>
                 <input type="date" class="form-control" id="data_inicio_contratacao" name="data_inicio_contratacao" value="{{ request.GET.data_contratacao }}">
             </div>
-
             <div class="mb-2 ms-2 me-2">
                 <small for="data_fim" class="form-text">Contratação Fim:</small>
                 <input type="date" class="form-control" id="data_fim_contratacao" name="data_fim_contratacao" value="{{ request.GET.data_contratacao }}">
             </div>
-
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
                     <option value="">Selecione funcionário</option>
@@ -32,7 +31,6 @@
                 </select>
                 <label for="floatingSelect">Funcionáro</label>
             </div>
-
             <div class="form-floating mb-1 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="setor" aria-label="Floating label select example">
                     <option value="">Selecione setor</option>
@@ -45,7 +43,6 @@
                 </select>
                 <label for="floatingSelect">Setor</label>
             </div>
-
             <div class="form-floating mb-1 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="cargo" aria-label="Floating label select example">
                     <option value="">Selecione cargo</option>
@@ -58,25 +55,21 @@
                 </select>
                 <label for="floatingSelect">Cargo</label>
             </div>
-
             <div class="mb-1 ms-2 mt-2">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_cadastro">Buscar</button>
                 <a href="{% url 'contratacao_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
                 
                 {% if perms.funcionarios.add_contratacao %}
-                    <li><a href="{% url 'create_contratacao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Contratar</a></li>
+                    <a href="{% url 'create_contratacao' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Contratar</a>
                 {% else %}
                     <a class="btn btn-outline-success disabled" href="#" aria-disabled="true">Contratar</a>
                 {% endif %}
-
             </div>
-
-            <!-- switch para filtrar contas vencidas -->
+            <!-- switch para filtrar contratos ativos -->
             <div class="form-check form-switch mb-2 me-2 ms-2 mt-3">
                 <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="filtrar_status_contrato" {% if filtrar_status_contrato %}checked{% endif %} onchange="document.getElementById('filtro-form').submit();">
                 <label class="form-check-label" for="flexSwitchCheckDefault">Contratos ativos</label>
             </div>
-
         </form>
     </div>
 

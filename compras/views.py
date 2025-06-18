@@ -320,7 +320,7 @@ class ComprasUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuery
     fields = ["data_compra", "data_vencimento", "data_pagamento", "fornecedor", "valor_compra", "valor_pago",
               "numero_boleto", "grupo_produto", "produto", "classificacao", "forma_pagamento", "observacao","qtd"]
     success_url = reverse_lazy("compras_list")
-    permission_required = 'socio.change_compras'  # Permissão para visualizar objetos'
+    permission_required = 'compras.change_compras'  # Permissão para visualizar objetos'
 
     # Filtra os fornecedores pelo tenant no formulário de criação
     def get_form(self, form_class=None):
@@ -339,7 +339,7 @@ class ComprasUpDateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuery
 class ComprasDeleteView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, DeleteView):
     model = Compras
     success_url = reverse_lazy("compras_list")
-    permission_required = 'socio.delete_compras'  # Permissão para visualizar objetos'
+    permission_required = 'compras.delete_compras'  # Permissão para visualizar objetos'
 
     def get_success_url(self):
         tenant = getattr(self.request.user, 'tenant', None)
