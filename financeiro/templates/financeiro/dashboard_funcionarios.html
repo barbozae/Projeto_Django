@@ -9,17 +9,15 @@
     <!-- Filtros -->
     <div class="container">
         <form action="" method="GET" class="d-flex align-items-center">
-
+            <input type="hidden" name="tenant" value="{{ tenant }}">
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Data Início:</small>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
             </div>
-            
             <div class="mb-2 ms-2 me-2">
                 <small for="data_fim" class="form-text">Data Fim:</small>
                 <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
             </div>
-
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="nome_funcionario">
                     <option value="">Selecione funcionário</option>
@@ -32,7 +30,6 @@
                 </select>
                 <label for="floatingSelect">Funcionário</label>
             </div>
-            
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="tipo_pagamento" aria-label="Floating label select example">
                     <option value="">Selecione pagamento</option>
@@ -45,7 +42,6 @@
                 </select>
                 <label for="floatingSelect">Tipo Pagamento</label>
             </div>
-
             <div class="form-floating mb-2 ms-2 me-2 mt-2">
                 <select class="form-select" id="floatingSelect" name="forma_pagamento" aria-label="Floating label select example">
                     <option value="">Selecione forma pagamento</option>
@@ -58,12 +54,10 @@
                 </select>
                 <label for="floatingSelect">Forma Pagamento</label>
             </div>
-
             <div class="mb-2 ms-2 mt-3">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
                 <a href="{% url 'dashboard_funcionarios' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
-
         </form>
     </div>
 
@@ -89,12 +83,10 @@
                         <!-- Tabela por setor -->
                         {% include 'financeiro/table/tabela_setor.html' %}
                 </div>
-        
                 <!-- Segunda Coluna -->
                 <div class="col-md-8">
                     {% include 'financeiro/table/tabela_pagamento_fucionario.html' %}
                 </div>
-
                 <style>
                     .detail-row {
                         background-color: #f9f9f9;

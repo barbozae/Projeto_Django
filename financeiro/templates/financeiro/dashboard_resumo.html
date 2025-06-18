@@ -33,12 +33,15 @@
     <h5 class="mb-4 mt-3" style="color: #06a060;">Dashboard Visão Geral</h5>
 
     <!-- MENU LATERAL -->
-    <!-- <div class="container-fluid"> -->
-        <!-- <div class="row"> -->
+
+    <!-- <div class="container-fluid">
+        <div class="row"> -->
+
             <!-- Menu lateral esquerdo estilizado -->
+
             <!-- <nav class="position-fixed start-0 menu-lateral p-3" style="top: 100px; width: 190px;">
-                <form action="" method="GET" class="row g-2 align-items-end mb-3"> -->
-                    <!-- <div class="col-12 mb-2">
+                <form action="" method="GET" class="row g-2 align-items-end mb-3">
+                    <div class="col-12 mb-2">
                         <div class="row g-2">
                             <div class="col">
                                 <label for="data_inicio" class="form-label mb-1" style="color:#06a060;">Data Início</label>
@@ -49,8 +52,8 @@
                                 <input type="date" class="form-control border-success" id="data_fim" name="data_fim" value="{{ data_fim }}">
                             </div>
                         </div>
-                    </div> -->
-                <!-- </form>
+                    </div>
+                </form>
                 <div class="col-auto d-flex align-items-end">
                     <ul class="nav flex-column">
                         <li class="nav-item mb-2">
@@ -75,12 +78,10 @@
     </div> -->
 
 
-
-    <!-- Conteúdo principal -->
-    <!-- <div class="col-10 offset-2"> -->
     <div class="container-fluid px-0">
         <!-- Filtro -->
         <form action="" method="GET" class="d-flex align-items-center">
+            <input type="hidden" name="tenant" value="{{ tenant }}">
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Data Início:</small>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">

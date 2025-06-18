@@ -10,17 +10,15 @@
     <!-- Filtro -->
     <div class="container-fluid">
         <form id="filtro-form" action="" method="GET" class="d-flex align-items-center">
-            
+            <input type="hidden" name="tenant" value="{{ tenant }}">
             <div class="mb-2 me-2">
                 <small for="data_inicio" class="form-text">Data Início:</small>
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
             </div>
-
             <div class="mb-2 ms-2 me-2">
                 <small for="data_fim" class="form-text">Data Fim:</small>
                 <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
             </div>
-
             <div class="form-floating mb-2 me-2">
                 <select class="form-select" id="floatingSelect" name="fornecedor" aria-label="Floating label select example">
                     <option value="">Selecione um fornecedor</option>
@@ -33,7 +31,6 @@
                 </select>
                 <label for="floatingSelect">Fornecedor</label>
             </div>
-
             <div class="form-floating mb-2 me-2">
                 <select class="form-select" id="floatingSelect" name="classificacao" aria-label="Floating label select example">
                     <option value="">Selecione uma classificação</option>
@@ -46,18 +43,15 @@
                 </select>
                 <label for="floatingSelect">Classificação</label>
             </div>
-
             <div class="mb-2 ms-2 me-2">
                 <button type="submit" class="btn btn-outline-primary me-2" name="buscar_compras">Buscar</button>
                 <a href="{% url 'dashboard_compras' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
             </div>
-
             <!-- switch para filtrar contas vencidas -->
             <div class="form-check form-switch mb-2 me-2">
                 <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" name="filtrar_vencidas" {% if filtrar_vencidas %}checked{% endif %} onchange="document.getElementById('filtro-form').submit();">
                 <label class="form-check-label" for="flexSwitchCheckDefault">Filtrar contas vencidas</label>
             </div>
-
         </form>
     </div>
 
@@ -78,26 +72,25 @@
         </div>
     {% endif %}
 {% endblock content %}
-
-
-            <!-- <div class="mb-2 me-2">
-                <small for="mes_ano" class="form-text">Selecione o mês/ano:</small>
-                <input type="month" class="form-control" id="mes_ano" name="mes_ano" 
-                    value="{% if data_inicio %}{{ data_inicio|date:'Y-m' }}{% endif %}">
-            </div> -->
-
-
-
-            <!-- <div class="col-md-4">
-                <label for="mes_ano" class="form-label small">Selecione o mês:</label>
-                <div class="input-group">
-                    <input type="month" class="form-control" id="mes_ano" name="mes_ano" 
-                        value="{{ mes_ano }}" 
-                        max="{{ current_month }}" -->
-                        <!-- onchange="this.form.submit()"> Submete o formulário -->
-                    <!-- <button class="btn btn-outline-secondary" type="button" 
-                            onclick="document.getElementById('mes_ano').value='{{ current_month }}'; this.form.submit();">
-                        <i class="bi bi-calendar-check"></i> Hoje
-                    </button>
-                </div>
-            </div> -->
+    
+    
+    
+    
+    <!-- <div class="mb-2 me-2">
+        <small for="mes_ano" class="form-text">Selecione o mês/ano:</small>
+        <input type="month" class="form-control" id="mes_ano" name="mes_ano" 
+        value="{% if data_inicio %}{{ data_inicio|date:'Y-m' }}{% endif %}">
+    </div>
+    
+    <div class="col-md-4">
+        <label for="mes_ano" class="form-label small">Selecione o mês:</label>
+        <div class="input-group">
+            <input type="month" class="form-control" id="mes_ano" name="mes_ano" 
+            value="{{ mes_ano }}" 
+            max="{{ current_month }}"
+            onchange="this.form.submit()"> Submete o formulário
+            <button class="btn btn-outline-secondary" type="button" 
+            onclick="document.getElementById('mes_ano').value='{{ current_month }}'; this.form.submit();">
+            <i class="bi bi-calendar-check"></i> Hoje
+        </button>
+    </div> -->

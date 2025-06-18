@@ -11,7 +11,7 @@
 <!-- Filtros para buscar vendas -->
 <div class="container-fluid">
     <form action="" method="GET" class="d-flex align-items-center">
-
+        <input type="hidden" name="tenant" value="{{ tenant }}">
         <div class="mb-3 me-2">
             <small for="data_inicio" class="form-text">Data Início:</small>
             <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
