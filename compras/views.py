@@ -48,7 +48,7 @@ def compras_update_em_massa(request):
                 continue
 
             try:
-                compra = Compras.objects.get(pk=row['id'])
+                compra = Compras.objects.filter(tenant=request.user.tenant).get(pk=row['id'])
 
                 # Datas
                 compra.data_compra = parse_date(row.get('data_compra'))
@@ -69,7 +69,7 @@ def compras_update_em_massa(request):
 
                 # Fornecedor
                 try:
-                    compra.fornecedor = Fornecedor.objects.get(pk=row['fornecedor']) if row.get('fornecedor') else None
+                    compra.fornecedor = Fornecedor.objects.filter(tenant=request.user.tenant).get(pk=row['fornecedor']) if row.get('fornecedor') else None
                 except Fornecedor.DoesNotExist:
                     compra.fornecedor = None
 
@@ -274,6 +274,7 @@ class ComprasListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQueryse
                 "forma_pagamento": str(c.forma_pagamento or ""),
                 "qtd": c.qtd or "",
                 "observacao": c.observacao or "",
+                "tenant_id": c.tenant_id,  # Inclui o tenant_id para referência
             }
             # for c in compras_queryset
             for c in compras_page  # Use apenas os itens da página atual

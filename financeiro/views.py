@@ -547,7 +547,7 @@ class DashboardVendasView(DashboardBaseView):
         vendas_filtradas = vendas_filtradas.order_by('-data_venda')
 
         # Paginação
-        paginator = Paginator(vendas_filtradas, 31)  # Exibe 10 registros por página
+        paginator = Paginator(vendas_filtradas, 62)  # Exibe 10 registros por página
         page_number = self.request.GET.get('page')
         vendas_paginadas = paginator.get_page(page_number)
 
