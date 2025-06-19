@@ -58,8 +58,9 @@ def exportar_vendas(request):
 
     # Define o range onde os filtros serão aplicados (A1:M1 no exemplo)
     ws.auto_filter.ref = "A1:S1"  # Ajuste conforme o número de colunas
-    # Congelar cabeçalho
-    ws.freeze_panes = "A2"
+    # Congelar cabeçalho e linha
+    ws.freeze_panes = "C2"
+
     # Ajustar largura das colunas automaticamente
     for col in ws.columns:
         max_length = 0
