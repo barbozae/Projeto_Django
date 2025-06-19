@@ -533,7 +533,7 @@ class DashboardVendasView(DashboardBaseView):
         if periodo:
             periodo = periodo.split(',')
 
-        vendas = Vendas.objects.all()
+        vendas = Vendas.objects.filter(tenant=self.request.user.tenant)
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio, 
             data_fim=data_fim, 
@@ -556,8 +556,8 @@ class DashboardVendasView(DashboardBaseView):
         # Calcular a taxa percentual de total_taxa em relação ao total_vendas
         taxa_total_taxa = (total_taxas / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
 
-        total_compras = self.calcular_totais_compras(Compras.objects.all())
-        total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.all())
+        total_compras = self.calcular_totais_compras(Compras.objects.filter(tenant=self.request.user.tenant))
+        total_pagamento_funcionarios = self.calcular_totais_pagamentos(Pagamento.objects.filter(tenant=self.request.user.tenant))
 
         context = {
             **totais_vendas,
@@ -587,7 +587,7 @@ class DashboardComprasView(DashboardBaseView):
         # Widget RADIO
         filtrar_vencidas = request.GET.get('filtrar_vencidas') == 'on'
 
-        compras = Compras.objects.all().order_by('-data_compra')
+        compras = Compras.objects.filter(tenant=self.request.user.tenant).order_by('-data_compra')
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio, 
             data_fim=data_fim, 
@@ -642,7 +642,7 @@ class DashboardFuncionariosView(DashboardBaseView):
         forma_pagamento_selecionado = request.GET.getlist('forma_pagamento')
         tenant = getattr(request.user, 'tenant', None)  # Obter o tenant do usuário logado
 
-        funcionarios = Pagamento.objects.all().order_by('-data_pagamento')
+        funcionarios = Pagamento.objects.filter(tenant=self.request.user.tenant).order_by('-data_pagamento')
 
         filtros = FiltrosFinanceiro(
             data_inicio=data_inicio,

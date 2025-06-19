@@ -159,10 +159,9 @@ class ContratacaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQue
         # context['page_obj'] = page_obj
         # context['query_params'] = self.request.GET.urlencode()
 
-        context['contratacao_funcionarios'] = Contratacao.objects.all()
-        context['contratacao_setor'] = Contratacao.objects.values_list('setor', flat=True).distinct()
-        # context['contratacao_cargo'] = Contratacao.objects.all().distinct()
-        context['contratacao_cargo'] = Contratacao.objects.values_list('cargo', flat=True).distinct()
+        context['contratacao_funcionarios'] = Contratacao.objects.filter(tenant=self.request.user.tenant)
+        context['contratacao_setor'] = Contratacao.objects.filter(tenant=self.request.user.tenant).values_list('setor', flat=True).distinct()
+        context['contratacao_cargo'] = Contratacao.objects.filter(tenant=self.request.user.tenant).values_list('cargo', flat=True).distinct()
         context['filtrar_status_contrato'] = 'filtrar_status_contrato' in self.request.GET  # Passa o estado do switch para o template
         return context
     
@@ -197,7 +196,7 @@ class ContratacaoCreateView(LoginRequiredMixin, PermissionRequiredMixin, TenantQ
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pagamento_funcionarios'] = Pagamento.objects.all()
+        context['pagamento_funcionarios'] = Pagamento.objects.filter(tenant=self.request.user.tenant)
         return context
     
     def form_valid(self, form):
@@ -364,7 +363,7 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerys
     permission_required = 'funcionarios.view_rescisao'  # Permissão para visualizar objetos'
 
     def get_queryset(self):
-        queryset = Rescisao.objects.all()
+        queryset = Rescisao.objects.filter(tenant=self.request.user.tenant)
 
         # Captura os parâmetros da requisição GET
         data_inicio_rescisao = self.request.GET.get('data_inicio_rescisao')
@@ -406,8 +405,8 @@ class RescisaoListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerys
         context['query_params'] = self.request.GET.urlencode()
 
 
-        context['rescisao_funcionarios'] = Rescisao.objects.all()
-        context['tipo_desligamento'] = Rescisao.objects.values_list('tipo_desligamento', flat=True).distinct()
+        context['rescisao_funcionarios'] = Rescisao.objects.filter(tenant=self.request.user.tenant)
+        context['tipo_desligamento'] = Rescisao.objects.values_list('tipo_desligamento', flat=True).distinct().filter(tenant=self.request.user.tenant)
         return context
 
 
