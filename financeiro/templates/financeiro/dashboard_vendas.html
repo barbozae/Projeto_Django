@@ -37,6 +37,10 @@
                 class="btn btn-outline-secondary me-2 mt-3">
                 Limpar Filtro
             </a>
+            
+            <a href="{% url 'exportar_vendas' %}?tenant={{ tenant }}" class="btn btn-primary me-2 mt-3">
+                <i class="fas fa-file-excel"></i> Exportar
+            </a>
             <!-- <a href="{% url 'taxas_vendas' %}?tenant={{ tenant }}"
                 class="btn btn-outline-danger me-2 mt-3">
                 Edição das Taxas

@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from openpyxl import Workbook
 from decimal import Decimal, InvalidOperation, DivisionByZero
 
 from .models import TaxasVendas
@@ -10,6 +11,7 @@ from funcionarios.models import Pagamento
 from django.views import View
 from django.utils import timezone
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.core.serializers.json import DjangoJSONEncoder
@@ -20,6 +22,185 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 
 from project.utils import generate_success_url
 from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
+
+
+def exportar_vendas(request):
+    # Verifica se o usuário está autenticado e tem tenant
+    if not request.user.is_authenticated or not hasattr(request.user, 'tenant'):
+        return HttpResponse("Acesso não autorizado", status=403)
+    
+    tenant = request.user.tenant
+    # Filtra as vendas pelo tenant
+    queryset = Vendas.objects.filter(tenant=tenant)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Vendas"
+
+    # Adiciona cabeçalhos
+    headers = ["Data Vendas", "Período", 
+                "Rodízio", 
+                "Dinheiro", "Pix", 
+                "Débito MasterCard", "Débito Visa", "Debito Elo",
+                "Crédito MasterCard", "Crédito Visa", "Crédito Elo",
+                "Alelo", "American Express", "Hiper", "Sodexo", "Ticket Rest", "Vale Refeição", "DinersClub",
+                "Sócio"]
+    ws.append(headers)
+
+    for obj in queryset:
+        ws.append([obj.data_venda, obj.periodo, 
+                    obj.rodizio,
+                    obj.dinheiro, obj.pix, 
+                    obj.debito_mastercard, obj.debito_visa, obj.debito_elo,
+                    obj.credito_mastercard, obj.credito_visa, obj.credito_elo,
+                    obj.alelo, obj.american_express, obj.hiper, obj.sodexo, obj.ticket_rest, obj.vale_refeicao, obj.dinersclub,
+                    obj.socio])
+
+    # Define o range onde os filtros serão aplicados (A1:M1 no exemplo)
+    ws.auto_filter.ref = "A1:S1"  # Ajuste conforme o número de colunas
+    # Congelar cabeçalho
+    ws.freeze_panes = "A2"
+    # Ajustar largura das colunas automaticamente
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name
+        
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    # Cria a resposta HTTP com o arquivo Excel
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f"attachment; filename=Vendas_{tenant}.xlsx"
+    wb.save(response)
+    return response
+
+def exportar_compras(request):
+    # Verifica se o usuário está autenticado e tem tenant
+    if not request.user.is_authenticated or not hasattr(request.user, 'tenant'):
+        return HttpResponse("Acesso não autorizado", status=403)
+    
+    tenant = request.user.tenant
+    # Filtra as vendas pelo tenant
+    queryset = Compras.objects.filter(tenant=tenant)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Compras"
+
+    # Adiciona cabeçalhos
+    headers = ["Data Compra", "Data Vencimento", "Data Pagamento",
+               "Fornecedor",
+               "Valor da Compra", "Valor de Pagamento", "Quantidade", 
+               "Boleto",
+               "Grupo do Produto", "Produto", "Classificação",
+               "Forma de Pagamento",
+               "Observação"]
+    ws.append(headers)
+
+    # fornecedor é uma chave da tabela Fornecedor
+    for obj in queryset:
+        # Acessa diretamente o nome_empresa do fornecedor relacionado
+        fornecedor_nome = obj.fornecedor.nome_empresa if obj.fornecedor else ""
+
+    for obj in queryset:
+        ws.append([obj.data_compra, obj.data_vencimento, obj.data_pagamento, 
+                    fornecedor_nome,
+                    obj.valor_compra, obj.valor_pago, obj.qtd, 
+                    obj.numero_boleto,
+                    obj.grupo_produto, obj.produto, obj.classificacao,
+                    obj.forma_pagamento,
+                    obj.observacao])
+
+    # Define o range onde os filtros serão aplicados (A1:M1 no exemplo)
+    ws.auto_filter.ref = "A1:M1"  # Ajuste conforme o número de colunas
+    # Congelar cabeçalho
+    ws.freeze_panes = "A2"
+    # Ajustar largura das colunas automaticamente
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name
+        
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    # Cria a resposta HTTP com o arquivo Excel
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f"attachment; filename=Compras_{tenant}.xlsx"
+    wb.save(response)
+
+    return response
+
+def exportar_pg_funcionarios(request):
+    # Verifica se o usuário está autenticado e tem tenant
+    if not request.user.is_authenticated or not hasattr(request.user, 'tenant'):
+        return HttpResponse("Acesso não autorizado", status=403)
+    
+    tenant = request.user.tenant
+    # Filtra as vendas pelo tenant
+    queryset = Pagamento.objects.filter(tenant=tenant)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Pagamento de Funcionários"
+
+    # Adiciona cabeçalhos
+    headers = ["Data Pagamento", "Nome Funcionário", "Valor Pago", "Tipo de Pagamento", "Forma de Pagamento"]
+    ws.append(headers)
+
+    # Adicionando filtro no cabeçalho
+    ws.auto_filter.ref = "A1:E1"
+
+    for obj in queryset:
+        # Acessa o nome do funcionário através da ForeignKey
+        funcionario_nome = obj.nome_funcionario.nome_funcionario if obj.nome_funcionario else ""
+
+    for obj in queryset:
+        ws.append([obj.data_pagamento,
+                   funcionario_nome,
+                   obj.valor_pago, 
+                    obj.tipo_pagamento,
+                    obj.forma_pagamento])
+
+    # Congelar cabeçalhos
+    ws.freeze_panes = "A2"
+
+    # Ajustar largura das colunas automaticamente
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name
+        
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    # Cria a resposta HTTP com o arquivo Excel
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f"attachment; filename=Pagamentos_{tenant}.xlsx"
+    wb.save(response)
+    return response
 
 
 class FiltrosFinanceiro:
@@ -282,6 +463,8 @@ class DashboardBaseView(View):
         )['total_nao_pagas_dentro_do_prazo'] or 0
 
         return total_compras_dentro_do_prazo
+
+    
 
 
 class TaxaListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):
