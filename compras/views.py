@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.decorators.cache import cache_page
 
 # Importações locais (do meu projeto)
 from .models import Fornecedor, Compras

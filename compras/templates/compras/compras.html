@@ -1,0 +1,228 @@
+{% load cache %}
+
+<div class="container-fluid mb-3">
+    {% cache 600 widget_compras %}
+    <form action="" method="GET" class="d-flex align-items-center">
+        <input type="hidden" name="tenant" value="{{ tenant }}">
+        
+        <div class="mb-2 me-2">
+            <small for="data_inicio" class="form-text">Data Início:</small>
+            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
+        </div>
+
+        <div class="mb-2 ms-2 me-2">
+            <small for="data_fim" class="form-text">Data Fim:</small>
+            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
+        </div>
+
+        <div class="form-floating ms-2 me-2 mt-1">
+            <select class="form-select" id="floatingSelect" name="fornecedor[]" aria-label="Floating label select example">
+                <option value="">Selecione fornecedor</option>
+                {% for fornecedor in fornecedores %}
+                    <option value="{{ fornecedor.id }}" 
+                        {% if fornecedor.id|stringformat:"s" in request.GET.fornecedor %}selected{% endif %}>
+                        {{ fornecedor.nome_empresa }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label for="floatingSelect">Fornecedor</label>
+        </div>
+
+        <div class="form-floating me-2 ms-2 mt-1">
+            <select class="form-select" id="floatingSelect" name="numero_boleto[]" aria-label="Floating label select example">
+                <option value="">Selecione boleto</option>
+                {% for boleto in numero_boleto %}
+                    <option value="{{ boleto }}" 
+                        {% if boleto in request.GET.boleto %}selected{% endif %}>
+                        {{ boleto }}
+                    </option>
+                {% endfor %}
+            </select>
+                <label for="floatingSelect">Boleto</label>
+        </div>
+    {% endcache %}
+        <div class="mb-1 ms-1 mt-2">
+            <button type="submit" class="btn btn-outline-primary me-2" name="buscar_compras">Buscar</button>
+            <a href="{% url 'compras_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>            
+        
+            {% if perms.comrpas.add_compras %}
+                <a href="{% url 'create_compras' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Compra</a>
+            {% else %}
+                <a href="#" class="btn btn-outline-success btn-sm disabled">
+                    <i class="fas fa-lock"></i>Nova Compra
+                </a>
+            {% endif %}
+        </div>
+    {% cache 7200 radio_compras %}
+    <!-- Radios para filtrar datas compras - vencimento - pagamento -->
+        <div class="mb-1 ms-2">
+            <small for="filtro_data" class="form-text">Filtrar por data:</small>
+            <fieldset class="mb-2 ms-0 mt-2 p-2 border rounded" style="min-width: 200px;">
+                <legend class="float-none w-auto px-2" style="font-size: 1rem;">Filtrar datas</legend>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="filtro_data" id="filtro_data_compra" value="compra"
+                        {% if request.GET.filtro_data == "compra" or not request.GET.filtro_data %}checked{% endif %}>
+                    <label class="form-check-label" for="filtro_data_compra">Compra</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="filtro_data" id="filtro_data_pagamento" value="pagamento"
+                    {% if request.GET.filtro_data == "pagamento" %}checked{% endif %}>
+                    <label class="form-check-label" for="filtro_data_pagamento">Pagamento</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="filtro_data" id="filtro_data_vencimento" value="vencimento"
+                        {% if request.GET.filtro_data == "vencimento" %}checked{% endif %}>
+                    <label class="form-check-label" for="filtro_data_vencimento">Vencimento</label>
+                </div>
+            </fieldset>
+        </div>
+    {% endcache %}
+    </form>
+</div>
+
+{% if compras_list %}
+    <table class="table table-sm table-striped table-hover mt-3">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data Compra</th>
+                <th scope="col">Vencimento</th>
+                <th scope="col">Pagamento</th>
+                <th scope="col">Fornecedor</th>
+                <th scope="col">Valor Compra</th>
+                <th scope="col">Valor Pago</th>
+                <th scope="col">N° Boleto</th>
+                <th scope="col">Grupo</th>
+                <th scope="col">Produto</th>
+                <th scope="col">Classificação</th>
+                <th scope="col">Forma Pagamento</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for compras in compras_list %}
+                <tr>
+                    <th scope="row" >{{ compras.pk }}</th>
+                    <td>{{ compras.data_compra| date:"d/m/y"}}</td>
+                    <td>{{ compras.data_vencimento| date:"d/m/y"}}</td>
+                    <td>{{ compras.data_pagamento| date:"d/m/y"}}</td>
+                    <td>{{ compras.fornecedor }}</td>
+                    <td>{{ compras.valor_compra| floatformat:2| default:"-" }}</td>
+                    <td>{{ compras.valor_pago| floatformat:2| default:"-" }}</td>
+                    <td>{{ compras.numero_boleto| default:"-" }}</td>
+                    <td>{{ compras.grupo_produto| default:"-" }}</td>
+                    <td>{{ compras.produto| default:"-" }}</td>
+                    <td>{{ compras.classificacao| default:"-" }}</td>
+                    <td>{{ compras.forma_pagamento| default:"-" }}</td>
+                    <td>
+                        {% if perms.compras.change_compras %}
+                            <a href="{% url 'update_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                        {% else %}
+                            <a href="#" class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">
+                                <i class="fas fa-lock"></i> Editar
+                            </a>
+                        {% endif %}
+
+                        {% if perms.compras.delete_compras %}
+                            <a href="{% url 'delete_compras' pk=compras.pk %}?tenant={{ tenant }}" class="btn btn-danger btn-sm">Excluir</a>
+                        {% else %}
+                            <a href="#" class="btn btn-danger btn-sm disabled" aria-disabled="true">
+                                <i class="fas fa-lock"></i>Excluir
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr class="detail-row" style="display: none;">
+                    <td colspan="12">
+                        <div class="detail-content">
+                            <ul>
+                                <li><strong>Quantidade:</strong> {{ compras.qtd|default:"-" }}</li>
+                                <li><strong>Observação:</strong> {{ compras.observacao|default:"-" }}</li>
+                                <li><strong>Autor:</strong> {{ compras.author.username|default:"-" }}</li>
+                                <li><strong>Atualizado em:</strong> {{ compras.dt_atualizado|date:"d/m/y H:i" }}</li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <style>
+        .detail-row {
+            background-color: #f9f9f9;
+        }
+        .detail-content {
+            padding: 10px;
+            margin-left: 20px;
+        }
+        .detail-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .detail-content ul li {
+            margin-bottom: 5px;
+        }
+    </style>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
+    
+            rows.forEach(row => {
+                row.addEventListener("click", function() {
+                    const detailRow = this.nextElementSibling;
+                    if (detailRow && detailRow.classList.contains("detail-row")) {
+                        detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                    }
+                });
+            });
+        });
+    </script>
+
+{% else %}
+    <div class="container">
+        <div class="alert alert-warning mt-3" role="alert">
+            Não há compras para o filtro selecionado.
+        </div>
+    </div>
+{% endif %}
+
+<!-- Paginação -->
+<nav aria-label="Page navigation example">
+<ul class="pagination justify-content-end">
+    {% if compras_list.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?tenant={{ tenant }}&page={{ compras_list.previous_page_number }}">Previous</a>
+        </li>
+    {% else %}
+        <li class="page-item disabled">
+            <a class="page-link">Anterior</a>
+        </li>
+    {% endif %}
+    
+    {% for num in compras_list.paginator.page_range %}
+        {% if compras_list.number == num %}
+            <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ num }}</span>
+            </li>
+        {% elif num > compras_list.number|add:-2 and num < compras_list.number|add:2 %}
+            <li class="page-item">
+                <a class="page-link" href="?tenant={{ tenant }}&page={{ num }}">{{ num }}</a>
+            </li>
+        {% endif %}
+    {% endfor %}
+    
+    {% if compras_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?tenant={{ tenant }}&page={{ compras_list.next_page_number }}">Próxima</a>
+        </li>
+    {% else %}
+        <li class="page-item disabled">
+            <a class="page-link">Próxima</a>
+        </li>
+    {% endif %}
+</ul>
+</nav>
+{% if perms.compras.add_compras %}
+    {% include 'compras/compras_edicao.html' %}
+{% endif %}

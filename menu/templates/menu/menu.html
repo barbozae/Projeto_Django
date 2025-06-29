@@ -1,14 +1,7 @@
 {% include 'home.html' %}
+{% load cache %}
 
 {% block content %}
-
-    <style>
-      body {
-        background-color: #f2f5f2;
-        /* #e0e9df */
-      }
-    </style>
-
   <!-- Cabeçalho -->
   <div class="jumbotron text-center p-2 mb-4" style="background: linear-gradient(45deg, #FFFAEC, #BAD8B6, #a6d4af); color: white;">
     <h1 class="display-6">Bem-vindo ao Nosso Menu, {{ user.first_name }}!</h1>
@@ -16,27 +9,16 @@
   </div>
 
   <!-- Carrossel -->
-  {% include 'menu/carrossel.html' %}
-
-  
-  <style>
-    /* Cor padrão do link */
-    .custom-nav-link {
-      color: green !important;
-    }
-    
-    /* Cor do link quando está ativo (selecionado) */
-    .custom-nav-link.active {
-      color: black !important;
-    }
-    
-    /* Opcional: cor ao passar o mouse */
-    .custom-nav-link:hover {
-      color: limegreen !important;
-    }
-    </style>
+  {% if perms.menu.add_menu %}
+    {% include 'menu/carrossel.html' %}
+  {% else %}
+    {% cache 900 carrossel_|add:request.session.tenant_id %} <!-- Cache para 15 minutos -->
+      {% include 'menu/carrossel.html' %}
+    {% endcache %}
+  {% endif %}
 
 <!-- Abas do Menu -->
+{% cache 600 widget_menu_card %}
 <div class="card text-center mt-4 mx-auto" style="max-width: 1200px;">
     <div class="card-header">
       <ul class="nav nav-tabs card-header-tabs justify-content-center" id="myTab" role="tablist">
@@ -104,4 +86,26 @@
         </p>
     </div>
   </footer>
+  {% endcache %}
+  <style>
+    body {
+      background-color: #f2f5f2;
+      /* #e0e9df */
+    }
+
+    /* Cor padrão do link */
+    .custom-nav-link {
+      color: green !important;
+    }
+    
+    /* Cor do link quando está ativo (selecionado) */
+    .custom-nav-link.active {
+      color: black !important;
+    }
+    
+    /* Opcional: cor ao passar o mouse */
+    .custom-nav-link:hover {
+      color: limegreen !important;
+    }
+  </style>
 {% endblock %}

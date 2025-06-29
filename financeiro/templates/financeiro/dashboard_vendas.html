@@ -1,89 +1,87 @@
 {% extends 'global/base.html' %}
+{% load cache %}
 
 {% block page_title %}
     Dashboard Vendas
 {% endblock page_title %}
 
 {% block content %}
+    <h5 class="mb-4 mt-3" style="color: green;">Dashboard Vendas</h5>
 
-<h5 class="mb-4 mt-3" style="color: green;">Dashboard Vendas</h5>
+    {% cache 7200 widget_dash_vendas %} <!-- cache de 2 hora -->
+        <!-- Filtros para buscar vendas -->
+        <div class="container-fluid">
+            <form action="" method="GET" class="d-flex align-items-center">
+                        <input type="hidden" name="tenant" value="{{ tenant }}">
+                        <div class="mb-3 me-2">
+                            <small for="data_inicio" class="form-text">Data Início:</small>
+                            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
+                        </div>
 
-<!-- Filtros para buscar vendas -->
-<div class="container-fluid">
-    <form action="" method="GET" class="d-flex align-items-center">
-        <input type="hidden" name="tenant" value="{{ tenant }}">
-        <div class="mb-3 me-2">
-            <small for="data_inicio" class="form-text">Data Início:</small>
-            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
+                        <div class="mb-2 ms-2 me-2">
+                            <small for="data_fim" class="form-text">Data Fim:</small>
+                            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
+                        </div>
+
+                        <!-- Filtro para Período -->
+                        <div class="mb-2 ms-2 me-2">
+                            <small for="periodo" class="form-text">Período:</small>
+                            <select class="form-select" id="periodo" name="periodo">
+                                <option value="" {% if periodo == "" %}selected{% endif %}>Todos os períodos</option>
+                                <option value="Almoço" {% if periodo == "Almoço" %}selected{% endif %}>Almoço</option>
+                                <option value="Jantar" {% if periodo == "Jantar" %}selected{% endif %}>Jantar</option>
+                            </select>
+                        </div> 
+                        <div class="mb-2 ms-1 mt-2">
+                            <button type="submit" class="btn btn-outline-primary me-2 mt-3" name="buscar_compras">Buscar</button>
+                            <a href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}" 
+                            class="btn btn-outline-secondary me-2 mt-3">
+                            Limpar Filtro
+                        </a>
+                        
+                        <a href="{% url 'exportar_vendas' %}?tenant={{ tenant }}" class="btn btn-primary me-2 mt-3">
+                            <i class="fas fa-file-excel"></i> Exportar
+                        </a>
+                        <!-- <a href="{% url 'taxas_vendas' %}?tenant={{ tenant }}"
+                        class="btn btn-outline-danger me-2 mt-3">
+                        Edição das Taxas
+                    </a> -->
+                </div>  
+            </form>
         </div>
-
-        <div class="mb-2 ms-2 me-2">
-            <small for="data_fim" class="form-text">Data Fim:</small>
-            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
+    {% endcache %}
+    
+    {% if vendas_por_forma %}
+        <!-- cards -->
+        <div class="d-flex justify-content-around flex-wrap mt-2">
+            {% include 'financeiro/cards/cards_vendas.html' %}
         </div>
-
-        <!-- Filtro para Período -->
-        <div class="mb-2 ms-2 me-2">
-            <small for="periodo" class="form-text">Período:</small>
-            <select class="form-select" id="periodo" name="periodo">
-                <option value="" {% if periodo == "" %}selected{% endif %}>Todos os períodos</option>
-                <option value="Almoço" {% if periodo == "Almoço" %}selected{% endif %}>Almoço</option>
-                <option value="Jantar" {% if periodo == "Jantar" %}selected{% endif %}>Jantar</option>
-            </select>
+        {% include 'financeiro/table/tabela_vendas.html' %}
+    {% else %}
+        <div class="container">
+            <div class="alert alert-warning mt-3" role="alert">
+                Não há vendas para o filtro selecionado.
+            </div>
         </div>
-        <div class="mb-2 ms-1 mt-2">
-            <button type="submit" class="btn btn-outline-primary me-2 mt-3" name="buscar_compras">Buscar</button>
-            <a href="{% url 'dashboard_vendas' %}?tenant={{ tenant }}" 
-                class="btn btn-outline-secondary me-2 mt-3">
-                Limpar Filtro
-            </a>
-            
-            <a href="{% url 'exportar_vendas' %}?tenant={{ tenant }}" class="btn btn-primary me-2 mt-3">
-                <i class="fas fa-file-excel"></i> Exportar
-            </a>
-            <!-- <a href="{% url 'taxas_vendas' %}?tenant={{ tenant }}"
-                class="btn btn-outline-danger me-2 mt-3">
-                Edição das Taxas
-            </a> -->
-        </div>  
-    </form>
-</div>
-
-{% if vendas_por_forma %}
-    <!-- cards -->
-    <div class="d-flex justify-content-around flex-wrap mt-2">
-        {% include 'financeiro/cards/cards_vendas.html' %}
+    {% endif %}
+    <div>
+        <h1 class="mt-5"><strong>Abaixo Conteúdo para montar o relatório</h2></strong>
+            <h2>Receitas e Despesas</h2>
+            <p><strong>Total de Rodízio:</strong> {{ rodizio }}</p>
+            <p><strong>Ticket Médio:</strong> R$ {{ ticket_medio|floatformat:2 }}</p>
+            <p><strong>Total de Vendas:</strong> R$ {{ total_vendas|floatformat:2 }}</p>
+            <p><strong>Total de Compras:</strong> R$ {{ total_despesas|floatformat:2 }}</p>
+            <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido|floatformat:2 }}</p>
+            <p><strong>Pagamento Funcionário:</strong> R$ {{ pagamento_funcionario|floatformat:2 }}</p>
+            <p><strong>Taxa:</strong> R$ {{ total_taxas|floatformat:2 }}</p>
     </div>
-
-    {% include 'financeiro/table/tabela_vendas.html' %}
-
-{% else %}
-    <div class="container">
-        <div class="alert alert-warning mt-3" role="alert">
-            Não há vendas para o filtro selecionado.
-        </div>
-    </div>
-{% endif %}
-
-<div>
-    <h1 class="mt-5"><strong>Abaixo Conteúdo para montar o relatório</h2></strong>
-    <h2>Receitas e Despesas</h2>
-    <p><strong>Total de Rodízio:</strong> {{ rodizio }}</p>
-    <p><strong>Ticket Médio:</strong> R$ {{ ticket_medio|floatformat:2 }}</p>
-    <p><strong>Total de Vendas:</strong> R$ {{ total_vendas|floatformat:2 }}</p>
-    <p><strong>Total de Compras:</strong> R$ {{ total_despesas|floatformat:2 }}</p>
-    <p><strong>Lucro Líquido:</strong> R$ {{ lucro_liquido|floatformat:2 }}</p>
-    <p><strong>Pagamento Funcionário:</strong> R$ {{ pagamento_funcionario|floatformat:2 }}</p>
-    <p><strong>Taxa:</strong> R$ {{ total_taxas|floatformat:2 }}</p>
-</div>
-
-<div>
-    <h2>Receita por Forma de Pagamento</h2>
-    <ul>
+    <div>
+        <h2>Receita por Forma de Pagamento</h2>
+        <ul>
         <li>Dinheiro: R$ {{ vendas_por_forma.dinheiro|floatformat:2 }}</li>
         <li>Pix: R$ {{ vendas_por_forma.pix|floatformat:2 }}</li>
         <li>Crédito: R$ {{ vendas_forma.credito|floatformat:2 }}</li>
         <li>Débito: R$ {{ vendas_forma.debito|floatformat:2 }}</li>
-    </ul>
-</div>
+        </ul>
+    </div>
 {% endblock content %}

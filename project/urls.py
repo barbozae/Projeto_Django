@@ -5,7 +5,6 @@ from django.shortcuts import redirect
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-# from .views import home_view
 
 # http://127.0.0.1:8000/admin/?tenant=modelo_1
 # http://127.0.0.1:8000/?tenant=modelo_1

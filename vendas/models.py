@@ -1,6 +1,8 @@
 from django.db import models
 from users.models import Tenant
 from django.conf import settings
+from django.core.cache import cache
+import logging
 
 
 class Vendas(models.Model):
@@ -33,12 +35,67 @@ class Vendas(models.Model):
     dt_atualizado = models.DateTimeField(auto_now=True, null=False, blank=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=False)
 
+    # class excencial para os caches
+    class Meta:
+        get_latest_by = 'dt_atualizado'
+
     def save(self, *args, **kwargs):
         if not self.tenant_id:
             self.tenant = kwargs.pop('tenant', None)
         if not self.author_id :  # Verifica se o autor não foi definido
             self.author = kwargs.pop('user', None)  # Pega o usuário da kwargs
         super().save(*args, **kwargs)
+
+    # def save(self, *args, **kwargs):
+    #     # Lógica existente de tenant e author
+    #     if not self.tenant_id:
+    #         self.tenant = kwargs.pop('tenant', None)
+    #     if not self.author_id:
+    #         self.author = kwargs.pop('user', None)
+    #     # Executa o save normal
+    #     super().save(*args, **kwargs)
+    #     # Invalida o cache após o save
+    #     self._invalidate_vendas_cache()
+        
+    # def _invalidate_vendas_cache(self):
+    #     # Invalida o cache da listagem de vendas
+    #     try:
+    #         if not hasattr(self, 'tenant') or not self.tenant:
+    #             return
+                
+    #         tenant_id = str(self.tenant.id)
+    #         cache_key_pattern = f'venda_list_{tenant_id}_*'
+            
+    #         # Tenta deletar usando padrão (Redis)
+    #         try:
+    #             cache.delete_pattern(cache_key_pattern)
+    #             return
+    #         except (AttributeError, NotImplementedError):
+    #             pass
+                
+    #         # Fallback para backends que não suportam delete_pattern
+    #         from django.core.cache.utils import make_template_fragment_key
+    #         keys_to_delete = []
+            
+    #         # Adiciona chave principal
+    #         keys_to_delete.append(make_template_fragment_key('venda_list'))
+            
+    #         # Tenta encontrar outras variações
+    #         try:
+    #             for key in cache._cache.iterkeys():  # Adapte conforme seu backend
+    #                 if isinstance(key, str) and key.startswith(f'venda_list_{tenant_id}_'):
+    #                     keys_to_delete.append(key)
+    #         except AttributeError:
+    #             pass
+                
+    #         if keys_to_delete:
+    #             cache.delete_many(list(set(keys_to_delete)))
+                
+    #     except Exception as e:
+    #         import logging
+    #         logger = logging.getLogger(__name__)
+    #         logger.error(f"Erro ao invalidar cache de vendas: {str(e)}", exc_info=True)
+
 
     def calcular_debito(self):
         return (self.debito_mastercard or 0) + (self.debito_visa or 0) + (self.debito_elo or 0)

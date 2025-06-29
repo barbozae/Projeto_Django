@@ -14,12 +14,12 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
+from django.views.decorators.cache import cache_page
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.generic import ListView, CreateView, UpdateView
 from django.db.models import Sum, Value, CharField, DecimalField, Q, F
 from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-
 from project.utils import generate_success_url
 from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 
@@ -464,8 +464,6 @@ class DashboardBaseView(View):
         )['total_nao_pagas_dentro_do_prazo'] or 0
 
         return total_compras_dentro_do_prazo
-
-    
 
 
 class TaxaListView(LoginRequiredMixin, PermissionRequiredMixin, TenantQuerysetMixin, HandleNoPermissionMixin, ListView):

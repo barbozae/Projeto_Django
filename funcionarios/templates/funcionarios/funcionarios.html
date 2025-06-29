@@ -1,0 +1,115 @@
+<div class="container-fluid mb-3">
+    <form action="" method="GET" class="d-flex align-items-center">
+        <input type="hidden" name="tenant" value="{{ tenant }}">
+        
+        <div class="form-floating mb-2 me-2">
+            <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
+                <option value="">Selecione funcionário</option>
+                {% for funcionario in cadastros_funcionarios %}
+                    <option value="{{ funcionario.id }}"
+                        {% if funcionario.id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                        {{ funcionario.nome_funcionario }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label for="floatingSelect">Funcionáro</label>
+        </div>
+
+        <div class="mb-2 ms-2">
+            <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_cadastro">Buscar</button>
+            <a href="{% url 'funcionarios_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+            {% if perms.funcionarios.add_contratacao %}
+                <a href="{% url 'create_funcionarios' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Novo Funcionário</a>
+            {% else %}
+                <a class="btn btn-outline-success disabled" href="#" aria-disabled="true">Novo Funcionário</a>
+            {% endif %}
+
+        </div>
+
+    </form>
+</div>
+
+{% if funcionarios_list %}
+    <table class="table table-sm table-striped table-hover mt-3"> <!-- table-bordered -->
+        <thead class="table-light">
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nome</th>
+            <th scope="col">RG</th>
+            <th scope="col">CPF</th>
+            <th scope="col">CTPS</th>
+            <th scope="col">Cidade</th>
+            <th scope="col">Bairro</th>
+            <th scope="col">Endereço</th>
+            <th scope="col">Número</th>
+            <th scope="col">Contato</th>
+            <th scope="col">Banco</th>
+            <th scope="col">Agencia</th>
+            <th scope="col">Conta</th>
+            <th scope="col">Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for funcionario in funcionarios_list %}
+                <tr>
+                    <th scope="row" >{{ funcionario.pk }}</th>
+                    <td>{{ funcionario.nome_funcionario }}</td>
+                    <td>{{ funcionario.rg| default:"-" }}</td>
+                    <td>{{ funcionario.cpf| default:"-" }}</td>
+                    <td>{{ funcionario.carteira_trabalho| default:"-" }}</td>
+                    <td>{{ funcionario.cidade| default:"-" }}</td>
+                    <td>{{ funcionario.bairro| default:"-" }}</td>
+                    <td>{{ funcionario.endereco| default:"-" }}</td>
+                    <td>{{ funcionario.numero| default:"-" }}</td>
+                    <td>{{ funcionario.telefone| default:"-" }}</td>
+                    <td>{{ funcionario.banco| default:"-" }}</td>
+                    <td>{{ funcionario.agencia| default:"-" }}</td>
+                    <td>{{ funcionario.conta| default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'update_funcionarios' pk=funcionario.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm" >Editar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Não há registros</p>
+{% endif %}
+
+
+<!-- Paginação -->
+        <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-end">
+        {% if funcionarios_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?tenant={{ tenant }}&page={{ funcionarios_list.previous_page_number }}">Anterior</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Anterior</a>
+            </li>
+        {% endif %}
+        
+        {% for num in funcionarios_list.paginator.page_range %}
+            {% if funcionarios_list.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > funcionarios_list.number|add:-2 and num < funcionarios_list.number|add:2 %}
+                <li class="page-item">
+                    <a class="page-link" href="?tenant={{ tenant }}&page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if funcionarios_list.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?tenant={{ tenant }}&page={{ funcionarios_list.next_page_number }}">Próxima</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Próxima</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

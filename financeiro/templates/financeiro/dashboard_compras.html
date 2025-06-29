@@ -1,44 +1,44 @@
 {% extends 'global/base.html' %}
+{% load cache %}
 
 {% block page_title %}
     Dashboard Compras
 {% endblock page_title %}
 
 {% block content %}
-    <h5 class="mb-4 mt-3" style="color: green;">Dashboard Compras</h5>
-
+<h5 class="mb-4 mt-3" style="color: green;">Dashboard Compras</h5>
     <!-- Filtro -->
     <div class="container-fluid">
         <form id="filtro-form" action="" method="GET" class="d-flex align-items-center">
             <input type="hidden" name="tenant" value="{{ tenant }}">
-            <div class="mb-2 me-2">
-                <small for="data_inicio" class="form-text">Data Início:</small>
-                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
-            </div>
-            <div class="mb-2 ms-2 me-2">
-                <small for="data_fim" class="form-text">Data Fim:</small>
-                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
-            </div>
-            <div class="form-floating mb-2 me-2">
-                <select class="form-select" id="floatingSelect" name="fornecedor" aria-label="Floating label select example">
-                    <option value="">Selecione um fornecedor</option>
-                    {% for fornecedor in fornecedores %}
+                <div class="mb-2 me-2">
+                    <small for="data_inicio" class="form-text">Data Início:</small>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+                </div>
+                <div class="mb-2 ms-2 me-2">
+                    <small for="data_fim" class="form-text">Data Fim:</small>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                </div>
+                <div class="form-floating mb-2 me-2">
+                    <select class="form-select" id="floatingSelect" name="fornecedor" aria-label="Floating label select example">
+                        <option value="">Selecione um fornecedor</option>
+                        {% for fornecedor in fornecedores %}
                         <option value="{{ fornecedor.fornecedor__id }}" 
-                            {% if fornecedor.fornecedor__id|stringformat:"s" in fornecedores_selecionados %} selected {% endif %}>
-                            {{ fornecedor.fornecedor__nome_empresa }}
-                        </option>
+                        {% if fornecedor.fornecedor__id|stringformat:"s" in fornecedores_selecionados %} selected {% endif %}>
+                        {{ fornecedor.fornecedor__nome_empresa }}
+                    </option>
                     {% endfor %}
                 </select>
                 <label for="floatingSelect">Fornecedor</label>
-            </div>
-            <div class="form-floating mb-2 me-2">
-                <select class="form-select" id="floatingSelect" name="classificacao" aria-label="Floating label select example">
-                    <option value="">Selecione uma classificação</option>
-                    {% for item in classificacao %}
+                </div>
+                <div class="form-floating mb-2 me-2">
+                    <select class="form-select" id="floatingSelect" name="classificacao" aria-label="Floating label select example">
+                        <option value="">Selecione uma classificação</option>
+                        {% for item in classificacao %}
                         <option value="{{ item.classificacao }}" 
-                            {% if item.classificacao in classificacao_selecionado %} selected {% endif %}>
-                            {{ item.classificacao }}
-                        </option>
+                        {% if item.classificacao in classificacao_selecionado %} selected {% endif %}>
+                        {{ item.classificacao }}
+                    </option>
                     {% endfor %}
                 </select>
                 <label for="floatingSelect">Classificação</label>
@@ -59,23 +59,22 @@
             </div>
         </form>
     </div>
-
-    {% if compras %}
-        <div>
-            <div class="justify-content-around flex-wrap mt-3">
-                {% include 'financeiro/cards/cards_compras.html' %}
+        {% if compras %}
+            <div>
+                <div class="justify-content-around flex-wrap mt-3">
+                    {% include 'financeiro/cards/cards_compras.html' %}
+                </div>
+                <div class="mt-3">
+                    {% include 'financeiro/table/tabela_compras.html' %}
+                </div>
             </div>
-            <div class="mt-3">
-                {% include 'financeiro/table/tabela_compras.html' %}
+        {% else %}
+            <div class="container">
+                <div class="alert alert-warning mt-3" role="alert">
+                    Não há compras para o filtro selecionado cadastradas.
+                </div>
             </div>
-        </div>
-    {% else %}
-        <div class="container">
-            <div class="alert alert-warning mt-3" role="alert">
-                Não há compras para o filtro selecionado cadastradas.
-            </div>
-        </div>
-    {% endif %}
+        {% endif %}
 {% endblock content %}
     
     

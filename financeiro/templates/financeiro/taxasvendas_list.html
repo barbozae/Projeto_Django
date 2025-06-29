@@ -5,125 +5,116 @@
 {% endblock page_title %}
 
 {% block content %}
+    <h5 class="mb-4 mt-3">Taxas das Vendas</h5>
 
-<h5 class="mb-4 mt-3">Taxas das Vendas</h5>
-
-<div class="container-fluid">
-    <div class="ms-2 me-2 mt-4">
-        <a href="{% url 'create_taxas_vendas' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Atualização</a>
-    </div>
-</div>
-
-{% if taxas_list %}
-    <table class="table table-sm table-striped table-hover mt-4">
-        <thead class="table-light">
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Data</th>
-            <th scope="col">Débito Master</th>
-            <th scope="col">Débito Visa</th>
-            <th scope="col">Débito Elo</th>
-            <th scope="col">Crédito Master</th>
-            <th scope="col">Crédito Visa</th>
-            <th scope="col">Crédito Elo</th>
-            <th scope="col">Hiper</th>
-            <th scope="col">Dinersclub</th>
-            <th scope="col">American Express</th>
-            <th scope="col">Alelo</th>
-            <th scope="col">Sodexo</th>
-            <th scope="col">Vale Refeição</th>
-            <th scope="col">Ticket Rest</th>
-            <th scope="col">Ações</th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for taxas in taxas_list %}
-                <tr>
-                    <th scope="row" class="text-center">{{ taxas.pk }}</th>
-                    <td class="text-center">{{ taxas.data_taxa_venda|date:"d/m/y"}}</td>
-                    <td class="text-center">{{ taxas.debito_mastercard}}</td>
-                    <td class="text-center">{{ taxas.debito_visa}}</td>
-                    <td class="text-center">{{ taxas.debito_elo| default:"-"}}</td>
-                    <td class="text-center">{{ taxas.credito_mastercard| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.credito_visa| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.credito_elo| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.hiper| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.dinersclub| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.american_express| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.alelo| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.sodexo| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.vale_refeicao| default:"-" }}</td>
-                    <td class="text-center">{{ taxas.ticket_rest| default:"-" }}</td>
-                    <td class="text-center">
-                        {% if perms.financeiro.change_taxas_vendas %}
-                            <a href="{% url 'update_taxas_vendas' pk=taxas.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
-                        {% else %}
-                            <a href="#" class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">
-                                <i class="fas fa-lock"></i> Editar
-                            </a>
-                        {% endif %}
-                </td>
-                    <tr class="detail-row" style="display: none;">
-                        <td colspan="3">
-                            <div class="detail-content">
-                                <ul>
-                                    <li><strong>Criado em:</strong> {{ taxas.created_at|date:"d/m/y H:i" }}</li>
-                                    <li><strong>Criado por:</strong> {{ taxas.author|default:"-" }}</li>
-                                    <li><strong>Atualizado em:</strong> {{ taxas.dt_atualizado|date:"d/m/y H:i" }}</li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-
-
-
-
-
-
-
-    <style>
-        .detail-row {
-            background-color: #f9f9f9;
-        }
-        .detail-content {
-            padding: 10px;
-            margin-left: 20px;
-        }
-        .detail-content ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        .detail-content ul li {
-            margin-bottom: 5px;
-        }
-    </style>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
-
-            rows.forEach(row => {
-                row.addEventListener("click", function() {
-                    const detailRow = this.nextElementSibling;
-                    if (detailRow && detailRow.classList.contains("detail-row")) {
-                        detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
-                    }
-                });
-            });
-        });
-    </script>
-
-{% else %}
-    <div class="container">
-        <div class="alert alert-warning mt-3" role="alert">
-            Não há taxas para o filtro selecionado.
+    <div class="container-fluid">
+        <div class="ms-2 me-2 mt-4">
+            <a href="{% url 'create_taxas_vendas' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Nova Atualização</a>
         </div>
     </div>
-{% endif %}
 
+    {% if taxas_list %}
+        <table class="table table-sm table-striped table-hover mt-4">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Data</th>
+                <th scope="col">Débito Master</th>
+                <th scope="col">Débito Visa</th>
+                <th scope="col">Débito Elo</th>
+                <th scope="col">Crédito Master</th>
+                <th scope="col">Crédito Visa</th>
+                <th scope="col">Crédito Elo</th>
+                <th scope="col">Hiper</th>
+                <th scope="col">Dinersclub</th>
+                <th scope="col">American Express</th>
+                <th scope="col">Alelo</th>
+                <th scope="col">Sodexo</th>
+                <th scope="col">Vale Refeição</th>
+                <th scope="col">Ticket Rest</th>
+                <th scope="col">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for taxas in taxas_list %}
+                    <tr>
+                        <th scope="row" class="text-center">{{ taxas.pk }}</th>
+                        <td class="text-center">{{ taxas.data_taxa_venda|date:"d/m/y"}}</td>
+                        <td class="text-center">{{ taxas.debito_mastercard}}</td>
+                        <td class="text-center">{{ taxas.debito_visa}}</td>
+                        <td class="text-center">{{ taxas.debito_elo| default:"-"}}</td>
+                        <td class="text-center">{{ taxas.credito_mastercard| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.credito_visa| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.credito_elo| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.hiper| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.dinersclub| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.american_express| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.alelo| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.sodexo| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.vale_refeicao| default:"-" }}</td>
+                        <td class="text-center">{{ taxas.ticket_rest| default:"-" }}</td>
+                        <td class="text-center">
+                            {% if perms.financeiro.change_taxas_vendas %}
+                                <a href="{% url 'update_taxas_vendas' pk=taxas.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            {% else %}
+                                <a href="#" class="btn btn-outline-secondary btn-sm disabled" aria-disabled="true">
+                                    <i class="fas fa-lock"></i> Editar
+                                </a>
+                            {% endif %}
+                    </td>
+                        <tr class="detail-row" style="display: none;">
+                            <td colspan="3">
+                                <div class="detail-content">
+                                    <ul>
+                                        <li><strong>Criado em:</strong> {{ taxas.created_at|date:"d/m/y H:i" }}</li>
+                                        <li><strong>Criado por:</strong> {{ taxas.author|default:"-" }}</li>
+                                        <li><strong>Atualizado em:</strong> {{ taxas.dt_atualizado|date:"d/m/y H:i" }}</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <style>
+            .detail-row {
+                background-color: #f9f9f9;
+            }
+            .detail-content {
+                padding: 10px;
+                margin-left: 20px;
+            }
+            .detail-content ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+            .detail-content ul li {
+                margin-bottom: 5px;
+            }
+        </style>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
+
+                rows.forEach(row => {
+                    row.addEventListener("click", function() {
+                        const detailRow = this.nextElementSibling;
+                        if (detailRow && detailRow.classList.contains("detail-row")) {
+                            detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+                        }
+                    });
+                });
+            });
+        </script>
+
+    {% else %}
+        <div class="container">
+            <div class="alert alert-warning mt-3" role="alert">
+                Não há taxas para o filtro selecionado.
+            </div>
+        </div>
+    {% endif %}
 {% endblock content %}

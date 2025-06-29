@@ -1,0 +1,140 @@
+{% load cache %}
+
+<div class="container-fluid">
+    <form action="" method="GET" class="d-flex align-items-center">
+        {% cache 600 widget_pagamento %}
+        <input type="hidden" name="tenant" value="{{ tenant }}">
+        
+        <div class="mb-2 me-2">
+            <small for="data_inicio" class="form-text">Data Início:</small>
+            <input type="date" class="form-control" id="data_inicio_pagamento_funcionario" name="data_inicio_pagamento_funcionario" value="{{ request.GET.data_inicio_pagamento_funcionario }}">
+        </div>
+
+        <div class="mb-2 ms-2 me-2">
+            <small for="data_fim" class="form-text">Data Fim:</small>
+            <input type="date" class="form-control" id="data_fim_pagamento_funcionario" name="data_fim_pagamento_funcionario" value="{{ request.GET.data_fim_pagamento_funcionario }}">
+        </div>
+
+        <div class="form-floating mb-2 ms-2 me-2 mt-2">
+            <select class="form-select" id="floatingSelect" name="nome_funcionario" aria-label="Floating label select example">
+                <option value="">Selecione todos funcionário</option>
+                {% for funcionario in pagamento_funcionarios %}
+                    <option value="{{ funcionario.nome_funcionario_id}}" 
+                        {% if funcionario.nome_funcionario_id|stringformat:"s" == request.GET.nome_funcionario %} selected {% endif %}>
+                        {{ funcionario.nome_funcionario__nome_funcionario }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label for="floatingSelect">Funcionário</label>
+        </div>
+        
+        <div class="form-floating mb-2 ms-2 me-2 mt-2">
+            <select class="form-select" id="floatingSelectTipoPagamento" name="tipo_pagamento" aria-label="Floating label select example">
+                <option value="">Selecione tipo de pagamento</option>
+                {% for tipo in tipos_pagamento %}
+                    <option value="{{ tipo }}" 
+                        {% if tipo|stringformat:"s" == request.GET.tipo_pagamento %} selected {% endif %}>
+                        {{ tipo }}
+                    </option>
+                {% endfor %}
+            </select>
+            <label for="floatingSelectTipoPagamento">Tipo de Pagamento</label>
+        </div>
+        {% endcache %}
+        <div class="mb-2 ms-2 mt-3">
+            <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
+            <a href="{% url 'pagamento_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+            {% if perms.funcionarios.add_pagamento %}
+                <a href="{% url 'create_payment' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Pagar Funcionário</a>
+            {% else %}
+                <a class="btn btn-outline-success disabled me-2" href="#" aria-disabled="true">Pagar Funcionário</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{% if pagamento_list %}
+    <div class="table-responsive mt-3">
+        <table class="table table-sm table-striped table-hover"> <!-- table-bordered -->
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Data Pagamento</th>
+                    <th scope="col">Valor Pago</th>
+                    <th scope="col">Tipo Pagamento</th>
+                    <th scope="col">Forma Pagamento</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pagamento in pagamento_list %}
+                    <tr>
+                        <th scope="row" >{{ pagamento.pk }}</th>
+                        <td>{{ pagamento.nome_funcionario }}</td>
+                        <td>{{ pagamento.data_pagamento|date:"d/m/y"|default:"-" }}</td>
+                        <td>{{ pagamento.valor_pago|default:"-" }}</td>
+                        <td>{{ pagamento.tipo_pagamento|default:"-" }}</td>
+                        <td>{{ pagamento.forma_pagamento|default:"-" }}</td>
+                        <td>
+                            {% if perms.funcionarios.change_pagamento %}
+                                <a href="{% url 'update_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                            {% else %}
+                                <a class="btn btn-outline-secondary disabled btn-sm" href="#" aria-disabled="true">Editar</a>
+                            {% endif %}
+
+                            {% if perms.funcionarios.delete_pagamento %}
+                                <a href="{% url 'delete_payment' pk=pagamento.pk %}?tenant={{ tenant }}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                            {% else %}
+                                <a class="btn btn-outline-danger disabled btn-sm" href="#" aria-disabled="true">Excluir</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Paginação -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-end">
+                    {% if pagamento_funcionarios_paginados.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?tenant={{ tenant }}&page={{ pagamento_funcionarios_paginados.previous_page_number }}">Anterior</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">Anterior</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in pagamento_funcionarios_paginados.paginator.page_range %}
+                    {% if pagamento_funcionarios_paginados.number == num %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > pagamento_funcionarios_paginados.number|add:-2 and num < pagamento_funcionarios_paginados.number|add:2 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?tenant={{ tenant }}&page={{ num }}">{{ num }}</a>
+                    </li>
+                    
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if pagamento_funcionarios_paginados.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?tenant={{ tenant }}&page={{ pagamento_funcionarios_paginados.next_page_number }}">Próxima</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link">Próxima</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+    </div>
+{% else %}
+    <div class="container">
+        <div class="alert alert-warning mt-3" role="alert">
+            Não há pagamentos para o filtro selecionado.
+        </div>
+    </div>
+{% endif %}

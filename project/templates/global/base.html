@@ -1,3 +1,4 @@
+{% load cache %}
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
@@ -155,40 +156,41 @@
     <main class="container-fluid px-4">
         {% block content %}{% endblock content %}
     </main>
+      {% cache 7200 rodape_base %}
+        <footer class="bg-body-tertiary text-dark py-3 mt-5">
+          <div class="container text-center">
+              <p>&copy; 2024 Restaurante. Todos os direitos reservados.</p>
+              <p>
+                  <a href="https://www.instagram.com/sushicasaverde/" 
+                      class="text-dark me-3"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >Instagram</a>
+                  <a href="#" class="text-dark me-3">Política de Privacidade</a>
+                  <a href="#" class="text-dark">Termos de Uso</a>
+              </p>
+          </div>
+        </footer>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+        
+        <!-- Script para o botão de tela cheia -->
+        <script>
+          const btn = document.getElementById('fullscreen-btn');
+          const icon = document.getElementById('fullscreen-icon');
+          btn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen();
+              btn.innerHTML = '<span id="fullscreen-icon" class="bi bi-fullscreen-exit"></span>';
+            } else {
+              document.exitFullscreen();
+              btn.innerHTML = '<span id="fullscreen-icon" class="bi bi-arrows-fullscreen"></span>';
+            }
+          });
+          </script>
 
-      <footer class="bg-body-tertiary text-dark py-3 mt-5">
-        <div class="container text-center">
-            <p>&copy; 2024 Restaurante. Todos os direitos reservados.</p>
-            <p>
-                <a href="https://www.instagram.com/sushicasaverde/" 
-                    class="text-dark me-3"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >Instagram</a>
-                <a href="#" class="text-dark me-3">Política de Privacidade</a>
-                <a href="#" class="text-dark">Termos de Uso</a>
-            </p>
-        </div>
-      </footer>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-
-<!-- Script para o botão de tela cheia -->
-    <script>
-      const btn = document.getElementById('fullscreen-btn');
-      const icon = document.getElementById('fullscreen-icon');
-      btn.addEventListener('click', function() {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-          btn.innerHTML = '<span id="fullscreen-icon" class="bi bi-fullscreen-exit"></span>';
-        } else {
-          document.exitFullscreen();
-          btn.innerHTML = '<span id="fullscreen-icon" class="bi bi-arrows-fullscreen"></span>';
-        }
-      });
-    </script>
-
-<!-- Opcional: Bootstrap Icons CDN para ícones bonitos -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Opcional: Bootstrap Icons CDN para ícones bonitos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   </body>
+{% endcache rodape_base %}
 </html>

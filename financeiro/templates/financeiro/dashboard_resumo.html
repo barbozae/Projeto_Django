@@ -1,145 +1,148 @@
 {% extends 'global/base.html' %}
+{% load cache %}
 
 {% block page_title %}
     Dashboard Visão Geral
 {% endblock page_title %}
 
 {% block content %}
-    <style>
-        /* #06a060 */
-        .menu-lateral {
-            background: linear-gradient(180deg, #78ad97 80%, #e6f9f0 100%);
-            color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(6,160,96,0.15);
-        }
-        .menu-lateral .nav-link {
-            color: #fff;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: background 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-        }
-        .menu-lateral .nav-link:hover, .menu-lateral .nav-link.active {
-            background: #fff;
-            color: #06a060;
-        }
-        .menu-lateral .nav-item i {
-            margin-right: 8px;
-        }
-    </style>
+    {% cache 7200 widget_dash_resumo %} <!-- Cache para 2 horas -->
+        <style>
+            /* #06a060 */
+            .menu-lateral {
+                background: linear-gradient(180deg, #78ad97 80%, #e6f9f0 100%);
+                color: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(6,160,96,0.15);
+            }
+            .menu-lateral .nav-link {
+                color: #fff;
+                font-weight: 500;
+                border-radius: 8px;
+                transition: background 0.2s, color 0.2s;
+                display: flex;
+                align-items: center;
+            }
+            .menu-lateral .nav-link:hover, .menu-lateral .nav-link.active {
+                background: #fff;
+                color: #06a060;
+            }
+            .menu-lateral .nav-item i {
+                margin-right: 8px;
+            }
+        </style>
 
-    <h5 class="mb-4 mt-3" style="color: #06a060;">Dashboard Visão Geral</h5>
+        <h5 class="mb-4 mt-3" style="color: #06a060;">Dashboard Visão Geral</h5>
 
-    <!-- MENU LATERAL -->
+        <!-- MENU LATERAL -->
 
-    <!-- <div class="container-fluid">
-        <div class="row"> -->
+        <!-- <div class="container-fluid">
+            <div class="row"> -->
 
-            <!-- Menu lateral esquerdo estilizado -->
+                <!-- Menu lateral esquerdo estilizado -->
 
-            <!-- <nav class="position-fixed start-0 menu-lateral p-3" style="top: 100px; width: 190px;">
-                <form action="" method="GET" class="row g-2 align-items-end mb-3">
-                    <div class="col-12 mb-2">
-                        <div class="row g-2">
-                            <div class="col">
-                                <label for="data_inicio" class="form-label mb-1" style="color:#06a060;">Data Início</label>
-                                <input type="date" class="form-control border-success" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
-                            </div>
-                            <div class="col">
-                                <label for="data_fim" class="form-label mb-1" style="color:#06a060;">Data Fim</label>
-                                <input type="date" class="form-control border-success" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                <!-- <nav class="position-fixed start-0 menu-lateral p-3" style="top: 100px; width: 190px;">
+                    <form action="" method="GET" class="row g-2 align-items-end mb-3">
+                        <div class="col-12 mb-2">
+                            <div class="row g-2">
+                                <div class="col">
+                                    <label for="data_inicio" class="form-label mb-1" style="color:#06a060;">Data Início</label>
+                                    <input type="date" class="form-control border-success" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+                                </div>
+                                <div class="col">
+                                    <label for="data_fim" class="form-label mb-1" style="color:#06a060;">Data Fim</label>
+                                    <input type="date" class="form-control border-success" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                                </div>
                             </div>
                         </div>
+                    </form>
+                    <div class="col-auto d-flex align-items-end">
+                        <ul class="nav flex-column">
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="#cards1">
+                                    <i class="bi bi-bar-chart-fill"></i> Vendas
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="#cards2">
+                                    <i class="bi bi-graph-up-arrow"></i> Resumo 2
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="#tabela">
+                                    <i class="bi bi-table"></i> Tabela
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                </form>
-                <div class="col-auto d-flex align-items-end">
-                    <ul class="nav flex-column">
-                        <li class="nav-item mb-2">
-                            <a class="nav-link" href="#cards1">
-                                <i class="bi bi-bar-chart-fill"></i> Vendas
-                            </a>
-                        </li>
-                        <li class="nav-item mb-2">
-                            <a class="nav-link" href="#cards2">
-                                <i class="bi bi-graph-up-arrow"></i> Resumo 2
-                            </a>
-                        </li>
-                        <li class="nav-item mb-2">
-                            <a class="nav-link" href="#tabela">
-                                <i class="bi bi-table"></i> Tabela
-                            </a>
-                        </li>
-                    </ul>
+                </nav>
+            </div>
+        </div> -->
+
+        
+        <div class="container-fluid px-0">
+            <!-- Filtro -->
+            <form action="" method="GET" class="d-flex align-items-center">
+                <input type="hidden" name="tenant" value="{{ tenant }}">
+                <div class="mb-2 me-2">
+                    <small for="data_inicio" class="form-text">Data Início:</small>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
+                    
                 </div>
-            </nav>
-        </div>
-    </div> -->
-
-
-    <div class="container-fluid px-0">
-        <!-- Filtro -->
-        <form action="" method="GET" class="d-flex align-items-center">
-            <input type="hidden" name="tenant" value="{{ tenant }}">
-            <div class="mb-2 me-2">
-                <small for="data_inicio" class="form-text">Data Início:</small>
-                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio }}">
-
-            </div>
-            <div class="mb-2 ms-2 me-2">
-                <small for="data_fim" class="form-text">Data Fim:</small>
-                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
-            </div>
-            <div class="mb-2 ms-2 mt-3">
-                <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
-                <a href="{% url 'dashboard_resumo' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-            </div>
-            
-            {% if pagamentos %}
+                <div class="mb-2 ms-2 me-2">
+                    <small for="data_fim" class="form-text">Data Fim:</small>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim }}">
+                </div>
+                <div class="mb-2 ms-2 mt-3">
+                    <button type="submit" class="btn btn-outline-primary me-2" name="buscar_funcionario_pagamento">Buscar</button>
+                    <a href="{% url 'dashboard_resumo' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
+                </div>
+                {% if pagamentos %}
                 <div class="alert alert-success">
                     <strong>{{ pagamentos|length }}</strong> pagamento(s) encontrado(s) entre <strong>{{ data_inicio }}</strong> e <strong>{{ data_fim }}</strong>.
                 </div>
-            {% endif %}
-        </form>
+                {% endif %}
+    {% endcache %}
+            </form>
 
-        {% include 'financeiro/dashboard/vendas.html'%}
+            {% include 'financeiro/dashboard/vendas.html'%}
 
-        {% include 'financeiro/dashboard/ticket_medio.html'%}
+            {% include 'financeiro/dashboard/ticket_medio.html'%}
+            
+            {% include 'financeiro/dashboard/compras.html'%}
+
+            {% include 'financeiro/dashboard/cmv.html'%}
+
+            {% include 'financeiro/dashboard/compra_classificacao.html' %}
         
-        {% include 'financeiro/dashboard/compras.html'%}
+            <hr class="my-3 mt-5" style="border-color: #06a060; border-width: 3px;">
+            <!-- Caixa expansiva tabela dinamica -->
+            <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <summary style="font-weight: bold; cursor: pointer;">Tabela Dinâmica Ajustando</summary>
+                    <p>Tabela expansiva para visualização agrupada.</p>
 
-        {% include 'financeiro/dashboard/cmv.html'%}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                {% include 'financeiro/table/tabela_compras_dinamica.html' %}
+                            </div>
+                        </div>
+            </details>
 
-        {% include 'financeiro/dashboard/compra_classificacao.html' %}
+            <!-- Caixa expansiva Resumo final -->
+            <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                <summary style="font-weight: bold; cursor: pointer;">Cards</summary>
+                    <p>Resumo Geral.</p>
+                        <div class="row">
+                            <div class="col-12 mt-3">
+                                {% include 'financeiro/cards/cards_resumo.html' %}
+                            </div>
+                        </div>
+            </details>
+        </div>
+
+        <!-- IDs para navegação rápida -->
+        <span id="cards1"></span>
+        <span id="cards2"></span>
+        <span id="tabela"></span>
     
-        <hr class="my-3 mt-5" style="border-color: #06a060; border-width: 3px;">
-        <!-- Caixa expansiva tabela dinamica -->
-        <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-            <summary style="font-weight: bold; cursor: pointer;">Tabela Dinâmica Ajustando</summary>
-                <p>Tabela expansiva para visualização agrupada.</p>
-
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            {% include 'financeiro/table/tabela_compras_dinamica.html' %}
-                        </div>
-                    </div>
-        </details>
-
-        <!-- Caixa expansiva Resumo final -->
-        <details class="expandable-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-            <summary style="font-weight: bold; cursor: pointer;">Cards</summary>
-                <p>Resumo Geral.</p>
-                    <div class="row">
-                        <div class="col-12 mt-3">
-                            {% include 'financeiro/cards/cards_resumo.html' %}
-                        </div>
-                    </div>
-        </details>
-    </div>
-
-    <!-- IDs para navegação rápida -->
-    <span id="cards1"></span>
-    <span id="cards2"></span>
-    <span id="tabela"></span>
 {% endblock content %}

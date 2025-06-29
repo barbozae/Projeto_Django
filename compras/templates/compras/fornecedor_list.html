@@ -1,4 +1,5 @@
 {% extends 'global/base.html' %}
+{% load cache %}
 
 {% block page_title %}
     Fornecedores
@@ -6,113 +7,7 @@
 
 {% block content %}
 
-<h5 class="mb-4 mt-3">Fornecedores</h5>
+    <h5 class="mb-4 mt-3">Fornecedores</h5>
+    {% include 'compras/fornecedor.html' %}
 
-<div class="container-fluid mb-3">
-    <form action="" method="GET" class="d-flex align-items-center">
-        <input type="hidden" name="tenant" value="{{ tenant }}">
-        
-        <div class="form-floating mb-2 me-2">
-            <select class="form-select" id="floatingSelect" name="nome_empresa[]" aria-label="Floating label select example">
-                <option value="">Selecione um fornecedor</option>
-                {% for fornecedor in fornecedores %}
-                    <option value="{{ fornecedor.nome_empresa }}"
-                        {% if fornecedor.nome_empresa in request.GET.nome_empresa %}selected{% endif %}>
-                        {{ fornecedor.nome_empresa }}
-                    </option>
-                {% endfor %}
-            </select>
-            <label for="floatingSelect">Fornecedor</label>
-        </div>
-
-        <div class="mb-2 ms-2 me-2">
-            <button type="submit" class="btn btn-outline-primary me-2" name="buscar_fornecedores">Buscar</button>
-            <a href="{% url 'fornecedor_list' %}?tenant={{ tenant }}" class="btn btn-outline-secondary me-2">Limpar</a>
-            <a href="{% url 'create_fornecedor' %}?tenant={{ tenant }}" class="btn btn-outline-success me-2">Novo Fornecedor</a>
-        </div>
-
-    </form>
-</div>
-
-{% if fornecedor_list %}
-    <table class="table table-sm table-striped table-hover mt-3"> <!-- table-bordered -->
-        <thead class="table-light">
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Empresa</th>
-            <th scope="col">CNPJ</th>
-            <th scope="col">Nome Contato</th>
-            <th scope="col">Telefone</th>
-            <th scope="col">E-mail</th>
-            <th scope="col">Endereço</th>
-            <th scope="col">CEP</th>
-            <th scope="col">Número</th>
-            <th scope="col">Bairro</th>
-            <th scope="col">Cidade</th>
-            <th scope="col">Ações</th>
-        </tr>
-        </thead>
-        <tbody>
-            {% for fornecedor in fornecedor_list %}
-                <tr>
-                    <th scope="row" >{{ fornecedor.pk }}</th>
-                    <td>{{ fornecedor.nome_empresa }}</td>
-                    <td>{{ fornecedor.cnpj| default:"-" }}</td>
-                    <td>{{ fornecedor.nome_contato| default:"-" }}</td>
-                    <td>{{ fornecedor.telefone| default:"-" }}</td>
-                    <td>{{ fornecedor.email| default:"-" }}</td>
-                    <td>{{ fornecedor.endereco| default:"-" }}</td>
-                    <td>{{ fornecedor.cep| default:"-" }}</td>
-                    <td>{{ fornecedor.numero| default:"-" }}</td>
-                    <td>{{ fornecedor.bairro| default:"-" }}</td>
-                    <td>{{ fornecedor.cidade| default:"-" }}</td>
-                    <td>
-                        <a href="{% url 'update_fornecedor' pk=fornecedor.pk %}?tenant={{ tenant }}" class="btn btn-outline-secondary btn-sm" >Editar</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Paginação -->
-<nav aria-label="Page navigation example">
-    <ul class="pagination justify-content-end">
-        {% if fornecedor_list.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ fornecedor_list.previous_page_number }}">Anterior</a>
-            </li>
-        {% else %}
-            <li class="page-item disabled">
-                <a class="page-link">Anterior</a>
-            </li>
-        {% endif %}
-        
-        {% for num in fornecedor_list.paginator.page_range %}
-            {% if fornecedor_list.number == num %}
-                <li class="page-item active" aria-current="page">
-                    <span class="page-link">{{ num }}</span>
-                </li>
-            {% elif num > fornecedor_list.number|add:-2 and num < fornecedor_list.number|add:2 %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-            {% endif %}
-        {% endfor %}
-        
-        {% if fornecedor_list.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ fornecedor_list.next_page_number }}">Próxima</a>
-            </li>
-        {% else %}
-            <li class="page-item disabled">
-                <a class="page-link">Próxima</a>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
-
-
-{% else %}
-    <p>Não há registros</p>
-{% endif %}
 {% endblock content %}

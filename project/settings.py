@@ -46,6 +46,21 @@ INSTALLED_APPS = [
     'financeiro.apps.FinanceiroConfig',
     ]
 
+# Redis Caches para ambientes em produção e desenvolvimento com o redis
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379',  # Altere o número do banco de dados conforme necessário
+    }
+}
+
+# Caches para ambientes de desenvolvimento 
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#     }
+# }
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
