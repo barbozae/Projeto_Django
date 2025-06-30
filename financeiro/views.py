@@ -1,7 +1,7 @@
 import json
 from datetime import date
 from openpyxl import Workbook
-from decimal import Decimal, InvalidOperation, DivisionByZero
+from decimal import Decimal, InvalidOperation, DivisionByZero, getcontext
 
 from .models import TaxasVendas
 from vendas.models import Vendas
@@ -14,14 +14,13 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
-from django.views.decorators.cache import cache_page
+from project.utils import generate_success_url
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.generic import ListView, CreateView, UpdateView
 from django.db.models import Sum, Value, CharField, DecimalField, Q, F
+from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 from django.db.models.functions import Coalesce, ExtractWeek, ExtractYear
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from project.utils import generate_success_url
-from project.mixins import TenantQuerysetMixin, HandleNoPermissionMixin
 
 
 def exportar_vendas(request):
@@ -345,72 +344,76 @@ class DashboardBaseView(View):
         }
 
     def calcular_taxas_vendas(self, vendas_queryset):
-        # Define as taxas por bandeira de cartão
-        # taxas_bandeiras = {
-        #     "debito_mastercard": 0.0095,
-        #     "debito_visa": 0.0095,
-        #     "debito_elo": 0.0098,
-        #     "credito_mastercard": 0.0299,
-        #     "credito_visa": 0.0299,
-        #     "credito_elo": 0.0299,
-        #     "hiper": 0.0299,
-        #     "dinersclub": 0.0299,
-        #     "american_express": 0.025,
-        #     "alelo": 0.07,
-        #     "sodexo": 0.069,
-        #     "vale_refeicao": 0.069,
-        #     "ticket_rest": 0.07,
-        # }
-
-
-        # Configura precisão decimal
-        # getcontext().prec = 8
-
-        # Verifica se existem vendas
-        if not vendas_queryset.exists():
-            return Decimal('0.00')
-
-        # Obtém todas as taxas em ordem cronológica (como lista)
-        taxas = list(TaxasVendas.objects.order_by('data_taxa_venda'))
-        
-        if not taxas:
-            return Decimal('0.00')
-
+        # Configuração inicial para maior precisão
+        getcontext().prec = 8
         total_taxas = Decimal('0.00')
         
-        # Processa cada taxa
-        for i in range(len(taxas)):
-            taxa = taxas[i]
+        # Verificação rápida de existência de vendas
+        if not vendas_queryset.exists():
+            return total_taxas
+
+        # Obtém apenas períodos com vendas
+        taxas = list(TaxasVendas.objects.filter(
+            tenant=self.request.user.tenant,
+            data_taxa_venda__lte=vendas_queryset.last().data_venda
+        ).order_by('data_taxa_venda'))
+        
+        if not taxas:
+            return total_taxas
+
+        BANDEIRAS = [
+            'debito_mastercard', 'debito_visa', 'debito_elo',
+            'credito_mastercard', 'credito_visa', 'credito_elo',
+            'hiper', 'dinersclub', 'american_express',
+            'alelo', 'sodexo', 'vale_refeicao', 'ticket_rest'
+        ]
+
+        # Pré-filtra bandeiras que realmente têm taxas
+        bandeiras_ativas = set()
+        for taxa in taxas:
+            for bandeira in BANDEIRAS:
+                if getattr(taxa, bandeira, Decimal('0.00')) > 0:
+                    bandeiras_ativas.add(bandeira)
+
+        # Se nenhuma bandeira com taxa positiva
+        if not bandeiras_ativas:
+            return total_taxas
+
+        # Processamento otimizado
+        for i, taxa in enumerate(taxas):
             data_inicio = taxa.data_taxa_venda
             data_fim = taxas[i+1].data_taxa_venda if i+1 < len(taxas) else None
             
-            # Cria nova queryset para o período
-            vendas_filtradas = vendas_queryset.model.objects.filter(
-                pk__in=vendas_queryset.values_list('pk', flat=True),
-                data_venda__gte=data_inicio
+            # Filtra vendas e verifica se existem no período
+            vendas_periodo = vendas_queryset.filter(data_venda__gte=data_inicio)
+            if data_fim:
+                vendas_periodo = vendas_periodo.filter(data_venda__lt=data_fim)
+            
+            if not vendas_periodo.exists():
+                continue
+
+            # Verifica quais bandeiras têm valores nas vendas deste período
+            bandeiras_com_vendas = set()
+            valores_agregados = vendas_periodo.aggregate(
+                **{f'total_{b}': Sum(b) for b in bandeiras_ativas}
             )
             
-            if data_fim:
-                vendas_filtradas = vendas_filtradas.filter(data_venda__lt=data_fim)
-            
-            # Calcula para cada bandeira
-            for bandeira in [
-                'debito_mastercard', 'debito_visa', 'debito_elo',
-                'credito_mastercard', 'credito_visa', 'credito_elo',
-                'hiper', 'dinersclub', 'american_express',
-                'alelo', 'sodexo', 'vale_refeicao', 'ticket_rest'
-            ]:
-                valor_taxa = getattr(taxa, bandeira, Decimal('0.00'))
-                valor_taxa = valor_taxa if valor_taxa is not None else Decimal('0.00')
-                
-                if valor_taxa != Decimal('0.00'):
-                    resultado = vendas_filtradas.aggregate(
-                        total=Sum(F(bandeira) * valor_taxa / 100,
-                        output_field=DecimalField()
-                    ))
+            for bandeira in bandeiras_ativas:
+                if valores_agregados.get(f'total_{bandeira}', 0) > 0:
+                    bandeiras_com_vendas.add(bandeira)
 
-                    total_bandeira = Decimal(resultado.get('total') or '0.00')
-                    total_taxas += total_bandeira
+            # Calcula apenas para bandeiras com vendas e taxas
+            for bandeira in bandeiras_com_vendas:
+                valor_taxa = Decimal(str(getattr(taxa, bandeira, 0)))
+                if valor_taxa <= 0:
+                    continue
+                
+                # Cálculo direto e eficiente
+                total_bandeira = vendas_periodo.aggregate(
+                    total=Sum(F(bandeira) * valor_taxa / Decimal('100'))
+                ).get('total') or Decimal('0.00')
+                
+                total_taxas += total_bandeira
 
         return total_taxas
 
@@ -545,12 +548,14 @@ class DashboardVendasView(DashboardBaseView):
         vendas_filtradas = vendas_filtradas.order_by('-data_venda')
 
         # Paginação
-        paginator = Paginator(vendas_filtradas, 62)  # Exibe 10 registros por página
+        paginator = Paginator(vendas_filtradas, 64)  # Exibe 10 registros por página
         page_number = self.request.GET.get('page')
         vendas_paginadas = paginator.get_page(page_number)
 
-        totais_vendas = self.calcular_totais_vendas(vendas_paginadas.object_list)
-        total_taxas = self.calcular_taxas_vendas(vendas_paginadas.object_list) or 0
+        # totais_vendas = self.calcular_totais_vendas(vendas_paginadas.object_list)
+        # total_taxas = self.calcular_taxas_vendas(vendas_paginadas.object_list) or 0
+        totais_vendas = self.calcular_totais_vendas(vendas_filtradas)
+        total_taxas = self.calcular_taxas_vendas(vendas_filtradas) or 0
         # Calcular a taxa percentual de total_taxa em relação ao total_vendas
         taxa_total_taxa = (total_taxas / totais_vendas['total_vendas'] * 100) if totais_vendas['total_vendas'] != 0 else 0
 
@@ -813,8 +818,7 @@ class DashboardResumoView(DashboardBaseView):
                 (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
                 (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
                 (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
-                (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
-                (v.socio or 0)
+                (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0)
             )
             for v in vendas_filtradas if hasattr(v, 'periodo') and v.periodo == 'Almoço'
         )
@@ -823,8 +827,7 @@ class DashboardResumoView(DashboardBaseView):
                 (v.dinheiro or 0) + (v.pix or 0) + (v.debito_mastercard or 0) + (v.debito_visa or 0) +
                 (v.debito_elo or 0) + (v.credito_mastercard or 0) + (v.credito_visa or 0) +
                 (v.credito_elo or 0) + (v.alelo or 0) + (v.american_express or 0) + (v.hiper or 0) +
-                (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0) +
-                (v.socio or 0)
+                (v.sodexo or 0) + (v.ticket_rest or 0) + (v.vale_refeicao or 0) + (v.dinersclub or 0)
             )
             for v in vendas_filtradas if hasattr(v, 'periodo') and v.periodo == 'Jantar'
         )
@@ -1060,8 +1063,6 @@ class DashboardResumoView(DashboardBaseView):
         # Dados para o gráfico de teia (Radar) - Compras por classificação
         radar_labels = [item['classificacao'] for item in gastos_por_classificacao]
         radar_data = [safe_float(item.get('total_valor')) for item in gastos_por_classificacao]
-
-
 
         # Dados para o gráfico de linha - Compras por data
         compras_por_data = {}

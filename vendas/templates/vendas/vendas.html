@@ -138,7 +138,6 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const rows = document.querySelectorAll("tbody tr:not(.detail-row)");
-
             rows.forEach(row => {
                 row.addEventListener("click", function() {
                     const detailRow = this.nextElementSibling;

@@ -1,18 +1,11 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
-from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.urls import reverse
-from django.db import models
-from django.core.cache import cache
-from django.http import Http404
-import time
-from django.views.decorators.cache import cache_page
-
 
 from .models import Vendas
 
