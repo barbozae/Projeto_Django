@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-# from decouple import config
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p9a=99jkpfwt62n85v%yyeo&t^grj2_-e1c!pm9igp03%(owv_'
+SECRET_KEY = os.environ.get('chave_secreta')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -98,20 +99,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.environ.get('DATABASE_ENGINE'),
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER', ''),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
+        'HOST': os.environ.get('DATABASE_HOST', ''),
+        'PORT': os.environ.get('DATABASE_PORT', ''),
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -150,9 +147,6 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CONFIGURAÇÕES EXTRA
@@ -163,15 +157,3 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_URL = '/login/'  # Caminho para a página de login
 LOGIN_REDIRECT_URL = '/menu/'  # Substitua pelo caminho desejado após realizar o login
 LOGOUT_REDIRECT_URL = '/login/'  # Redireciona para a página de login
-
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-DEFAULT_FROM_EMAIL = 'tojirosushi_app@outlook.com'
-
-# variaveis no .env
-# EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-# EMAIL_HOST = config('EMAIL_HOST')
-# EMAIL_USE_TLS = config('EMAIL_USE_TLS')
-# EMAIL_PORT = config('EMAIL_PORT')
